@@ -32,6 +32,7 @@ import FavoritesScreen from '../features/favorites/FavoritesScreen';
 import AddPaymentMethodScreen from '../features/user/profile/AddPaymentMethodScreen';
 import EditPaymentMethodScreen from '../features/user/profile/EditPaymentMethodScreen';
 import PaymentScreen from '../features/payment/PaymentScreen';
+import PaymentScreen from '../features/payment/PaymentScreen';
 import OwnerTabNavigator from './OwnerTabNavigator';
 import ReviewScreen from '../features/reviews/ReviewScreen';
 

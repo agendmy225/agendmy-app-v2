@@ -245,6 +245,30 @@ const BookingConfirmationScreen: React.FC = () => {
       }
       console.log('🎉 Agendamento confirmado com sucesso!');
 
+      const goToAppointments = async () => {
+        const isOwner = await checkIfUserIsOwner();
+        navigation.reset({ index: 0, routes: [{ name: isOwner ? 'OwnerTabs' : 'ClientTabs', params: { screen: 'Appointments' } }] });
+      };
+
+      const inAppPaymentEnabled = businessData?.paymentMethods?.inApp ?? false;
+      if (inAppPaymentEnabled && (serviceData?.price ?? 0) > 0) {
+        Alert.alert(
+          'Agendamento Confirmado! 🎉',
+          'Deseja pagar agora pelo app com Pix ou cartão?',
+          [
+            { text: 'Pagar agora', onPress: () => {
+              navigation.navigate('Payment', {
+                appointmentId: `${businessId}_${Date.now()}`,
+                amount: serviceData?.price ?? 0,
+                description: `${serviceData?.name ?? 'Serviço'} — ${professionalData?.name ?? ''}`,
+                businessName: businessData?.name ?? 'Estabelecimento',
+                currency: 'BRL',
+              });
+            }},
+            { text: 'Pagar no local', onPress: goToAppointments },
+          ],
+        );
+      } else {
       Alert.alert(
         'Agendamento Confirmado',
         isPackage && appointmentSessions
@@ -282,6 +306,7 @@ const BookingConfirmationScreen: React.FC = () => {
           },
         ],
       );
+      }
     } catch (error) {
       console.error('❌ Erro ao confirmar agendamento:', error);
       console.error('📊 Detalhes do erro:', {

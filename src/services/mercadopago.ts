@@ -1,211 +1,203 @@
 // Serviço de integração com Mercado Pago
-// O app usa o SDK do Mercado Pago via Cloud Functions (backend) para criar preferências de pagamento
-// O frontend abre o Checkout Pro via deep link / WebView
+// Usa Firebase Functions como backend seguro para não expor credenciais no app
 
-import {
-  doc,
-  getDoc,
-  addDoc,
-  updateDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  serverTimestamp,
-  orderBy,
-} from '@react-native-firebase/firestore';
-import { firebaseDb, firebaseAuth, firebaseFunctions } from '../config/firebase';
 import { httpsCallable } from '@react-native-firebase/functions';
+import { firebaseFunctions, firebaseAuth } from '../config/firebase';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
-export type PaymentStatus =
-  | 'pending'
-  | 'approved'
-  | 'authorized'
-  | 'in_process'
-  | 'in_mediation'
-  | 'rejected'
-  | 'cancelled'
-  | 'refunded'
-  | 'charged_back';
+export type PaymentMethod = 'pix' | 'credit_card' | 'debit_card';
 
-export interface PaymentMethod {
-  id: string;
-  userId: string;
-  type: 'credit_card' | 'debit_card' | 'pix';
-  // Dados do cartão tokenizado pelo Mercado Pago (nunca armazenamos dados brutos)
-  mpCardId?: string;        // ID do cartão no Mercado Pago
-  lastFourDigits?: string;
-  brand?: string;           // 'visa', 'mastercard', etc.
-  expirationMonth?: string;
-  expirationYear?: string;
-  holderName?: string;
-  isDefault: boolean;
-  createdAt?: Date;
+export interface CardData {
+  cardNumber: string;
+  cardholderName: string;
+  expirationMonth: string;
+  expirationYear: string;
+  securityCode: string;
+  docType: 'CPF' | 'CNPJ';
+  docNumber: string;
+  email: string;
+  installments?: number;
 }
 
-export interface PaymentPreference {
-  id: string;
+export interface CreatePaymentParams {
   appointmentId: string;
-  userId: string;
-  businessId: string;
-  amount: number;
-  currency: string;
+  amount: number;           // em centavos (ex: 5000 = R$50,00)
   description: string;
-  status: PaymentStatus;
-  mpPreferenceId?: string;   // ID da preferência no Mercado Pago
-  mpPaymentId?: string;      // ID do pagamento após aprovação
-  checkoutUrl?: string;      // URL do Checkout Pro
-  pixQrCode?: string;        // QR Code para Pix
+  paymentMethod: PaymentMethod;
+  cardData?: CardData;
+  pixEmail?: string;
+}
+
+export interface PaymentResult {
+  id: string;
+  status: 'approved' | 'pending' | 'rejected' | 'cancelled';
+  statusDetail: string;
+  pixQrCode?: string;
   pixQrCodeBase64?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  paidAt?: Date;
+  pixExpirationDate?: string;
+  transactionAmount: number;
 }
 
-// ─── Criar preferência de pagamento via Cloud Function ────────────────────────
+export interface SavedCard {
+  id: string;
+  lastFourDigits: string;
+  brand: string;
+  holderName: string;
+  expirationMonth: string;
+  expirationYear: string;
+  isDefault: boolean;
+  customerId: string;
+}
 
-export const createPaymentPreference = async (params: {
-  appointmentId: string;
-  businessId: string;
-  amount: number;
-  description: string;
-  paymentType?: 'checkout_pro' | 'pix';
-}): Promise<{ preferenceId: string; checkoutUrl?: string; pixQrCode?: string; pixQrCodeBase64?: string }> => {
+// ─── Funções principais ───────────────────────────────────────────────────────
+
+/**
+ * Cria um pagamento via Mercado Pago.
+ * O processamento real ocorre na Cloud Function para manter a chave secreta segura.
+ */
+export const createPayment = async (params: CreatePaymentParams): Promise<PaymentResult> => {
   const currentUser = firebaseAuth.currentUser;
-  if (!currentUser) throw new Error('Usuário não autenticado');
+  if (!currentUser) throw new Error('Usuário não autenticado.');
 
-  try {
-    // Chamar Cloud Function que cria a preferência no Mercado Pago
-    const createPreference = httpsCallable(firebaseFunctions, 'createPaymentPreference');
-    const result = await createPreference({
-      appointmentId: params.appointmentId,
-      businessId: params.businessId,
-      amount: params.amount,
-      description: params.description,
-      paymentType: params.paymentType ?? 'checkout_pro',
-      userId: currentUser.uid,
-      userEmail: currentUser.email,
-    });
+  const createPaymentFn = httpsCallable<CreatePaymentParams, PaymentResult>(
+    firebaseFunctions,
+    'createMercadoPagoPayment',
+  );
 
-    const data = result.data as {
-      preferenceId: string;
-      checkoutUrl?: string;
-      pixQrCode?: string;
-      pixQrCodeBase64?: string;
-    };
-
-    // Registrar no Firestore para rastreamento
-    await addDoc(collection(firebaseDb, 'payments'), {
-      appointmentId: params.appointmentId,
-      userId: currentUser.uid,
-      businessId: params.businessId,
-      amount: params.amount,
-      currency: 'BRL',
-      description: params.description,
-      status: 'pending' as PaymentStatus,
-      mpPreferenceId: data.preferenceId,
-      checkoutUrl: data.checkoutUrl,
-      pixQrCode: data.pixQrCode,
-      pixQrCodeBase64: data.pixQrCodeBase64,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-
-    return data;
-  } catch (error) {
-    throw new Error('Não foi possível criar o pagamento. Tente novamente.');
-  }
+  const result = await createPaymentFn(params);
+  return result.data;
 };
 
-// ─── Buscar status de um pagamento ───────────────────────────────────────────
-
-export const getPaymentByAppointment = async (
+/**
+ * Gera um QR Code Pix para pagamento.
+ */
+export const createPixPayment = async (
   appointmentId: string,
-): Promise<PaymentPreference | null> => {
-  try {
-    const q = query(
-      collection(firebaseDb, 'payments'),
-      where('appointmentId', '==', appointmentId),
-      orderBy('createdAt', 'desc'),
-    );
-    const snap = await getDocs(q);
-    if (snap.empty) return null;
-    const d = snap.docs[0];
-    return { id: d.id, ...d.data() } as PaymentPreference;
-  } catch {
-    return null;
-  }
-};
-
-// ─── Métodos de pagamento salvos ──────────────────────────────────────────────
-
-export const getSavedPaymentMethods = async (): Promise<PaymentMethod[]> => {
-  const currentUser = firebaseAuth.currentUser;
-  if (!currentUser) return [];
-
-  try {
-    const q = query(
-      collection(firebaseDb, 'paymentMethods'),
-      where('userId', '==', currentUser.uid),
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as PaymentMethod));
-  } catch {
-    return [];
-  }
-};
-
-export const setDefaultPaymentMethod = async (paymentMethodId: string): Promise<void> => {
-  const currentUser = firebaseAuth.currentUser;
-  if (!currentUser) throw new Error('Usuário não autenticado');
-
-  // Remover default de todos os outros
-  const q = query(
-    collection(firebaseDb, 'paymentMethods'),
-    where('userId', '==', currentUser.uid),
-  );
-  const snap = await getDocs(q);
-
-  const updates = snap.docs.map(d =>
-    updateDoc(doc(firebaseDb, 'paymentMethods', d.id), {
-      isDefault: d.id === paymentMethodId,
-    }),
-  );
-  await Promise.all(updates);
-};
-
-export const deletePaymentMethod = async (paymentMethodId: string): Promise<void> => {
-  const currentUser = firebaseAuth.currentUser;
-  if (!currentUser) throw new Error('Usuário não autenticado');
-
-  const pmDoc = await getDoc(doc(firebaseDb, 'paymentMethods', paymentMethodId));
-  if (!pmDoc.exists()) throw new Error('Método de pagamento não encontrado');
-  if (pmDoc.data()?.userId !== currentUser.uid) throw new Error('Sem permissão');
-
-  // Chamar Cloud Function para remover o cartão no Mercado Pago também
-  try {
-    const removeCard = httpsCallable(firebaseFunctions, 'removePaymentMethod');
-    await removeCard({ paymentMethodId, mpCardId: pmDoc.data()?.mpCardId });
-  } catch { /* se falhar no MP, ainda remove localmente */ }
-
-  await updateDoc(doc(firebaseDb, 'paymentMethods', paymentMethodId), {
-    active: false,
-    deletedAt: serverTimestamp(),
+  amount: number,
+  description: string,
+  payerEmail: string,
+): Promise<PaymentResult> => {
+  return createPayment({
+    appointmentId,
+    amount,
+    description,
+    paymentMethod: 'pix',
+    pixEmail: payerEmail,
   });
 };
 
-// ─── Verificar status do pagamento via Cloud Function ─────────────────────────
+/**
+ * Processa pagamento com cartão de crédito/débito.
+ */
+export const createCardPayment = async (
+  appointmentId: string,
+  amount: number,
+  description: string,
+  cardData: CardData,
+  method: 'credit_card' | 'debit_card' = 'credit_card',
+): Promise<PaymentResult> => {
+  return createPayment({
+    appointmentId,
+    amount,
+    description,
+    paymentMethod: method,
+    cardData,
+  });
+};
 
-export const checkPaymentStatus = async (
-  mpPreferenceId: string,
-): Promise<PaymentStatus> => {
-  try {
-    const checkStatus = httpsCallable(firebaseFunctions, 'checkPaymentStatus');
-    const result = await checkStatus({ preferenceId: mpPreferenceId });
-    return (result.data as { status: PaymentStatus }).status;
-  } catch {
-    return 'pending';
+/**
+ * Busca o status atual de um pagamento.
+ */
+export const getPaymentStatus = async (paymentId: string): Promise<PaymentResult> => {
+  const getStatusFn = httpsCallable<{ paymentId: string }, PaymentResult>(
+    firebaseFunctions,
+    'getMercadoPagoPaymentStatus',
+  );
+  const result = await getStatusFn({ paymentId });
+  return result.data;
+};
+
+/**
+ * Busca os cartões salvos do usuário no Mercado Pago.
+ */
+export const getSavedCards = async (): Promise<SavedCard[]> => {
+  const currentUser = firebaseAuth.currentUser;
+  if (!currentUser) return [];
+
+  const getSavedCardsFn = httpsCallable<Record<string, never>, SavedCard[]>(
+    firebaseFunctions,
+    'getMercadoPagoSavedCards',
+  );
+
+  const result = await getSavedCardsFn({});
+  return result.data ?? [];
+};
+
+/**
+ * Cancela um pagamento pendente.
+ */
+export const cancelPayment = async (paymentId: string): Promise<void> => {
+  const cancelFn = httpsCallable<{ paymentId: string }, void>(
+    firebaseFunctions,
+    'cancelMercadoPagoPayment',
+  );
+  await cancelFn({ paymentId });
+};
+
+// ─── Helpers de formatação ────────────────────────────────────────────────────
+
+export const formatAmount = (amountInCents: number): string => {
+  return (amountInCents / 100).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+};
+
+export const getPaymentStatusLabel = (status: PaymentResult['status']): string => {
+  const labels: Record<PaymentResult['status'], string> = {
+    approved: 'Aprovado',
+    pending: 'Aguardando pagamento',
+    rejected: 'Recusado',
+    cancelled: 'Cancelado',
+  };
+  return labels[status] ?? status;
+};
+
+export const getPaymentStatusColor = (status: PaymentResult['status']): string => {
+  const colors: Record<PaymentResult['status'], string> = {
+    approved: '#4CAF50',
+    pending: '#FFA000',
+    rejected: '#D32F2F',
+    cancelled: '#777777',
+  };
+  return colors[status] ?? '#777777';
+};
+
+export const maskCardNumber = (number: string): string =>
+  number.replace(/\s/g, '').replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+
+export const validateCardNumber = (number: string): boolean => {
+  const digits = number.replace(/\s/g, '');
+  if (!/^\d{13,19}$/.test(digits)) return false;
+  // Luhn
+  let sum = 0;
+  let alternate = false;
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let n = parseInt(digits[i], 10);
+    if (alternate) { n *= 2; if (n > 9) n -= 9; }
+    sum += n;
+    alternate = !alternate;
   }
+  return sum % 10 === 0;
+};
+
+export const detectCardBrand = (number: string): string => {
+  const n = number.replace(/\s/g, '');
+  if (/^4/.test(n)) return 'Visa';
+  if (/^5[1-5]/.test(n)) return 'Mastercard';
+  if (/^3[47]/.test(n)) return 'Amex';
+  if (/^6(?:011|5)/.test(n)) return 'Elo';
+  if (/^(?:636368|438935|504175|451416|636297)/.test(n)) return 'Elo';
+  return 'Cartão';
 };
