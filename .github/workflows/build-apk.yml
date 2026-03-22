@@ -34,15 +34,15 @@ jobs:
       - name: Dar permissão ao gradlew
         run: chmod +x android/gradlew
 
-      - name: Criar keystore para assinatura
+      - name: Aumentar memória do Gradle
+        run: echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
+
+      - name: Criar keystore
         run: |
           keytool -genkey -v -keystore android/app/agendmy.keystore \
             -alias agendmy -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass agendmy123 -keypass agendmy123 \
             -dname "CN=AgendMy, OU=Dev, O=AgendMy, L=Brasil, S=SP, C=BR"
-
-      - name: Aumentar memória do Gradle
-        run: echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
 
       - name: Gerar APK assinado
         run: |
@@ -53,6 +53,8 @@ jobs:
             -Pandroid.injected.signing.key.alias=agendmy \
             -Pandroid.injected.signing.key.password=agendmy123 \
             --no-daemon
+        env:
+          GRADLE_OPTS: "-Xmx4g"
 
       - name: Upload do APK
         uses: actions/upload-artifact@v4
