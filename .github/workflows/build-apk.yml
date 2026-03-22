@@ -34,7 +34,7 @@ jobs:
       - name: Dar permissão ao gradlew
         run: chmod +x android/gradlew
 
-      - name: Gerar APK universal
+      - name: Gerar APK debug Samsung
         run: cd android && ./gradlew assembleDebug -PreactNativeArchitectures=armeabi-v7a,arm64-v8a --no-daemon
 
       - name: Upload do APK
