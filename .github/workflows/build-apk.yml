@@ -34,18 +34,29 @@ jobs:
       - name: Dar permissão ao gradlew
         run: chmod +x android/gradlew
 
+      - name: Criar keystore para assinatura
+        run: |
+          keytool -genkey -v -keystore android/app/agendmy.keystore \
+            -alias agendmy -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass agendmy123 -keypass agendmy123 \
+            -dname "CN=AgendMy, OU=Dev, O=AgendMy, L=Brasil, S=SP, C=BR"
+
       - name: Aumentar memória do Gradle
         run: echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
 
-      - name: Limpar cache do Gradle
-        run: cd android && ./gradlew clean --no-daemon
-
-      - name: Gerar APK Samsung
-        run: cd android && ./gradlew assembleDebug -PreactNativeArchitectures=armeabi-v7a,arm64-v8a --no-daemon
+      - name: Gerar APK assinado
+        run: |
+          cd android && ./gradlew assembleRelease \
+            -PreactNativeArchitectures=armeabi-v7a,arm64-v8a \
+            -Pandroid.injected.signing.store.file=app/agendmy.keystore \
+            -Pandroid.injected.signing.store.password=agendmy123 \
+            -Pandroid.injected.signing.key.alias=agendmy \
+            -Pandroid.injected.signing.key.password=agendmy123 \
+            --no-daemon
 
       - name: Upload do APK
         uses: actions/upload-artifact@v4
         with:
           name: agendmy-samsung
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 7
