@@ -28,6 +28,9 @@ jobs:
       - name: Instalar dependências
         run: npm install
 
+      - name: Gerar codegen
+        run: npx react-native codegen
+
       - name: Configurar Android SDK
         uses: android-actions/setup-android@v3
 
@@ -36,6 +39,9 @@ jobs:
 
       - name: Aumentar memória do Gradle
         run: echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
+
+      - name: Limpar cache
+        run: cd android && ./gradlew clean --no-daemon
 
       - name: Criar keystore
         run: |
@@ -53,8 +59,6 @@ jobs:
             -Pandroid.injected.signing.key.alias=agendmy \
             -Pandroid.injected.signing.key.password=agendmy123 \
             --no-daemon
-        env:
-          GRADLE_OPTS: "-Xmx4g"
 
       - name: Upload do APK
         uses: actions/upload-artifact@v4
