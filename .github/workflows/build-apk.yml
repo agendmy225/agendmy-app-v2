@@ -28,9 +28,6 @@ jobs:
       - name: Instalar dependências
         run: npm install
 
-      - name: Gerar codegen
-        run: npx react-native codegen
-
       - name: Configurar Android SDK
         uses: android-actions/setup-android@v3
 
@@ -38,10 +35,10 @@ jobs:
         run: chmod +x android/gradlew
 
       - name: Aumentar memória do Gradle
-        run: echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
-
-      - name: Limpar cache
-        run: cd android && ./gradlew clean --no-daemon
+        run: |
+          echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
+          echo "org.gradle.daemon=false" >> android/gradle.properties
+          echo "org.gradle.parallel=false" >> android/gradle.properties
 
       - name: Criar keystore
         run: |
@@ -50,19 +47,18 @@ jobs:
             -storepass agendmy123 -keypass agendmy123 \
             -dname "CN=AgendMy, OU=Dev, O=AgendMy, L=Brasil, S=SP, C=BR"
 
-      - name: Gerar APK assinado
+      - name: Gerar APK debug ARM
         run: |
-          cd android && ./gradlew assembleRelease \
-            -PreactNativeArchitectures=armeabi-v7a,arm64-v8a \
+          cd android && ./gradlew assembleDebug \
+            -PreactNativeArchitectures=arm64-v8a \
             -Pandroid.injected.signing.store.file=app/agendmy.keystore \
             -Pandroid.injected.signing.store.password=agendmy123 \
             -Pandroid.injected.signing.key.alias=agendmy \
-            -Pandroid.injected.signing.key.password=agendmy123 \
-            --no-daemon
+            -Pandroid.injected.signing.key.password=agendmy123
 
       - name: Upload do APK
         uses: actions/upload-artifact@v4
         with:
           name: agendmy-samsung
-          path: android/app/build/outputs/apk/release/app-release.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
