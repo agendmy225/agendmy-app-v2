@@ -34,7 +34,13 @@ jobs:
       - name: Dar permissão ao gradlew
         run: chmod +x android/gradlew
 
-      - name: Gerar APK debug Samsung
+      - name: Aumentar memória do Gradle
+        run: echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
+
+      - name: Limpar cache do Gradle
+        run: cd android && ./gradlew clean --no-daemon
+
+      - name: Gerar APK Samsung
         run: cd android && ./gradlew assembleDebug -PreactNativeArchitectures=armeabi-v7a,arm64-v8a --no-daemon
 
       - name: Upload do APK
