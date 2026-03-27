@@ -60,7 +60,7 @@ const OwnerHomeScreen: React.FC = () => {
   const [filterSortBy, setFilterSortBy] = useState<'rating' | 'recent' | 'name'>('rating');
   const [filterMinRating, setFilterMinRating] = useState<number>(0);
   const [activeFilters, setActiveFilters] = useState<{ sortBy: 'rating' | 'recent' | 'name'; minRating: number }>({ sortBy: 'rating', minRating: 0 });
-  const mapRef = useRef<MapView>(null);
+  const applyFilters = (list) => { return list.filter(b => (b.rating || 0) >= activeFilters.minRating).sort((a, b) => { if (activeFilters.sortBy === 'rating') return (b.rating || 0) - (a.rating || 0); if (activeFilters.sortBy === 'name') return (a.name || '').localeCompare(b.name || ''); return 0; }); }; const mapRef = useRef<MapView>(null);
   const navigation = useNavigation<StackNavigationProp<AppStackParamList>>() as any;
 
   // Ref para controlar o primeiro foco da tela
