@@ -44,17 +44,10 @@ jobs:
             -storepass agendmy123 -keypass agendmy123 \
             -dname "CN=AgendMy, OU=Dev, O=AgendMy, L=Brasil, S=SP, C=BR"
 
-      - name: Limpar cache e build
-        run: |
-          cd android
-          rm -rf .gradle
-          rm -rf build
-          ./gradlew clean --no-daemon
+      - name: Limpar build
+        run: cd android && ./gradlew clean --no-daemon
 
-      - name: Baixar dependências
-        run: cd android && ./gradlew downloadDependencies --no-daemon
-
-      - name: Gerar APK debug ARM
+      - name: Gerar APK
         run: |
           cd android && ./gradlew assembleDebug \
             -PreactNativeArchitectures=arm64-v8a \
