@@ -35,10 +35,7 @@ jobs:
         run: chmod +x android/gradlew
 
       - name: Aumentar memória do Gradle
-        run: |
-          echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
-          echo "org.gradle.daemon=false" >> android/gradle.properties
-          echo "org.gradle.parallel=false" >> android/gradle.properties
+        run: echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
 
       - name: Criar keystore
         run: |
@@ -47,6 +44,9 @@ jobs:
             -storepass agendmy123 -keypass agendmy123 \
             -dname "CN=AgendMy, OU=Dev, O=AgendMy, L=Brasil, S=SP, C=BR"
 
+      - name: Limpar build
+        run: cd android && ./gradlew clean --no-daemon
+
       - name: Gerar APK debug ARM
         run: |
           cd android && ./gradlew assembleDebug \
@@ -54,7 +54,9 @@ jobs:
             -Pandroid.injected.signing.store.file=app/agendmy.keystore \
             -Pandroid.injected.signing.store.password=agendmy123 \
             -Pandroid.injected.signing.key.alias=agendmy \
-            -Pandroid.injected.signing.key.password=agendmy123
+            -Pandroid.injected.signing.key.password=agendmy123 \
+            -x stripDebugDebugSymbols \
+            --no-daemon
 
       - name: Upload do APK
         uses: actions/upload-artifact@v4
