@@ -2,46 +2,28 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
 import {
-  ImageBackground,
-  Image,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { colors } from '../constants/colors';
 import { AppStackParamList } from '../types/types';
-
-// Importar as imagens
-const backgroundImage = require('../assets/images/fundo.png');
-const logoImage = require('../assets/images/logo.png');
 
 type WelcomeScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Welcome'>;
 
 const WelcomeScreen: React.FC = () => {
   const navigation = useNavigation<WelcomeScreenNavigationProp>();
 
-  const handleClientPress = () => {
-    console.log('Cliente selecionado');
-    navigation.navigate('Login', { userType: 'client' });
-  };
-
-  const handleOwnerPress = () => {
-    console.log('Proprietário selecionado');
-    navigation.navigate('Login', { userType: 'owner' });
-  };
-
   return (
-    <ImageBackground source={backgroundImage} style={styles.backgroundContainer} resizeMode="cover">
-      <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
+
           <View style={styles.logoContainer}>
-            <Image
-              source={logoImage}
-              style={styles.logo}
-              resizeMode="contain"
-            />
+            <Text style={styles.logoText}>
+              Agend<Text style={styles.logoAccent}>My</Text>
+            </Text>
           </View>
 
           <View style={styles.welcomeContainer}>
@@ -52,7 +34,7 @@ const WelcomeScreen: React.FC = () => {
           <View style={styles.buttonsContainer}>
             <TouchableOpacity
               style={styles.userTypeButton}
-              onPress={handleOwnerPress}
+              onPress={() => navigation.navigate('Login', { userType: 'owner' })}
             >
               <Text style={styles.buttonText}>PROPRIETÁRIO</Text>
             </TouchableOpacity>
@@ -61,26 +43,25 @@ const WelcomeScreen: React.FC = () => {
 
             <TouchableOpacity
               style={styles.userTypeButton}
-              onPress={handleClientPress}
+              onPress={() => navigation.navigate('Login', { userType: 'client' })}
             >
               <Text style={styles.buttonText}>CLIENTE</Text>
             </TouchableOpacity>
           </View>
+
         </View>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundContainer: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: '#33001b',
+  },
+  safeArea: {
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -89,12 +70,17 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logoContainer: {
-    //alignItems: 'center',
     marginTop: 80,
+    alignItems: 'center',
   },
-  logo: {
-    width: 150,
-    height: 150,
+  logoText: {
+    fontSize: 56,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    letterSpacing: 2,
+  },
+  logoAccent: {
+    color: '#d31027',
   },
   welcomeContainer: {
     alignItems: 'center',
@@ -104,53 +90,41 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: colors.white,
-    marginBottom: 20,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
+    color: '#ffffff',
+    marginBottom: 10,
+    letterSpacing: 4,
   },
   subtitleText: {
     fontSize: 16,
-    color: colors.white,
+    color: 'rgba(255,255,255,0.8)',
     textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
   },
   buttonsContainer: {
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 50,
   },
   userTypeButton: {
-    backgroundColor: colors.brandRed,
+    backgroundColor: 'rgba(255,255,255,0.95)',
     width: '80%',
     height: 52,
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
     elevation: 5,
   },
   buttonText: {
-    color: 'white',
+    color: '#33001b',
     fontSize: 16,
     fontWeight: 'bold',
+    letterSpacing: 2,
   },
   orText: {
-    color: colors.white,
+    color: 'rgba(255,255,255,0.8)',
     fontSize: 16,
     fontWeight: 'bold',
     marginVertical: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
   },
 });
 
