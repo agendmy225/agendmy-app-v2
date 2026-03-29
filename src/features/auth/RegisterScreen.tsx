@@ -10,22 +10,15 @@ import {
   KeyboardAvoidingView,
   Alert,
   ActivityIndicator,
-  ImageBackground,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth, UserType } from './context/AuthContext';
-import { colors } from '../../constants/colors';
-
-import { AppStackParamList } from '../../types/types'; // <-- Adjust the path as needed
+import { AppStackParamList } from '../../types/types';
 import { validatePassword, getPasswordStrengthColor, getPasswordStrengthText } from '../../utils/passwordValidation';
-
-// Importa a imagem de fundo
-const backgroundImage = require('../../assets/images/fundo.png');
 
 type RegisterScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Register'>;
 type RegisterScreenRouteProp = RouteProp<AppStackParamList, 'Register'>;
-
 
 const RegisterScreen: React.FC = () => {
   const navigation = useNavigation<RegisterScreenNavigationProp>();
@@ -44,7 +37,6 @@ const RegisterScreen: React.FC = () => {
 
   const { signUp } = useAuth();
 
-  // Validar senha em tempo real
   useEffect(() => {
     setPasswordValidation(validatePassword(password));
   }, [password]);
@@ -54,17 +46,14 @@ const RegisterScreen: React.FC = () => {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
       return;
     }
-
     if (!passwordValidation.isValid) {
       Alert.alert('Senha Inválida', passwordValidation.errors.join('\n'));
       return;
     }
-
     if (password !== confirmPassword) {
       Alert.alert('Erro', 'As senhas não coincidem.');
       return;
     }
-
     if (userType === 'owner' && !establishmentName) {
       Alert.alert('Erro', 'Por favor, informe o nome do estabelecimento.');
       return;
@@ -73,7 +62,6 @@ const RegisterScreen: React.FC = () => {
     setIsLoading(true);
     try {
       await signUp(name, email, password, userType as 'client' | 'owner', establishmentName);
-      // A navegação será tratada pelo AuthContext
     } catch (error) {
       const err = error as Error;
       Alert.alert('Erro no Cadastro', err.message || 'Não foi possível criar a conta.');
@@ -82,12 +70,8 @@ const RegisterScreen: React.FC = () => {
     }
   };
 
-  const handleLogin = () => {
-    navigation.navigate('Login', { userType });
-  };
-
   return (
-    <ImageBackground source={backgroundImage} style={styles.backgroundContainer} resizeMode="cover">
+    <View style={styles.backgroundContainer}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
@@ -97,8 +81,13 @@ const RegisterScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.headerContainer}>
-            <Text style={styles.clientTypeText}>{userType === 'client' ? 'CLIENTE' : 'PROPRIETÁRIO'}</Text>
-            <Text style={styles.welcomeText}>BEM-VINDO!</Text>
+            <Text style={styles.logoText}>
+              Agend<Text style={styles.logoAccent}>My</Text>
+            </Text>
+            <Text style={styles.clientTypeText}>
+              {userType === 'client' ? 'CLIENTE' : 'PROPRIETÁRIO'}
+            </Text>
+            <Text style={styles.welcomeText}>CADASTRO</Text>
             <Text style={styles.registerText}>Cadastre-se agora!</Text>
           </View>
 
@@ -108,7 +97,7 @@ const RegisterScreen: React.FC = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Digite seu nome completo"
-                placeholderTextColor={colors.placeholderText}
+                placeholderTextColor="#999"
                 value={name}
                 onChangeText={setName}
               />
@@ -119,7 +108,7 @@ const RegisterScreen: React.FC = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Digite seu e-mail"
-                placeholderTextColor={colors.placeholderText}
+                placeholderTextColor="#999"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
@@ -133,7 +122,7 @@ const RegisterScreen: React.FC = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="Digite o nome do seu estabelecimento"
-                  placeholderTextColor={colors.placeholderText}
+                  placeholderTextColor="#999"
                   value={establishmentName}
                   onChangeText={setEstablishmentName}
                 />
@@ -146,7 +135,7 @@ const RegisterScreen: React.FC = () => {
                 <TextInput
                   style={styles.passwordInput}
                   placeholder="Crie uma senha"
-                  placeholderTextColor={colors.placeholderText}
+                  placeholderTextColor="#999"
                   secureTextEntry={!showPassword}
                   value={password}
                   onChangeText={setPassword}
@@ -164,8 +153,8 @@ const RegisterScreen: React.FC = () => {
                         passwordValidation.strength === 'weak'
                           ? styles.passwordStrengthFillWeak
                           : passwordValidation.strength === 'medium'
-                            ? styles.passwordStrengthFillMedium
-                            : styles.passwordStrengthFillStrong,
+                          ? styles.passwordStrengthFillMedium
+                          : styles.passwordStrengthFillStrong,
                       ]}
                     />
                   </View>
@@ -175,8 +164,8 @@ const RegisterScreen: React.FC = () => {
                       passwordValidation.strength === 'weak'
                         ? styles.passwordStrengthTextWeak
                         : passwordValidation.strength === 'medium'
-                          ? styles.passwordStrengthTextMedium
-                          : styles.passwordStrengthTextStrong,
+                        ? styles.passwordStrengthTextMedium
+                        : styles.passwordStrengthTextStrong,
                     ]}
                   >
                     Senha {getPasswordStrengthText(passwordValidation.strength)}
@@ -191,7 +180,7 @@ const RegisterScreen: React.FC = () => {
                 <TextInput
                   style={styles.passwordInput}
                   placeholder="Confirme sua senha"
-                  placeholderTextColor={colors.placeholderText}
+                  placeholderTextColor="#999"
                   secureTextEntry={!showConfirmPassword}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
@@ -208,7 +197,7 @@ const RegisterScreen: React.FC = () => {
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color={colors.white} />
+                <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={styles.registerButtonText}>CADASTRAR</Text>
               )}
@@ -216,7 +205,7 @@ const RegisterScreen: React.FC = () => {
 
             <TouchableOpacity
               style={styles.loginButton}
-              onPress={handleLogin}
+              onPress={() => navigation.navigate('Login', { userType })}
             >
               <Text style={styles.loginButtonText}>Já está cadastrado? Faça login aqui.</Text>
             </TouchableOpacity>
@@ -227,159 +216,43 @@ const RegisterScreen: React.FC = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundContainer: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    padding: 20,
-    justifyContent: 'space-between',
-  },
-  headerContainer: {
-    alignItems: 'center',
-    marginTop: 40,
-  },
-  clientTypeText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.offWhite,
-    marginBottom: 10,
-  },
-  welcomeText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: colors.offWhite,
-    marginBottom: 10,
-  },
-  registerText: {
-    fontSize: 14,
-    color: colors.offWhite,
-    textAlign: 'center',
-  },
-  formContainer: {
-    width: '100%',
-    marginTop: 30,
-  },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: colors.offWhite,
-    marginBottom: 5,
-  },
-  input: {
-    backgroundColor: colors.white,
-    borderRadius: 8,
-    height: 50,
-    paddingHorizontal: 15,
-    color: colors.text,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: colors.lightGray,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: 8,
-    height: 50,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: colors.lightGray,
-  },
-  passwordInput: {
-    flex: 1,
-    color: colors.text,
-    fontSize: 16,
-  },
-  showPasswordText: {
-    color: colors.primary,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  passwordStrengthContainer: {
-    marginTop: 8,
-  },
-  passwordStrengthBar: {
-    height: 8, // Aumenta a altura da barra
-    backgroundColor: colors.lightGray, // Cor de fundo da barra
-    borderRadius: 4,
-    overflow: 'hidden', // Garante que o preenchimento não ultrapasse as bordas
-    flex: 1, // Permite que a barra ocupe o espaço disponível
-    marginRight: 10, // Adiciona um espaçamento à direita
-  },
-  passwordStrengthFill: {
-    height: '100%',
-    borderRadius: 4, // Adiciona bordas arredondadas ao preenchimento
-  },
-  passwordStrengthFillWeak: {
-    width: '33%',
-    backgroundColor: getPasswordStrengthColor('weak'),
-  },
-  passwordStrengthFillMedium: {
-    width: '66%',
-    backgroundColor: getPasswordStrengthColor('medium'),
-  },
-  passwordStrengthFillStrong: {
-    width: '100%',
-    backgroundColor: getPasswordStrengthColor('strong'),
-  },
-  passwordStrengthText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  passwordStrengthTextWeak: {
-    color: getPasswordStrengthColor('weak'),
-  },
-  passwordStrengthTextMedium: {
-    color: getPasswordStrengthColor('medium'),
-  },
-  passwordStrengthTextStrong: {
-    color: getPasswordStrengthColor('strong'),
-  },
-  registerButton: {
-    backgroundColor: colors.error,
-    borderRadius: 5,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  registerButtonText: {
-    color: colors.offWhite,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  loginButton: {
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  loginButtonText: {
-    color: colors.offWhite,
-    fontSize: 16,
-    textDecorationLine: 'underline',
-  },
-  footer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  footerText: {
-    color: colors.offWhite,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
+  backgroundContainer: { flex: 1, backgroundColor: '#5a0025' },
+  container: { flex: 1 },
+  scrollContainer: { flexGrow: 1, padding: 20, justifyContent: 'space-between' },
+  headerContainer: { alignItems: 'center', marginTop: 40 },
+  logoText: { fontSize: 42, fontWeight: 'bold', color: '#ffffff', letterSpacing: 2, marginBottom: 8 },
+  logoAccent: { color: '#ff6680' },
+  clientTypeText: { fontSize: 14, fontWeight: 'bold', color: 'rgba(255,255,255,0.7)', letterSpacing: 3, marginBottom: 4 },
+  welcomeText: { fontSize: 26, fontWeight: 'bold', color: '#ffffff', marginBottom: 6, letterSpacing: 2 },
+  registerText: { fontSize: 14, color: 'rgba(255,255,255,0.8)', textAlign: 'center' },
+  formContainer: { width: '100%', marginTop: 30 },
+  inputContainer: { marginBottom: 15 },
+  inputLabel: { fontSize: 13, fontWeight: 'bold', color: 'rgba(255,255,255,0.9)', marginBottom: 6, letterSpacing: 1 },
+  input: { backgroundColor: '#ffffff', borderRadius: 10, height: 50, paddingHorizontal: 15, color: '#333', fontSize: 16 },
+  passwordContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 10, height: 50, paddingHorizontal: 15 },
+  passwordInput: { flex: 1, color: '#333', fontSize: 16 },
+  showPasswordText: { color: '#d31027', fontSize: 12, fontWeight: 'bold' },
+  passwordStrengthContainer: { marginTop: 8 },
+  passwordStrengthBar: { height: 6, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 3, overflow: 'hidden', marginBottom: 4 },
+  passwordStrengthFill: { height: '100%', borderRadius: 3 },
+  passwordStrengthFillWeak: { width: '33%', backgroundColor: getPasswordStrengthColor('weak') },
+  passwordStrengthFillMedium: { width: '66%', backgroundColor: getPasswordStrengthColor('medium') },
+  passwordStrengthFillStrong: { width: '100%', backgroundColor: getPasswordStrengthColor('strong') },
+  passwordStrengthText: { fontSize: 12, fontWeight: '500' },
+  passwordStrengthTextWeak: { color: getPasswordStrengthColor('weak') },
+  passwordStrengthTextMedium: { color: getPasswordStrengthColor('medium') },
+  passwordStrengthTextStrong: { color: getPasswordStrengthColor('strong') },
+  registerButton: { backgroundColor: '#d31027', borderRadius: 25, height: 52, justifyContent: 'center', alignItems: 'center', marginTop: 20, elevation: 4 },
+  registerButtonText: { color: '#ffffff', fontSize: 16, fontWeight: 'bold', letterSpacing: 2 },
+  loginButton: { height: 50, justifyContent: 'center', alignItems: 'center', marginTop: 10 },
+  loginButtonText: { color: 'rgba(255,255,255,0.9)', fontSize: 16, textDecorationLine: 'underline' },
+  footer: { alignItems: 'center', marginBottom: 20 },
+  footerText: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 'bold', letterSpacing: 4 },
 });
 
 export default RegisterScreen;
