@@ -10,19 +10,15 @@ import {
   KeyboardAvoidingView,
   Alert,
   ActivityIndicator,
-  ImageBackground,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../../types/types';
 import { useAuth } from './context/AuthContext';
-import { colors } from '../../constants/colors';
-const backgroundImage = require('../../assets/images/fundo.png');
 
 type LoginScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Login'>;
 type LoginScreenRouteProp = RouteProp<AppStackParamList, 'Login'>;
-
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
@@ -37,7 +33,6 @@ const LoginScreen: React.FC = () => {
 
   const { signIn } = useAuth();
 
-
   const loadSavedCredentials = useCallback(async () => {
     try {
       const savedEmail = await AsyncStorage.getItem('savedEmail');
@@ -46,22 +41,14 @@ const LoginScreen: React.FC = () => {
       const shouldRemember = await AsyncStorage.getItem('rememberMe');
 
       if (shouldRemember === 'true' && savedEmail && savedPassword) {
-        // Verificar se o tipo de usuário salvo corresponde ao tipo atual
         if (savedUserType === userType) {
           setEmail(savedEmail);
           setPassword(savedPassword);
           setRememberMe(true);
-
-          // REMOVER AUTO-LOGIN AUTOMÁTICO - apenas pré-preencher campos
-          // O usuário pode clicar em "ENTRAR" quando quiser fazer login
-
         } else {
-          // Tipos diferentes - manter credenciais mas limpar apenas o tipo incompatível
-          // Permite que o usuário use as credenciais salvas com o tipo correto
           setEmail(savedEmail || '');
           setPassword(savedPassword || '');
           setRememberMe(true);
-          // Atualizar o tipo de usuário salvo para o atual
           await AsyncStorage.setItem('savedUserType', userType);
         }
       }
@@ -70,7 +57,6 @@ const LoginScreen: React.FC = () => {
     }
   }, [userType]);
 
-  // Carregar dados salvos ao inicializar a tela
   useEffect(() => {
     loadSavedCredentials();
   }, [loadSavedCredentials]);
@@ -93,7 +79,6 @@ const LoginScreen: React.FC = () => {
     }
   }, [rememberMe, email, password, userType]);
 
-  // Salvar credenciais sempre que o rememberMe, email ou password mudarem
   useEffect(() => {
     if (email && password) {
       saveCredentials();
@@ -109,9 +94,7 @@ const LoginScreen: React.FC = () => {
     setIsLoading(true);
     try {
       await signIn(email, password, userType);
-      // Salvar credenciais após o login bem-sucedido também
       await saveCredentials();
-      // A navegação será tratada pelo AuthContext
     } catch (error) {
       const err = error as Error;
       Alert.alert('Erro no Login', err.message || 'Não foi possível fazer login. Verifique suas credenciais.');
@@ -129,7 +112,7 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <ImageBackground source={backgroundImage} style={styles.backgroundContainer} resizeMode="cover">
+    <View style={styles.backgroundContainer}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
@@ -139,7 +122,12 @@ const LoginScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.headerContainer}>
-            <Text style={styles.clientTypeText}>{userType === 'client' ? 'CLIENTE' : 'PROPRIETÁRIO'}</Text>
+            <Text style={styles.logoText}>
+              Agend<Text style={styles.logoAccent}>My</Text>
+            </Text>
+            <Text style={styles.clientTypeText}>
+              {userType === 'client' ? 'CLIENTE' : 'PROPRIETÁRIO'}
+            </Text>
             <Text style={styles.welcomeText}>BEM-VINDO!</Text>
             {rememberMe && email && password ? (
               <Text style={styles.savedCredentialsText}>Credenciais salvas! Clique em ENTRAR para acessar.</Text>
@@ -154,7 +142,7 @@ const LoginScreen: React.FC = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Digite seu e-mail"
-                placeholderTextColor={colors.placeholderText}
+                placeholderTextColor="#999"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
@@ -167,8 +155,8 @@ const LoginScreen: React.FC = () => {
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
-                  placeholder="SENHA"
-                  placeholderTextColor={colors.placeholderText}
+                  placeholder="Digite sua senha"
+                  placeholderTextColor="#999"
                   secureTextEntry={!showPassword}
                   value={password}
                   onChangeText={setPassword}
@@ -197,23 +185,17 @@ const LoginScreen: React.FC = () => {
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color={colors.white} />
+                <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={styles.loginButtonText}>ENTRAR</Text>
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.registerButton}
-              onPress={handleRegister}
-            >
+            <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
               <Text style={styles.registerButtonText}>Cadastrar agora!</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.forgotPasswordButton}
-              onPress={handleForgotPassword}
-            >
+            <TouchableOpacity style={styles.forgotPasswordButton} onPress={handleForgotPassword}>
               <Text style={styles.forgotPasswordText}>Esqueci minha senha</Text>
             </TouchableOpacity>
           </View>
@@ -223,13 +205,14 @@ const LoginScreen: React.FC = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   backgroundContainer: {
     flex: 1,
+    backgroundColor: '#5a0025',
   },
   container: {
     flex: 1,
@@ -243,34 +226,40 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 60,
   },
-  clientTypeText: {
-    fontSize: 18,
+  logoText: {
+    fontSize: 42,
     fontWeight: 'bold',
-    color: colors.offWhite,
+    color: '#ffffff',
+    letterSpacing: 2,
     marginBottom: 10,
+  },
+  logoAccent: {
+    color: '#ff6680',
+  },
+  clientTypeText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: 6,
+    letterSpacing: 3,
   },
   welcomeText: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: colors.offWhite,
+    color: '#ffffff',
     marginBottom: 10,
+    letterSpacing: 2,
   },
   loginText: {
     fontSize: 14,
-    color: colors.offWhite,
+    color: 'rgba(255,255,255,0.8)',
     textAlign: 'center',
   },
   savedCredentialsText: {
     fontSize: 14,
-    color: colors.primary,
+    color: '#ffcccc',
     textAlign: 'center',
     fontWeight: 'bold',
-  },
-  autoLoginText: {
-    fontSize: 14,
-    color: colors.primary,
-    textAlign: 'center',
-    fontStyle: 'italic',
   },
   formContainer: {
     width: '100%',
@@ -280,53 +269,52 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
-    color: colors.offWhite,
-    marginBottom: 5,
+    color: 'rgba(255,255,255,0.9)',
+    marginBottom: 6,
+    letterSpacing: 1,
   },
   input: {
-    backgroundColor: colors.white,
-    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
     height: 50,
     paddingHorizontal: 15,
-    color: colors.text,
+    color: '#333',
     fontSize: 16,
-    borderWidth: 1,
-    borderColor: colors.lightGray,
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
     height: 50,
     paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: colors.lightGray,
   },
   passwordInput: {
     flex: 1,
-    color: colors.text,
+    color: '#333',
     fontSize: 16,
   },
   showPasswordText: {
-    color: colors.primary,
+    color: '#d31027',
     fontSize: 12,
     fontWeight: 'bold',
   },
   loginButton: {
-    backgroundColor: colors.error,
-    borderRadius: 5,
-    height: 50,
+    backgroundColor: '#d31027',
+    borderRadius: 25,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
+    elevation: 4,
   },
   loginButtonText: {
-    color: colors.offWhite,
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
+    letterSpacing: 2,
   },
   registerButton: {
     height: 50,
@@ -335,7 +323,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   registerButtonText: {
-    color: colors.offWhite,
+    color: 'rgba(255,255,255,0.9)',
     fontSize: 16,
     textDecorationLine: 'underline',
   },
@@ -350,23 +338,24 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: '#ffffff',
     borderRadius: 3,
     marginRight: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.white,
+    backgroundColor: 'transparent',
   },
   checkboxChecked: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#d31027',
+    borderColor: '#d31027',
   },
   checkmark: {
-    color: colors.white,
+    color: '#ffffff',
     fontSize: 12,
     fontWeight: 'bold',
   },
   rememberMeText: {
-    color: colors.offWhite,
+    color: 'rgba(255,255,255,0.9)',
     fontSize: 14,
   },
   forgotPasswordButton: {
@@ -376,7 +365,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   forgotPasswordText: {
-    color: colors.offWhite,
+    color: 'rgba(255,255,255,0.8)',
     fontSize: 14,
     textDecorationLine: 'underline',
   },
@@ -385,9 +374,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   footerText: {
-    color: colors.offWhite,
-    fontSize: 14,
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
     fontWeight: 'bold',
+    letterSpacing: 4,
   },
 });
 
