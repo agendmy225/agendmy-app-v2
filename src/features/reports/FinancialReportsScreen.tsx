@@ -25,7 +25,7 @@ import {
   FinancialReport,
   generateFinancialReport,
   getFinancialReports,
-  deleteFinancialReport, // Adicionado
+  deleteFinancialReport,
   ReportParams,
 } from '../../services/financialReports';
 import { validateCommissionConfig } from '../../services/businessConfig';
@@ -41,18 +41,15 @@ const FinancialReportsScreen: React.FC = () => {
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [generateModalVisible, setGenerateModalVisible] = useState(false);
 
-  // Estados para geração de relatório
   const [reportPeriod, setReportPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom'>('monthly');
   const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [generatingReport, setGeneratingReport] = useState(false);
 
-  const fetchBusinessId = React.useCallback(async () => { // Envolver com useCallback
+  const fetchBusinessId = React.useCallback(async () => {
     if (!user) { return; }
 
     try {
-      console.log('🔵 Buscando businessId para usuário:', user.uid);
-      // Buscar o ID do estabelecimento do proprietário atual
       const businessQuery = query(
         collection(firestore, 'businesses'),
         where('ownerId', '==', user.uid),
@@ -64,35 +61,27 @@ const FinancialReportsScreen: React.FC = () => {
         const businessDoc = businessSnapshot.docs[0];
         const foundBusinessId = businessDoc.id;
         setBusinessId(foundBusinessId);
-        console.log('✅ BusinessId encontrado:', foundBusinessId);
       } else {
-        console.log('⚠️ Nenhum estabelecimento encontrado para o usuário');
         setLoading(false);
       }
     } catch (businessError) {
-      console.error('❌ Erro ao buscar businessId:', businessError);
+      console.error('Erro ao buscar businessId:', businessError);
       setLoading(false);
     }
-  }, [user]); // Adicionar user como dependência
+  }, [user]);
 
   useEffect(() => {
     fetchBusinessId();
-  }, [fetchBusinessId]); // Adicionar fetchBusinessId como dependência
+  }, [fetchBusinessId]);
 
-  const loadReports = React.useCallback(async () => { // Envolver com useCallback
+  const loadReports = React.useCallback(async () => {
     if (!businessId) { return; }
 
     try {
       setLoading(true);
-      console.log('🔵 Carregando relatórios para businessId:', businessId);
-
-      // Buscar relatórios financeiros existentes
       const fetchedReports = await getFinancialReports(businessId);
-      console.log('📊 Relatórios encontrados:', fetchedReports.length);
 
-      // Se não houver relatórios, gerar um relatório do mês atual automaticamente
       if (fetchedReports.length === 0) {
-        console.log('📝 Gerando relatório automático do mês atual...');
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -104,35 +93,32 @@ const FinancialReportsScreen: React.FC = () => {
             startDate: startOfMonth,
             endDate: endOfMonth,
           });
-
           setReports([currentMonthReport]);
-          console.log('✅ Relatório automático gerado com sucesso');
         } catch (autoReportError) {
-          console.log('⚠️ Falha ao gerar relatório automático:', autoReportError);
-          setReports([]); // Define como array vazio se a geração automática falhar
+          setReports([]);
         }
-      } else { // Este else corresponde ao if (fetchedReports.length === 0)
+      } else {
         setReports(fetchedReports);
       }
 
       setLoading(false);
     } catch (loadError) {
-      console.error('❌ Erro ao carregar relatórios:', loadError);
+      console.error('Erro ao carregar relatórios:', loadError);
       setLoading(false);
     }
-  }, [businessId]); // Adicionar businessId como dependência
+  }, [businessId]);
 
   useEffect(() => {
     if (businessId) {
       loadReports();
     }
-  }, [businessId, loadReports]); // Adicionar loadReports como dependência
+  }, [businessId, loadReports]);
 
-  const onRefresh = React.useCallback(async () => { // Envolver com useCallback
+  const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
     await loadReports();
     setRefreshing(false);
-  }, [loadReports]); // Adicionar loadReports como dependência
+  }, [loadReports]);
 
   const handleGenerateReport = async () => {
     if (!businessId) {
@@ -142,27 +128,19 @@ const FinancialReportsScreen: React.FC = () => {
 
     try {
       setGeneratingReport(true);
-      console.log('🔵 Iniciando geração de relatório...');
 
-      // PRIMEIRO: Validar se há configuração de comissão
-      console.log('🔍 Validando configuração de comissão...');
       const commissionValidation = await validateCommissionConfig(businessId);
 
       if (!commissionValidation.hasValidConfig) {
         Alert.alert(
           'Configuração Necessária',
           `${commissionValidation.message}\n\nConfigure a taxa de comissão nas configurações do seu negócio para gerar relatórios.`,
-          [
-            { text: 'Entendi', style: 'default' }
-          ]
+          [{ text: 'Entendi', style: 'default' }]
         );
         setGeneratingReport(false);
         return;
       }
 
-      console.log('✅ Configuração válida:', commissionValidation.message);
-
-      // Preparar datas com validação mais robusta
       let start: Date;
       let end: Date;
 
@@ -170,13 +148,11 @@ const FinancialReportsScreen: React.FC = () => {
         start = new Date(startDate);
         end = new Date(endDate);
       } catch (dateError) {
-        console.error('❌ Erro ao converter datas:', dateError);
         Alert.alert('Erro', 'Formato de data inválido. Use o formato AAAA-MM-DD.');
         setGeneratingReport(false);
         return;
       }
 
-      // Validar datas
       if (isNaN(start.getTime()) || isNaN(end.getTime())) {
         Alert.alert('Erro', 'Formato de data inválido. Use o formato AAAA-MM-DD.');
         setGeneratingReport(false);
@@ -189,7 +165,6 @@ const FinancialReportsScreen: React.FC = () => {
         return;
       }
 
-      // Validar se a data não é muito no futuro
       const now = new Date();
       if (start > now) {
         Alert.alert('Erro', 'A data inicial não pode ser no futuro.');
@@ -197,7 +172,6 @@ const FinancialReportsScreen: React.FC = () => {
         return;
       }
 
-      // Preparar parâmetros do relatório
       const reportParams: ReportParams = {
         businessId,
         period: reportPeriod,
@@ -205,22 +179,13 @@ const FinancialReportsScreen: React.FC = () => {
         endDate: end,
       };
 
-      console.log('📊 Parâmetros do relatório:', reportParams);
-
-      // Gerar relatório
       const newReport = await generateFinancialReport(reportParams);
-      console.log('✅ Relatório gerado com sucesso:', newReport.id);
-
-      // Adicionar à lista de relatórios
       setReports([newReport, ...reports]);
-
-      // Fechar modal e mostrar mensagem de sucesso
       setGenerateModalVisible(false);
       Alert.alert('Sucesso', 'Relatório financeiro gerado com sucesso!');
-
       setGeneratingReport(false);
     } catch (error) {
-      console.error('❌ Erro ao gerar relatório:', error);
+      console.error('Erro ao gerar relatório:', error);
       const errorMessage = error instanceof Error
         ? error.message
         : 'Ocorreu um erro ao gerar o relatório. Tente novamente.';
@@ -245,14 +210,12 @@ const FinancialReportsScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              console.log('🗑️ Excluindo relatório:', reportId);
               await deleteFinancialReport(businessId, reportId);
               setReports(prevReports => prevReports.filter(report => report.id !== reportId));
-              setReportModalVisible(false); // Fecha o modal após a exclusão
+              setReportModalVisible(false);
               Alert.alert('Sucesso', 'Relatório excluído com sucesso.');
-              console.log('✅ Relatório excluído com sucesso');
             } catch (deleteError) {
-              console.error('❌ Erro ao excluir relatório:', deleteError);
+              console.error('Erro ao excluir relatório:', deleteError);
               Alert.alert('Erro', 'Ocorreu um erro ao excluir o relatório. Tente novamente.');
             }
           },
@@ -266,20 +229,35 @@ const FinancialReportsScreen: React.FC = () => {
     setReportModalVisible(true);
   };
 
-  const formatDate = (timestamp: { toDate: () => Date; } | Date | null | undefined) => {
+  // CORRIGIDO: aceita todos os formatos de timestamp do Firestore
+  const formatDate = (timestamp: any): string => {
     if (!timestamp) { return 'N/A'; }
-
-    const date = timestamp instanceof Date ? timestamp : timestamp.toDate();
-    return date.toLocaleDateString('pt-BR');
+    try {
+      let date: Date;
+      if (timestamp instanceof Date) {
+        date = timestamp;
+      } else if (typeof timestamp === 'string') {
+        date = new Date(timestamp);
+      } else if (typeof timestamp.toDate === 'function') {
+        date = timestamp.toDate();
+      } else if (timestamp.seconds) {
+        date = new Date(timestamp.seconds * 1000);
+      } else {
+        return 'N/A';
+      }
+      if (isNaN(date.getTime())) { return 'N/A'; }
+      return date.toLocaleDateString('pt-BR');
+    } catch {
+      return 'N/A';
+    }
   };
 
   const formatCurrency = (value: number) => {
-    // CORRIGIDO: usar função utilitária padronizada
     return formatCurrencyUtil(value);
   };
 
-  const getPeriodLabel = (period: string, pStartDate: { toDate: () => Date; } | Date | null, pEndDate: { toDate: () => Date; } | Date | null) => {
-    if (!pStartDate || !pEndDate) return '';
+  const getPeriodLabel = (period: string, pStartDate: any, pEndDate: any) => {
+    if (!pStartDate || !pEndDate) { return ''; }
     switch (period) {
       case 'daily':
         return `Diário - ${formatDate(pStartDate)}`;
@@ -345,13 +323,8 @@ const FinancialReportsScreen: React.FC = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                Relatório Financeiro
-              </Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setReportModalVisible(false)}
-              >
+              <Text style={styles.modalTitle}>Relatório Financeiro</Text>
+              <TouchableOpacity style={styles.closeButton} onPress={() => setReportModalVisible(false)}>
                 <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             </View>
@@ -446,10 +419,7 @@ const FinancialReportsScreen: React.FC = () => {
               >
                 <Text style={styles.deleteButtonText}>Excluir Relatório</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.closeModalButton}
-                onPress={() => setReportModalVisible(false)}
-              >
+              <TouchableOpacity style={styles.closeModalButton} onPress={() => setReportModalVisible(false)}>
                 <Text style={styles.closeModalButtonText}>Fechar</Text>
               </TouchableOpacity>
             </View>
@@ -469,13 +439,8 @@ const FinancialReportsScreen: React.FC = () => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>
-              Gerar Relatório Financeiro
-            </Text>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setGenerateModalVisible(false)}
-            >
+            <Text style={styles.modalTitle}>Gerar Relatório Financeiro</Text>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setGenerateModalVisible(false)}>
               <Text style={styles.closeButtonText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -484,102 +449,36 @@ const FinancialReportsScreen: React.FC = () => {
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Período</Text>
               <View style={styles.periodButtonsContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.periodButton,
-                    reportPeriod === 'daily' && styles.activePeriodButton,
-                  ]}
-                  onPress={() => setReportPeriod('daily')}
-                >
-                  <Text style={[
-                    styles.periodButtonText,
-                    reportPeriod === 'daily' && styles.activePeriodButtonText,
-                  ]}>Diário</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.periodButton,
-                    reportPeriod === 'weekly' && styles.activePeriodButton,
-                  ]}
-                  onPress={() => setReportPeriod('weekly')}
-                >
-                  <Text style={[
-                    styles.periodButtonText,
-                    reportPeriod === 'weekly' && styles.activePeriodButtonText,
-                  ]}>Semanal</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.periodButton,
-                    reportPeriod === 'monthly' && styles.activePeriodButton,
-                  ]}
-                  onPress={() => setReportPeriod('monthly')}
-                >
-                  <Text style={[
-                    styles.periodButtonText,
-                    reportPeriod === 'monthly' && styles.activePeriodButtonText,
-                  ]}>Mensal</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.periodButton,
-                    reportPeriod === 'yearly' && styles.activePeriodButton,
-                  ]}
-                  onPress={() => setReportPeriod('yearly')}
-                >
-                  <Text style={[
-                    styles.periodButtonText,
-                    reportPeriod === 'yearly' && styles.activePeriodButtonText,
-                  ]}>Anual</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.periodButton,
-                    reportPeriod === 'custom' && styles.activePeriodButton,
-                  ]}
-                  onPress={() => setReportPeriod('custom')}
-                >
-                  <Text style={[
-                    styles.periodButtonText,
-                    reportPeriod === 'custom' && styles.activePeriodButtonText,
-                  ]}>Personalizado</Text>
-                </TouchableOpacity>
+                {(['daily', 'weekly', 'monthly', 'yearly', 'custom'] as const).map((period) => (
+                  <TouchableOpacity
+                    key={period}
+                    style={[styles.periodButton, reportPeriod === period && styles.activePeriodButton]}
+                    onPress={() => setReportPeriod(period)}
+                  >
+                    <Text style={[styles.periodButtonText, reportPeriod === period && styles.activePeriodButtonText]}>
+                      {period === 'daily' ? 'Diário' : period === 'weekly' ? 'Semanal' : period === 'monthly' ? 'Mensal' : period === 'yearly' ? 'Anual' : 'Personalizado'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Data Inicial</Text>
-              <TextInput
-                style={styles.input}
-                value={startDate}
-                onChangeText={setStartDate}
-                placeholder="AAAA-MM-DD"
-              />
+              <TextInput style={styles.input} value={startDate} onChangeText={setStartDate} placeholder="AAAA-MM-DD" />
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Data Final</Text>
-              <TextInput
-                style={styles.input}
-                value={endDate}
-                onChangeText={setEndDate}
-                placeholder="AAAA-MM-DD"
-              />
+              <TextInput style={styles.input} value={endDate} onChangeText={setEndDate} placeholder="AAAA-MM-DD" />
             </View>
           </ScrollView>
 
           <View style={styles.modalFooter}>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setGenerateModalVisible(false)}
-            >
+            <TouchableOpacity style={styles.cancelButton} onPress={() => setGenerateModalVisible(false)}>
               <Text style={styles.cancelButtonText}>Cancelar</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.generateButton}
-              onPress={handleGenerateReport}
-              disabled={generatingReport}
-            >
+            <TouchableOpacity style={styles.generateButton} onPress={handleGenerateReport} disabled={generatingReport}>
               {generatingReport ? (
                 <ActivityIndicator size="small" color={colors.white} />
               ) : (
@@ -609,9 +508,7 @@ const FinancialReportsScreen: React.FC = () => {
 
       <ScrollView
         style={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {reports.length > 0 ? (
           reports.map(report => renderReportItem(report))
@@ -625,10 +522,7 @@ const FinancialReportsScreen: React.FC = () => {
         )}
       </ScrollView>
 
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => setGenerateModalVisible(true)}
-      >
+      <TouchableOpacity style={styles.addButton} onPress={() => setGenerateModalVisible(true)}>
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
 
@@ -639,341 +533,67 @@ const FinancialReportsScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: colors.text,
-  },
-  header: {
-    padding: 20,
-    backgroundColor: colors.primary,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.white,
-  },
-  content: {
-    flex: 1,
-    padding: 15,
-  },
-  reportCard: {
-    backgroundColor: colors.white,
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  reportHeader: {
-    marginBottom: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  reportTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-    flex: 1,
-  },
-  deleteIcon: {
-    padding: 5,
-  },
-  deleteIconText: {
-    fontSize: 20,
-  },
-  reportDate: {
-    fontSize: 14,
-    color: colors.lightText,
-    marginBottom: 10,
-  },
-  reportSummary: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  summaryItem: {
-    flex: 1,
-  },
-  summaryLabel: {
-    fontSize: 14,
-    color: colors.lightText,
-    marginBottom: 5,
-  },
-  summaryValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.primary,
-  },
-  viewDetailsText: {
-    fontSize: 14,
-    color: colors.primary,
-    textAlign: 'center',
-    marginTop: 10,
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 200,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.lightText,
-    marginBottom: 10,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: colors.lightText,
-    textAlign: 'center',
-  },
-  addButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-  },
-  addButtonText: {
-    fontSize: 30,
-    color: colors.white,
-    fontWeight: 'bold',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    width: '90%',
-    maxHeight: '80%',
-    backgroundColor: colors.white,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.lightGray,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-  },
-  closeButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: colors.lightGray,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    fontSize: 16,
-    color: colors.text,
-  },
-  modalContent: {
-    padding: 15,
-  },
-  reportDetailHeader: {
-    marginBottom: 20,
-  },
-  reportDetailTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 5,
-  },
-  reportDetailDate: {
-    fontSize: 14,
-    color: colors.lightText,
-  },
-  reportDetailSection: {
-    marginBottom: 20,
-    padding: 15,
-    backgroundColor: colors.background,
-    borderRadius: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 15,
-  },
-  detailItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  detailLabel: {
-    fontSize: 14,
-    color: colors.lightText,
-  },
-  detailValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: colors.text,
-  },
-  commissionItem: {
-    marginBottom: 15,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.lightGray,
-  },
-  commissionName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 10,
-  },
-  commissionDetails: {
-    paddingLeft: 10,
-  },
-  commissionValue: {
-    color: colors.success,
-  },
-  serviceItem: {
-    marginBottom: 15,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.lightGray,
-  },
-  serviceName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 10,
-  },
-  serviceDetails: {
-    paddingLeft: 10,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 15,
-    borderTopWidth: 1,
-    borderTopColor: colors.lightGray,
-  },
-  closeModalButton: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderRadius: 5,
-    backgroundColor: colors.primary,
-    marginLeft: 5,
-  },
-  closeModalButtonText: {
-    fontSize: 16,
-    color: colors.white,
-    fontWeight: 'bold',
-  },
-  deleteButton: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderRadius: 5,
-    backgroundColor: colors.error, // Alterado de colors.danger para colors.error
-    marginRight: 5,
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    color: colors.white,
-    fontWeight: 'bold',
-  },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 5,
-  },
-  input: {
-    backgroundColor: colors.background,
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 16,
-    color: colors.text,
-  },
-  periodButtonsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 10,
-  },
-  periodButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    marginRight: 8,
-    marginBottom: 8,
-    backgroundColor: colors.background,
-  },
-  activePeriodButton: {
-    backgroundColor: colors.primary,
-  },
-  periodButtonText: {
-    fontSize: 14,
-    color: colors.text,
-  },
-  activePeriodButtonText: {
-    color: colors.white,
-    fontWeight: 'bold',
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderRadius: 5,
-    marginRight: 10,
-    backgroundColor: colors.lightGray,
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    color: colors.text,
-    fontWeight: 'bold',
-  },
-  generateButton: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderRadius: 5,
-    backgroundColor: colors.primary,
-  },
-  generateButtonText: {
-    fontSize: 16,
-    color: colors.white,
-    fontWeight: 'bold',
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
+  loadingText: { marginTop: 10, fontSize: 16, color: colors.text },
+  header: { padding: 20, backgroundColor: colors.primary },
+  headerTitle: { fontSize: 20, fontWeight: 'bold', color: colors.white },
+  content: { flex: 1, padding: 15 },
+  reportCard: { backgroundColor: colors.white, borderRadius: 10, padding: 15, marginBottom: 15, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+  reportHeader: { marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  reportTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, flex: 1 },
+  deleteIcon: { padding: 5 },
+  deleteIconText: { fontSize: 20 },
+  reportDate: { fontSize: 14, color: colors.lightText, marginBottom: 10 },
+  reportSummary: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  summaryItem: { flex: 1 },
+  summaryLabel: { fontSize: 14, color: colors.lightText, marginBottom: 5 },
+  summaryValue: { fontSize: 16, fontWeight: 'bold', color: colors.primary },
+  viewDetailsText: { fontSize: 14, color: colors.primary, textAlign: 'center', marginTop: 10 },
+  emptyContainer: { padding: 20, alignItems: 'center', justifyContent: 'center', height: 200 },
+  emptyText: { fontSize: 18, fontWeight: 'bold', color: colors.lightText, marginBottom: 10 },
+  emptySubtext: { fontSize: 14, color: colors.lightText, textAlign: 'center' },
+  addButton: { position: 'absolute', bottom: 20, right: 20, width: 60, height: 60, borderRadius: 30, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 3 },
+  addButtonText: { fontSize: 30, color: colors.white, fontWeight: 'bold' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center' },
+  modalContainer: { width: '90%', maxHeight: '80%', backgroundColor: colors.white, borderRadius: 10, overflow: 'hidden' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 15, borderBottomWidth: 1, borderBottomColor: colors.lightGray },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text },
+  closeButton: { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.lightGray, justifyContent: 'center', alignItems: 'center' },
+  closeButtonText: { fontSize: 16, color: colors.text },
+  modalContent: { padding: 15 },
+  reportDetailHeader: { marginBottom: 20 },
+  reportDetailTitle: { fontSize: 20, fontWeight: 'bold', color: colors.text, marginBottom: 5 },
+  reportDetailDate: { fontSize: 14, color: colors.lightText },
+  reportDetailSection: { marginBottom: 20, padding: 15, backgroundColor: colors.background, borderRadius: 10 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 15 },
+  detailItem: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  detailLabel: { fontSize: 14, color: colors.lightText },
+  detailValue: { fontSize: 14, fontWeight: 'bold', color: colors.text },
+  commissionItem: { marginBottom: 15, paddingBottom: 15, borderBottomWidth: 1, borderBottomColor: colors.lightGray },
+  commissionName: { fontSize: 16, fontWeight: 'bold', color: colors.text, marginBottom: 10 },
+  commissionDetails: { paddingLeft: 10 },
+  commissionValue: { color: colors.success },
+  serviceItem: { marginBottom: 15, paddingBottom: 15, borderBottomWidth: 1, borderBottomColor: colors.lightGray },
+  serviceName: { fontSize: 16, fontWeight: 'bold', color: colors.text, marginBottom: 10 },
+  serviceDetails: { paddingLeft: 10 },
+  modalFooter: { flexDirection: 'row', justifyContent: 'space-between', padding: 15, borderTopWidth: 1, borderTopColor: colors.lightGray },
+  closeModalButton: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 5, backgroundColor: colors.primary, marginLeft: 5 },
+  closeModalButtonText: { fontSize: 16, color: colors.white, fontWeight: 'bold' },
+  deleteButton: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 5, backgroundColor: colors.error, marginRight: 5 },
+  deleteButtonText: { fontSize: 16, color: colors.white, fontWeight: 'bold' },
+  inputContainer: { marginBottom: 15 },
+  inputLabel: { fontSize: 14, fontWeight: 'bold', color: colors.text, marginBottom: 5 },
+  input: { backgroundColor: colors.background, borderRadius: 8, padding: 10, fontSize: 16, color: colors.text },
+  periodButtonsContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 10 },
+  periodButton: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, marginRight: 8, marginBottom: 8, backgroundColor: colors.background },
+  activePeriodButton: { backgroundColor: colors.primary },
+  periodButtonText: { fontSize: 14, color: colors.text },
+  activePeriodButtonText: { color: colors.white, fontWeight: 'bold' },
+  cancelButton: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 5, marginRight: 10, backgroundColor: colors.lightGray },
+  cancelButtonText: { fontSize: 16, color: colors.text, fontWeight: 'bold' },
+  generateButton: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 5, backgroundColor: colors.primary },
+  generateButtonText: { fontSize: 16, color: colors.white, fontWeight: 'bold' },
 });
 
 export default FinancialReportsScreen;
