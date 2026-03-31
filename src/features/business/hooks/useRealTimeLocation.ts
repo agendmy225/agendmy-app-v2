@@ -32,7 +32,7 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
   const isRequestingPermissionRef = useRef(false);
   const isStartingWatchRef = useRef(false);
 
-  // Checar permissão inicial
+  // Checar permissao inicial
   useEffect(() => {
     const checkInitialPermission = async () => {
       try {
@@ -41,16 +41,11 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
           );
           setHasPermission(permissionStatus);
-          if (permissionStatus) {
-            console.log('Permissão de localização já estava concedida.');
-          }
         } else {
-          // No iOS, a permissão é verificada automaticamente quando usamos o Geolocation
-          // Assumimos que temos permissão inicialmente, será verificada quando necessário
           setHasPermission(false);
         }
       } catch (err) {
-        console.error('Erro ao verificar permissão:', err);
+        console.error('Erro ao verificar permissao:', err);
         setHasPermission(false);
       }
     };
@@ -58,7 +53,7 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
     checkInitialPermission();
   }, []);
 
-  // Solicitar permissão de localização
+  // Solicitar permissao de localizacao
   const requestPermission = useCallback(async (): Promise<boolean> => {
     if (isRequestingPermissionRef.current) {
       return hasPermission;
@@ -73,8 +68,8 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
-            title: 'Permissão de Localização',
-            message: 'Este aplicativo precisa acessar sua localização',
+            title: 'Permissao de Localizacao',
+            message: 'Este aplicativo precisa acessar sua localizacao para mostrar estabelecimentos proximos.',
             buttonNeutral: 'Perguntar depois',
             buttonNegative: 'Cancelar',
             buttonPositive: 'OK',
@@ -84,12 +79,11 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
         setHasPermission(permissionGranted);
 
         if (!permissionGranted) {
-          setError('Permissão de localização foi negada');
+          setError('Permissao de localizacao foi negada');
         }
 
         return permissionGranted;
       } else {
-        // No iOS, tentamos obter a localização atual para solicitar permissão
         return new Promise((resolve) => {
           Geolocation.getCurrentPosition(
             () => {
@@ -97,18 +91,18 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
               resolve(true);
             },
             (geoError) => {
-              console.error('Erro ao solicitar permissão no iOS:', geoError);
-              setError('Permissão de localização foi negada');
+              console.error('Erro ao solicitar permissao no iOS:', geoError);
+              setError('Permissao de localizacao foi negada');
               setHasPermission(false);
               resolve(false);
             },
-            { enableHighAccuracy: false, timeout: 15000 }
+            { enableHighAccuracy: true, timeout: 15000 }
           );
         });
       }
     } catch (err) {
-      console.error('Erro ao solicitar permissão de localização:', err);
-      setError('Erro ao solicitar permissão de localização');
+      console.error('Erro ao solicitar permissao de localizacao:', err);
+      setError('Erro ao solicitar permissao de localizacao');
       setHasPermission(false);
       return false;
     } finally {
@@ -117,35 +111,30 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
     }
   }, [hasPermission]);
 
-  // Parar de observar a localização
+  // Parar de observar a localizacao
   const stopWatching = useCallback(() => {
     if (locationSubscription.current !== null) {
       Geolocation.clearWatch(locationSubscription.current);
       locationSubscription.current = null;
       setIsWatching(false);
-      console.log('Parou de observar a localização');
     }
   }, []);
 
-  // Iniciar observação da localização
+  // Iniciar observacao da localizacao
   const startWatching = useCallback(async () => {
     if (!hasPermission) {
-      console.log('Sem permissão para observar localização');
       return;
     }
 
     if (locationSubscription.current) {
-      console.log('Já está observando a localização');
       return;
     }
 
     if (isWatching) {
-      console.log('Já está no processo de observação');
       return;
     }
 
     if (isStartingWatchRef.current) {
-      console.log('Já está iniciando observação');
       return;
     }
 
@@ -154,7 +143,29 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
     setError(null);
     setIsWatching(true);
 
-    console.log('Iniciando observação da localização...');
+    // CORRIGIDO: Obter localizacao imediata primeiro
+    Geolocation.getCurrentPosition(
+      (position: any) => {
+        const immediateLocation: LocationData = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy || 0,
+          timestamp: position.timestamp,
+        };
+        setLocation(immediateLocation);
+        setIsLoading(false);
+        console.log('Localizacao imediata obtida:', immediateLocation.latitude, immediateLocation.longitude);
+      },
+      (geoError: any) => {
+        console.warn('Erro ao obter localizacao imediata:', geoError.message);
+        setIsLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 5000,
+      }
+    );
 
     try {
       locationSubscription.current = Geolocation.watchPosition(
@@ -171,23 +182,22 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
           setError(null);
         },
         (geoError: any) => {
-          console.error('Erro na observação de localização:', geoError);
-          setError(`Erro de localização: ${geoError.message}`);
+          console.error('Erro na observacao de localizacao:', geoError);
+          setError(`Erro de localizacao: ${geoError.message}`);
           setIsLoading(false);
         },
         {
-          enableHighAccuracy: false, // Balanced accuracy
-          timeout: 60000, // 60 segundos
-          maximumAge: 60000, // Cache por 60 segundos
-          distanceFilter: 100, // 100 metros
+          enableHighAccuracy: true,
+          timeout: 30000,
+          maximumAge: 5000,
+          distanceFilter: 10,
         }
       );
 
-      console.log('Observação da localização iniciada');
       isStartingWatchRef.current = false;
     } catch (err) {
-      console.error('Erro ao iniciar observação de localização:', err);
-      setError('Erro ao iniciar observação de localização');
+      console.error('Erro ao iniciar observacao de localizacao:', err);
+      setError('Erro ao iniciar observacao de localizacao');
       setIsLoading(false);
       setIsWatching(false);
       isStartingWatchRef.current = false;
@@ -197,17 +207,11 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
   // Gerenciar estado do app
   useEffect(() => {
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      console.log('App state mudou de', appStateRef.current, 'para', nextAppState);
-
       if (appStateRef.current.match(/inactive|background/) && nextAppState === 'active') {
-        // App voltou para foreground - só reinicia se não estiver observando
         if (hasPermission && !isWatching && !locationSubscription.current) {
-          console.log('App voltou ao foreground, reiniciando localização...');
           startWatching();
         }
       } else if (appStateRef.current === 'active' && nextAppState.match(/inactive|background/)) {
-        // App foi para background
-        console.log('App foi para background, parando localização...');
         stopWatching();
       }
 
