@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Image } from 'react-native';
 import { Marker } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Business } from '../../../services/businesses';
@@ -10,82 +10,58 @@ interface BusinessMarkerProps {
   onPress: () => void;
 }
 
-const MARKER_SIZE = 40;
+const MARKER_SIZE = 44;
 
-// Mapeamento de categorias para ícones do Material Icons
 const getCategoryIcon = (category: string): string => {
   switch (category) {
-    case 'saloes-beleza':
-      return 'content-cut'; // Tesoura
-    case 'barbearias':
-      return 'storefront'; // Loja/estabelecimento
-    case 'estetica':
-      return 'spa'; // Spa
-    case 'pet-shops':
-      return 'pets'; // Pet
-    case 'tatuagem':
-      return 'brush'; // Pincel
-    case 'academia':
-      return 'fitness-center'; // Academia
-    case 'odontologia':
-      return 'local-hospital'; // Hospital/saúde
-    case 'fisioterapia':
-      return 'accessibility'; // Acessibilidade
-    case 'massagem':
-      return 'healing'; // Cura/massagem
-    case 'manicure':
-      return 'colorize'; // Colorir/manicure
-    default:
-      return 'store'; // Ícone padrão para loja
+    case 'saloes-beleza': return 'content-cut';
+    case 'barbearias': return 'storefront';
+    case 'estetica': return 'spa';
+    case 'pet-shops': return 'pets';
+    case 'tatuagem': return 'brush';
+    case 'academia': return 'fitness-center';
+    case 'odontologia': return 'local-hospital';
+    case 'fisioterapia': return 'accessibility';
+    case 'massagem': return 'healing';
+    case 'manicure': return 'colorize';
+    default: return 'store';
   }
 };
 
-// Cores específicas para cada categoria
 const getCategoryColor = (category: string): string => {
   switch (category) {
-    case 'saloes-beleza':
-      return '#E91E63'; // Rosa
-    case 'barbearias':
-      return '#795548'; // Marrom
-    case 'estetica':
-      return '#9C27B0'; // Roxo
-    case 'pet-shops':
-      return '#FF9800'; // Laranja
-    case 'tatuagem':
-      return '#424242'; // Cinza escuro
-    case 'academia':
-      return '#F44336'; // Vermelho
-    case 'odontologia':
-      return '#2196F3'; // Azul
-    case 'fisioterapia':
-      return '#4CAF50'; // Verde
-    case 'massagem':
-      return '#00BCD4'; // Ciano
-    case 'manicure':
-      return '#FF5722'; // Laranja avermelhado
-    default:
-      return colors.primary; // Cor padrão
+    case 'saloes-beleza': return '#E91E63';
+    case 'barbearias': return '#795548';
+    case 'estetica': return '#9C27B0';
+    case 'pet-shops': return '#FF9800';
+    case 'tatuagem': return '#424242';
+    case 'academia': return '#F44336';
+    case 'odontologia': return '#2196F3';
+    case 'fisioterapia': return '#4CAF50';
+    case 'massagem': return '#00BCD4';
+    case 'manicure': return '#FF5722';
+    default: return colors.primary;
   }
 };
 
 export const BusinessMarker: React.FC<BusinessMarkerProps> = memo(({ business, onPress }) => {
   const [isRenderComplete, setIsRenderComplete] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
-  // Mark render as complete after mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsRenderComplete(true);
-    }, 200);
+    }, 300);
     return () => clearTimeout(timer);
   }, [business.id]);
 
-  // Não renderiza nada se o negócio não tiver localização.
   if (!business.location?.latitude || !business.location?.longitude) {
     return null;
   }
 
-  const iconName = getCategoryIcon(business.category);
   const backgroundColor = getCategoryColor(business.category);
+  const logoUrl = business.logo || business.coverImage || null;
+  const showLogo = logoUrl && !logoError;
 
   return (
     <Marker
@@ -97,18 +73,26 @@ export const BusinessMarker: React.FC<BusinessMarkerProps> = memo(({ business, o
       onPress={onPress}
       title={business.name}
       description={business.description}
-      // Para de rastrear mudanças quando renderização estiver completa
       tracksViewChanges={!isRenderComplete}
     >
       <View style={styles.markerContainer}>
-        <View style={[styles.markerWrapper, { backgroundColor }]}>
-          <Icon 
-            name={iconName} 
-            size={24} 
-            color={colors.white} 
-          />
+        <View style={[styles.markerWrapper, { borderColor: backgroundColor }]}>
+          {showLogo ? (
+            <Image
+              source={{ uri: logoUrl }}
+              style={styles.logoImage}
+              onError={() => setLogoError(true)}
+            />
+          ) : (
+            <View style={[styles.fallbackBackground, { backgroundColor }]}>
+              <Icon
+                name={getCategoryIcon(business.category)}
+                size={22}
+                color={colors.white}
+              />
+            </View>
+          )}
         </View>
-        {/* Pequeno triângulo apontando para baixo */}
         <View style={[styles.markerTriangle, { borderTopColor: backgroundColor }]} />
       </View>
     </Marker>
@@ -126,21 +110,28 @@ const styles = StyleSheet.create({
     width: MARKER_SIZE,
     height: MARKER_SIZE,
     borderRadius: MARKER_SIZE / 2,
-    backgroundColor: colors.primary,
-    borderWidth: 2,
-    borderColor: colors.white,
+    borderWidth: 2.5,
+    backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
-    // Sombra para Android
-    elevation: 5,
-    // Sombra para iOS
+    elevation: 6,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    overflow: 'hidden',
+  },
+  logoImage: {
+    width: MARKER_SIZE - 5,
+    height: MARKER_SIZE - 5,
+    borderRadius: (MARKER_SIZE - 5) / 2,
+  },
+  fallbackBackground: {
+    width: MARKER_SIZE - 5,
+    height: MARKER_SIZE - 5,
+    borderRadius: (MARKER_SIZE - 5) / 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   markerTriangle: {
     width: 0,
@@ -150,7 +141,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 8,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: colors.primary, // Será sobrescrito
     marginTop: -1,
   },
 });

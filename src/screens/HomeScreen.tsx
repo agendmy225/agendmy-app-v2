@@ -37,7 +37,6 @@ import { cacheService } from '../services/cache';
 import { getAddressFromCoordinates, getCoordinatesFromAddress } from '../services/maps';
 import CachedImage from '../components/common/CachedImage';
 
-// Configurar chave da API diretamente como fallback
 const GOOGLE_MAPS_API_KEY = 'AIzaSyBRowlrsBPawKX_Fgi8ZIWNt1_HO2DYI84';
 
 type BusinessItemType = Business;
@@ -47,9 +46,30 @@ type HomeScreenNavigationProp = CompositeNavigationProp<
   StackNavigationProp<AppStackParamList>
 >;
 
+// Extrai o nome da cidade a partir de um endereço formatado pelo Google
+const extractCity = (address: string): string => {
+  if (!address) { return ''; }
+  // Endereço do Google geralmente: "Rua X, Cidade - Estado, País"
+  const parts = address.split(',');
+  if (parts.length >= 2) {
+    // Pega a penúltima parte que normalmente é a cidade
+    return parts[parts.length - 2].trim().toLowerCase().replace(/\s*-\s*\w+$/, '').trim();
+  }
+  return address.trim().toLowerCase();
+};
+
+// Verifica se o estabelecimento é da mesma cidade do usuário
+const isSameCity = (businessAddress: string, userCity: string): boolean => {
+  if (!businessAddress || !userCity || userCity.length < 3) { return true; }
+  const bizCity = businessAddress.toLowerCase();
+  const cleanUserCity = userCity.toLowerCase().trim();
+  return bizCity.includes(cleanUserCity) || cleanUserCity.includes(bizCity);
+};
+
 const HomeScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [userFriendlyLocation, setUserFriendlyLocation] = useState('Obtendo localização...');
+  const [userCity, setUserCity] = useState('');
   const [mapRegion, setMapRegion] = useState<Region | null>({
     latitude: -15.7801,
     longitude: -47.9292,
@@ -77,7 +97,6 @@ const HomeScreen: React.FC = () => {
 
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
 
-  // Hook para localização em tempo real
   const {
     location: realTimeLocation,
     isLoading: isLocationLoading,
@@ -88,10 +107,8 @@ const HomeScreen: React.FC = () => {
     isWatching: isLocationWatching,
   } = useLocation();
 
-  // Automaticamente iniciar a observação quando a permissão for concedida
   useEffect(() => {
     if (hasLocationPermission && !isLocationWatching) {
-      console.log('Permissão concedida, iniciando observação de localização');
       startLocationWatching();
     }
   }, [hasLocationPermission, isLocationWatching, startLocationWatching]);
@@ -100,8 +117,7 @@ const HomeScreen: React.FC = () => {
     if (!hasLocationPermission) {
       const permissionGranted = await requestLocationPermission();
       if (permissionGranted) {
-        // O useEffect acima já vai iniciar a observação automaticamente
-        console.log('Permissão concedida, aguardando início automático da observação');
+        console.log('Permissão concedida');
       }
     } else {
       setIsChangeLocationModalVisible(true);
@@ -118,13 +134,12 @@ const HomeScreen: React.FC = () => {
     }
   };
 
-  // Função para calcular o centro dos estabelecimentos
   const calculateBusinessesCenter = useCallback((businesses: Business[]) => {
     const validBusinesses = businesses.filter(business =>
       business.location?.latitude && business.location?.longitude,
     );
 
-    if (validBusinesses.length === 0) return null;
+    if (validBusinesses.length === 0) { return null; }
 
     const totalLat = validBusinesses.reduce((sum, business) => sum + business.location!.latitude, 0);
     const totalLng = validBusinesses.reduce((sum, business) => sum + business.location!.longitude, 0);
@@ -132,27 +147,24 @@ const HomeScreen: React.FC = () => {
     const centerLat = totalLat / validBusinesses.length;
     const centerLng = totalLng / validBusinesses.length;
 
-    // Calcular o delta baseado na distância entre os pontos mais extremos
     const latitudes = validBusinesses.map(b => b.location!.latitude);
     const longitudes = validBusinesses.map(b => b.location!.longitude);
 
     const latDelta = Math.max(0.02, (Math.max(...latitudes) - Math.min(...latitudes)) * 1.2);
     const lngDelta = Math.max(0.02, (Math.max(...longitudes) - Math.min(...longitudes)) * 1.2);
 
-    return {
-      latitude: centerLat,
-      longitude: centerLng,
-      latitudeDelta: latDelta,
-      longitudeDelta: lngDelta,
-    };
+    return { latitude: centerLat, longitude: centerLng, latitudeDelta: latDelta, longitudeDelta: lngDelta };
   }, []);
 
-  const filterBusinessesInVisibleRegion = useCallback((_region: Region, allBusinessesToFilter: Business[]) => {
-    // Filtrar estabelecimentos válidos com localização
+  // CORRIGIDO: filtro por cidade do usuário
+  const filterBusinessesByCity = useCallback((allBusinessesToFilter: Business[], city: string) => {
     const validBusinesses = allBusinessesToFilter.filter(business => {
-      return business.location?.latitude && business.location?.longitude;
+      const hasLocation = business.location?.latitude && business.location?.longitude;
+      if (!hasLocation) { return false; }
+      // Se não tiver cidade definida ainda, mostra todos
+      if (!city || city.length < 3) { return true; }
+      return isSameCity(business.address || '', city);
     });
-
     setBusinessesForMap(validBusinesses);
   }, []);
 
@@ -167,43 +179,40 @@ const HomeScreen: React.FC = () => {
     setMapRegion(newRegionDetails);
     setHasLocationBeenSet(true);
 
-    // Animar para a nova região apenas se o mapa estiver pronto
     setTimeout(() => {
       mapViewRef.current?.animateToRegion(newRegionDetails, 1000);
     }, 100);
 
     if (friendlyName) {
       setUserFriendlyLocation(friendlyName);
+      setUserCity(extractCity(friendlyName));
     } else {
       if (GOOGLE_MAPS_API_KEY) {
         getAddressFromCoordinates(latitude, longitude, GOOGLE_MAPS_API_KEY).then((address: string | null) => {
           if (address) {
             setUserFriendlyLocation(address);
+            setUserCity(extractCity(address));
           } else {
-            setUserFriendlyLocation(`Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)} (Endereço não encontrado)`);
+            setUserFriendlyLocation(`Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`);
           }
-        }).catch((_geoError: any) => {
-          setUserFriendlyLocation(`Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)} (Endereço não encontrado)`);
+        }).catch(() => {
+          setUserFriendlyLocation(`Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`);
         });
       } else {
-        console.warn('Google Maps API Key not configured. Skipping reverse geocoding.');
         setUserFriendlyLocation(`Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`);
       }
     }
   }, [mapViewRef]);
 
-  // Effect para atualizar a interface quando a localização mudar
+  // CORRIGIDO: sempre atualiza quando a localização muda (removido !hasLocationBeenSet)
   useEffect(() => {
-    if (realTimeLocation && !hasLocationBeenSet) {
-      console.log('Atualizando interface com nova localização do usuário:', realTimeLocation);
+    if (realTimeLocation) {
       updateLocationStates(realTimeLocation.latitude, realTimeLocation.longitude);
     }
-  }, [realTimeLocation, updateLocationStates, hasLocationBeenSet]);
+  }, [realTimeLocation, updateLocationStates]);
 
-  // Effect para mostrar erros de localização
   useEffect(() => {
     if (locationError) {
-      console.error('Erro de localização:', locationError);
       setUserFriendlyLocation(locationError);
     }
   }, [locationError]);
@@ -228,13 +237,11 @@ const HomeScreen: React.FC = () => {
         Alert.alert('Erro', 'Não foi possível encontrar coordenadas para o endereço informado.');
       }
     } catch (error) {
-      console.error('Erro ao alterar localização:', error);
       Alert.alert('Erro', 'Ocorreu um erro ao tentar alterar a localização.');
     } finally {
       setIsGeocoding(false);
     }
   };
-
 
   const loadInitialData = useCallback(async () => {
     try {
@@ -244,29 +251,23 @@ const HomeScreen: React.FC = () => {
       const cachedData = await cacheService.getCachedData();
 
       if (cachedData) {
-
         setMostRecent(cachedData.mostRecent || []);
         setTopRated(cachedData.topRated || []);
-        setPromotions(cachedData.promotions || []); const businessesWithLocation = (cachedData.allActive || []).filter(
+        setPromotions(cachedData.promotions || []);
+        const businessesWithLocation = (cachedData.allActive || []).filter(
           (b: Business) => b.location?.latitude && b.location?.longitude,
         );
         setAllBusinessesLoaded(businessesWithLocation);
-
-        // Mostrar todos os estabelecimentos inicialmente, não apenas os da região visível
         setBusinessesForMap(businessesWithLocation);
-
-        console.log('Estabelecimentos do cache carregados com localização:', businessesWithLocation.length);
         setIsLoadingInitialData(false);
 
         const cacheAge = Date.now() - (cachedData.lastUpdate || 0);
         const CACHE_REFRESH_THRESHOLD = 3 * 60 * 1000;
-
-        if (cacheAge < CACHE_REFRESH_THRESHOLD) {
-          return;
-        }
+        if (cacheAge < CACHE_REFRESH_THRESHOLD) { return; }
       }
 
-      let allBusinessesForUser: Business[] = []; if (user?.userType === 'owner') {
+      let allBusinessesForUser: Business[] = [];
+      if (user?.userType === 'owner') {
         allBusinessesForUser = await getAllBusinessesForOwner();
       } else {
         const [mostRecentData, topRatedData, promotionsData, allActiveBusinesses] = await Promise.all([
@@ -293,92 +294,37 @@ const HomeScreen: React.FC = () => {
         }
       }
 
-      // Filtrar estabelecimentos com localização válida
       const businessesWithLocation = allBusinessesForUser.filter(
         (b: Business) => b.location?.latitude && b.location?.longitude,
       );
       setAllBusinessesLoaded(businessesWithLocation);
-
-      // Mostrar todos os estabelecimentos inicialmente, não apenas os da região visível
       setBusinessesForMap(businessesWithLocation);
 
-      console.log('=== TODOS OS ESTABELECIMENTOS CARREGADOS ===');
-      console.log('Total de estabelecimentos:', allBusinessesForUser.length);
-      console.log('Com localização válida:', businessesWithLocation.length);
-
-      // Debug específico de imagens
-      businessesWithLocation.slice(0, 5).forEach(business => {
-        console.log(`🏢 Business "${business.name}":`, {
-          id: business.id,
-          logo: business.logo,
-          coverImage: business.coverImage,
-          imageUrl: business.imageUrl, // Deprecated
-          location: business.location
-        });
-      });
-
-      // Debug específico do business problemático
-      const problemBusiness = businessesWithLocation.find(b => b.id === '6w6mRwI2QND9KUl7NaFm');
-      if (problemBusiness) {
-        console.log('🔍 BUSINESS PROBLEMÁTICO ENCONTRADO:');
-        console.log('Name:', problemBusiness.name);
-        console.log('ID:', problemBusiness.id);
-        console.log('Logo:', problemBusiness.logo);
-        console.log('Logo type:', typeof problemBusiness.logo);
-        console.log('Logo includes logo?:', problemBusiness.logo?.includes('logo'));
-        console.log('Cover:', problemBusiness.coverImage);
-        console.log('Location:', problemBusiness.location);
-      } else {
-        console.log('❌ Business 6w6mRwI2QND9KUl7NaFm não encontrado');
-      }
-
-      // Só centralizar nos estabelecimentos se não houver localização do usuário
       if (businessesWithLocation.length > 0 && !realTimeLocation && !hasLocationBeenSet) {
         const center = calculateBusinessesCenter(businessesWithLocation);
         if (center) {
-          console.log('Centralizando mapa no centro dos estabelecimentos (sem localização do usuário):', center);
           setMapRegion(center);
           setHasLocationBeenSet(true);
-
-          // Animar para a nova região
           setTimeout(() => {
             mapViewRef.current?.animateToRegion(center, 1000);
           }, 100);
-
-          setUserFriendlyLocation(`Negócios na área`);
+          setUserFriendlyLocation('Negócios na área');
         }
       }
 
-      allBusinessesForUser.forEach((business, index) => {
-        console.log(`\n--- Estabelecimento ${index + 1} ---`);
-        console.log('Nome:', business.name);
-        console.log('ID:', business.id);
-        console.log('Ativo:', business.active);
-        console.log('Endereço:', business.address);
-        console.log('Localização:', business.location);
-        console.log('Tem lat/lng?', !!(business.location?.latitude && business.location?.longitude));
-      });
-
     } catch (error) {
       console.error('Erro ao carregar dados iniciais:', error);
-
       if (mostRecent.length === 0) {
         const expiredCache = await cacheService.getCachedData();
         if (expiredCache) {
           setMostRecent(expiredCache.mostRecent || []);
           setTopRated(expiredCache.topRated || []);
           setPromotions(expiredCache.promotions || []);
-
           const businessesWithLocation = (expiredCache.allActive || []).filter(
             (b: Business) => b.location?.latitude && b.location?.longitude,
           );
           setAllBusinessesLoaded(businessesWithLocation);
-
-          // Mostrar todos os estabelecimentos inicialmente, não apenas os da região visível  
           setBusinessesForMap(businessesWithLocation);
-
-          console.log('Estabelecimentos do cache expirado carregados com localização:', businessesWithLocation.length);
-
         } else {
           setMostRecent([]);
           setTopRated([]);
@@ -403,7 +349,6 @@ const HomeScreen: React.FC = () => {
       setSelectedCategoryFilter(null);
       setSearchResults([]);
 
-      // Sempre priorizar a localização do usuário quando a tela receber foco
       if (realTimeLocation) {
         const currentRegion = {
           latitude: realTimeLocation.latitude,
@@ -419,18 +364,17 @@ const HomeScreen: React.FC = () => {
     }, [realTimeLocation]),
   );
 
-  // Efeito separado para filtrar negócios quando a localização ou lista de negócios muda
+  // CORRIGIDO: filtrar por cidade quando a cidade ou lista de negócios mudar
   useEffect(() => {
-    if (allBusinessesLoaded.length > 0 && mapRegion) {
-      filterBusinessesInVisibleRegion(mapRegion, allBusinessesLoaded);
+    if (allBusinessesLoaded.length > 0) {
+      filterBusinessesByCity(allBusinessesLoaded, userCity);
     }
-  }, [mapRegion, allBusinessesLoaded, filterBusinessesInVisibleRegion]);
+  }, [userCity, allBusinessesLoaded, filterBusinessesByCity]);
 
   const performSearch = useCallback(async () => {
     try {
       setIsSearching(true);
       let results: Business[] = [];
-
       const searchFilters = selectedCategoryFilter ? { category: selectedCategoryFilter } : undefined;
 
       if (searchQuery.trim()) {
@@ -442,7 +386,6 @@ const HomeScreen: React.FC = () => {
         setIsSearching(false);
         return;
       }
-
       setSearchResults(results);
     } catch (error) {
       console.error('Erro na busca:', error);
@@ -467,20 +410,16 @@ const HomeScreen: React.FC = () => {
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={() => {
-        console.log('Card pressionado:', item.name, 'ID:', item.id);
         if (item.id) {
           navigation.navigate('BusinessDetails', { businessId: item.id });
-        } else {
-          console.error('Business ID is missing for:', item.name);
         }
       }}
       style={styles.infoCardItem}
     >
-
       <CachedImage
-        storagePath={item.coverImage || item.logo || null} // Adicionado '|| null' para garantir
+        storagePath={item.coverImage || item.logo || null}
         style={styles.infoCardImage}
-        defaultSource={require('../assets/images/banner-home.png')} // Manter o fallback explícito
+        defaultSource={require('../assets/images/banner-home.png')}
       />
       <Text style={styles.infoCardTitle} numberOfLines={1}>{item.name || 'Nome não disponível'}</Text>
       <Text style={styles.infoCardSubtitle} numberOfLines={1}>{getCategoryById(item.category)?.name || item.category || 'Serviços'}</Text>
@@ -536,10 +475,7 @@ const HomeScreen: React.FC = () => {
               <View style={styles.modalButtonContainer}>
                 <Button
                   title="Cancelar"
-                  onPress={() => {
-                    setIsChangeLocationModalVisible(false);
-                    setNewAddress('');
-                  }}
+                  onPress={() => { setIsChangeLocationModalVisible(false); setNewAddress(''); }}
                   color={colors.error}
                 />
                 <Button
@@ -565,12 +501,8 @@ const HomeScreen: React.FC = () => {
                 Opções de filtro por data, hora, localização, preço, avaliação serão adicionadas aqui.
               </Text>
               <View style={styles.modalButtonContainer}>
-                <Button title="Limpar" onPress={() => {
-                  setIsFilterModalVisible(false);
-                }} color={colors.lightText} />
-                <Button title="Aplicar" onPress={() => {
-                  setIsFilterModalVisible(false);
-                }} />
+                <Button title="Limpar" onPress={() => { setIsFilterModalVisible(false); }} color={colors.lightText} />
+                <Button title="Aplicar" onPress={() => { setIsFilterModalVisible(false); }} />
               </View>
             </View>
           </View>
@@ -630,11 +562,8 @@ const HomeScreen: React.FC = () => {
                       style={styles.bannerItem}
                       activeOpacity={0.7}
                       onPress={() => {
-                        console.log('Banner pressionado:', item.name, 'ID:', item.id);
                         if (item.id) {
                           navigation.navigate('BusinessDetails', { businessId: item.id });
-                        } else {
-                          console.error('Business ID is missing for banner item:', item.name);
                         }
                       }}
                     >
@@ -726,18 +655,11 @@ const HomeScreen: React.FC = () => {
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
                   <TouchableOpacity
                     key="Todos"
-                    style={[
-                      styles.categoryItem,
-                      selectedCategoryFilter === null && styles.activeCategoryItem,
-                    ]}
+                    style={[styles.categoryItem, selectedCategoryFilter === null && styles.activeCategoryItem]}
                     onPress={() => handleCategoryPress('todos')}
                   >
                     <View style={styles.categoryIconContainer}>
-                      <Icon
-                        name="apps"
-                        size={24}
-                        color={colors.white}
-                      />
+                      <Icon name="apps" size={24} color={colors.white} />
                     </View>
                     <Text style={[styles.categoryName, selectedCategoryFilter === null && styles.activeCategoryName]}>Todos</Text>
                   </TouchableOpacity>
@@ -745,23 +667,13 @@ const HomeScreen: React.FC = () => {
                   {BUSINESS_CATEGORIES.map((category) => (
                     <TouchableOpacity
                       key={category.id}
-                      style={[
-                        styles.categoryItem,
-                        selectedCategoryFilter === category.id && styles.activeCategoryItem,
-                      ]}
+                      style={[styles.categoryItem, selectedCategoryFilter === category.id && styles.activeCategoryItem]}
                       onPress={() => handleCategoryPress(category.id)}
                     >
                       <View style={styles.categoryIconContainer}>
-                        <Icon
-                          name={category.icon}
-                          size={24}
-                          color={colors.white}
-                        />
+                        <Icon name={category.icon} size={24} color={colors.white} />
                       </View>
-                      <Text style={[
-                        styles.categoryName,
-                        selectedCategoryFilter === category.id && styles.activeCategoryName
-                      ]}>
+                      <Text style={[styles.categoryName, selectedCategoryFilter === category.id && styles.activeCategoryName]}>
                         {category.name}
                       </Text>
                     </TouchableOpacity>
@@ -773,9 +685,7 @@ const HomeScreen: React.FC = () => {
                   <TouchableOpacity
                     onPress={() => navigation.navigate('AllBusinesses', {
                       listType: 'recent',
-                      userCity: userFriendlyLocation.includes(',')
-                        ? userFriendlyLocation.split(',')[1]?.trim()
-                        : undefined,
+                      userCity: userCity || undefined,
                     })}
                   >
                     <Text style={styles.seeAllText}>Ver todos</Text>
@@ -800,9 +710,7 @@ const HomeScreen: React.FC = () => {
                   <TouchableOpacity
                     onPress={() => navigation.navigate('AllBusinesses', {
                       listType: 'topRated',
-                      userCity: userFriendlyLocation.includes(',')
-                        ? userFriendlyLocation.split(',')[1]?.trim()
-                        : undefined,
+                      userCity: userCity || undefined,
                     })}
                   >
                     <Text style={styles.seeAllText}>Ver todos</Text>
@@ -827,9 +735,7 @@ const HomeScreen: React.FC = () => {
                   <TouchableOpacity
                     onPress={() => navigation.navigate('AllBusinesses', {
                       listType: 'promotions',
-                      userCity: userFriendlyLocation.includes(',')
-                        ? userFriendlyLocation.split(',')[1]?.trim()
-                        : undefined,
+                      userCity: userCity || undefined,
                     })}
                   >
                     <Text style={styles.seeAllText}>Ver todas</Text>
@@ -858,14 +764,8 @@ const HomeScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  screenContainer: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  safeArea: { flex: 1, backgroundColor: colors.background },
+  screenContainer: { flex: 1, backgroundColor: colors.background },
   headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -877,47 +777,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.lightGray,
   },
-  headerLogo: {
-    height: 28,
-    width: 120,
-  },
-  headerLocationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerLocationInfo: {
-    marginLeft: 5,
-    flexShrink: 1,
-  },
-  locationAddressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  locationLoadingSpinner: {
-    marginRight: 6,
-  },
-  headerLocationText: {
-    fontSize: 10,
-    color: colors.lightText,
-  },
-  headerLocationAddress: {
-    fontSize: 12,
-    color: colors.text,
-  },
-  headerChangeLocationText: {
-    fontSize: 12,
-    color: colors.primary,
-    marginLeft: 10,
-    fontWeight: 'bold',
-  },
-  scrollContent: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  scrollContentContainer: {
-    paddingBottom: 20,
-  },
+  headerLogo: { height: 28, width: 120 },
+  headerLocationContainer: { flexDirection: 'row', alignItems: 'center' },
+  headerLocationInfo: { marginLeft: 5, flexShrink: 1 },
+  locationAddressContainer: { flexDirection: 'row', alignItems: 'center' },
+  locationLoadingSpinner: { marginRight: 6 },
+  headerLocationText: { fontSize: 10, color: colors.lightText },
+  headerLocationAddress: { fontSize: 12, color: colors.text },
+  headerChangeLocationText: { fontSize: 12, color: colors.primary, marginLeft: 10, fontWeight: 'bold' },
+  scrollContent: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
+  scrollContentContainer: { paddingBottom: 20 },
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -927,13 +796,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     height: 46,
   },
-  searchInput: {
-    flex: 1,
-    height: '100%',
-    color: colors.text,
-    fontSize: 14,
-    marginLeft: 8,
-  },
+  searchInput: { flex: 1, height: '100%', color: colors.text, fontSize: 14, marginLeft: 8 },
   mapContainer: {
     height: 250,
     marginVertical: 16,
@@ -942,13 +805,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.lightGray,
   },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  categoriesContainer: {
-    flexDirection: 'row',
-    marginVertical: 16,
-  },
+  map: { ...StyleSheet.absoluteFillObject },
+  categoriesContainer: { flexDirection: 'row', marginVertical: 16 },
   categoryItem: {
     alignItems: 'center',
     marginRight: 16,
@@ -959,10 +817,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  activeCategoryItem: {
-    borderColor: colors.primary,
-    backgroundColor: colors.lightGray,
-  },
+  activeCategoryItem: { borderColor: colors.primary, backgroundColor: colors.lightGray },
   categoryIconContainer: {
     width: 56,
     height: 56,
@@ -977,39 +832,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
-  categoryName: {
-    fontSize: 12,
-    color: colors.text,
-    textAlign: 'center',
-  },
-  activeCategoryName: {
-    fontWeight: 'bold',
-    color: colors.primary,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-  },
-  seeAllText: {
-    fontSize: 14,
-    color: colors.primary,
-  },
-  horizontalList: {
-    marginBottom: 24,
-  },
-  horizontalListContent: {
-    paddingRight: 16,
-  },
-  verticalListContent: {
-    paddingBottom: 24,
-  },
+  categoryName: { fontSize: 12, color: colors.text, textAlign: 'center' },
+  activeCategoryName: { fontWeight: 'bold', color: colors.primary },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text },
+  seeAllText: { fontSize: 14, color: colors.primary },
+  horizontalList: { marginBottom: 24 },
+  horizontalListContent: { paddingRight: 16 },
+  verticalListContent: { paddingBottom: 24 },
   infoCardItem: {
     width: 200,
     borderRadius: 12,
@@ -1021,60 +851,18 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    // Ensure touch events work properly
     pointerEvents: 'auto',
   },
-  infoCardImage: {
-    width: '100%',
-    height: 120,
-  },
-  infoCardTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginHorizontal: 12,
-    marginTop: 8,
-  },
-  infoCardSubtitle: {
-    fontSize: 12,
-    color: colors.lightText,
-    marginHorizontal: 12,
-    marginBottom: 12,
-    marginTop: 4,
-  },
-  searchSpinner: {
-    position: 'absolute',
-    right: 12,
-    top: '50%',
-    marginTop: -10,
-  },
-  resultsCount: {
-    fontSize: 12,
-    color: colors.lightText,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: colors.lightText,
-  },
-  emptyListText: {
-    textAlign: 'center',
-    color: colors.lightText,
-    marginTop: 20,
-    width: '100%',
-  },
-  bannerContainer: {
-    marginVertical: 16,
-  },
-  bannerScrollView: {
-    height: 200,
-  },
+  infoCardImage: { width: '100%', height: 120 },
+  infoCardTitle: { fontSize: 14, fontWeight: 'bold', color: colors.text, marginHorizontal: 12, marginTop: 8 },
+  infoCardSubtitle: { fontSize: 12, color: colors.lightText, marginHorizontal: 12, marginBottom: 12, marginTop: 4 },
+  searchSpinner: { position: 'absolute', right: 12, top: '50%', marginTop: -10 },
+  resultsCount: { fontSize: 12, color: colors.lightText },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 40 },
+  loadingText: { marginTop: 12, fontSize: 14, color: colors.lightText },
+  emptyListText: { textAlign: 'center', color: colors.lightText, marginTop: 20, width: '100%' },
+  bannerContainer: { marginVertical: 16 },
+  bannerScrollView: { height: 200 },
   bannerItem: {
     width: 300,
     height: 180,
@@ -1087,13 +875,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    // Ensure touch events work properly
     pointerEvents: 'auto',
   },
-  bannerImage: {
-    width: '100%',
-    height: '100%',
-  },
+  bannerImage: { width: '100%', height: '100%' },
   bannerTextContainer: {
     position: 'absolute',
     bottom: 0,
@@ -1102,17 +886,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     padding: 8,
   },
-  bannerTitle: {
-    color: colors.white,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  modalCenteredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
+  bannerTitle: { color: colors.white, fontSize: 14, fontWeight: 'bold' },
+  modalCenteredView: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
   modalView: {
     margin: 20,
     backgroundColor: colors.white,
@@ -1120,55 +895,20 @@ const styles = StyleSheet.create({
     padding: 35,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
     width: '80%',
   },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-  },
-  modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-  },
-  geocodingSpinner: {
-    marginVertical: 10,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    color: colors.error,
-    textAlign: 'center',
-    marginVertical: 16,
-  },
-  filterIconContainer: {
-    paddingLeft: 10,
-  },
-  filterModalText: {
-    marginVertical: 20,
-    color: colors.text,
-  },
-  customMarkerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 40,
-    height: 40,
-  },
+  modalText: { marginBottom: 15, textAlign: 'center', fontSize: 18, fontWeight: 'bold', color: colors.text },
+  modalButtonContainer: { flexDirection: 'row', justifyContent: 'space-around', width: '100%' },
+  geocodingSpinner: { marginVertical: 10 },
+  errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  errorText: { fontSize: 16, color: colors.error, textAlign: 'center', marginVertical: 16 },
+  filterIconContainer: { paddingLeft: 10 },
+  filterModalText: { marginVertical: 20, color: colors.text },
+  customMarkerContainer: { alignItems: 'center', justifyContent: 'center', width: 40, height: 40 },
   markerImageWrapper: {
     width: 40,
     height: 40,
@@ -1185,11 +925,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     overflow: 'hidden',
   },
-  customMarkerImage: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-  },
+  customMarkerImage: { width: 36, height: 36, borderRadius: 18 },
   defaultMarkerIcon: {
     width: 36,
     height: 36,
@@ -1198,16 +934,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-  searchTitleContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
+  backButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 12 },
+  searchTitleContainer: { flex: 1, alignItems: 'center' },
   modalInput: {
     height: 40,
     borderColor: colors.lightGray,
