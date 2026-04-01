@@ -38,6 +38,7 @@ import { getAddressFromCoordinates, getCoordinatesFromAddress } from '../service
 import CachedImage from '../components/common/CachedImage';
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyBRowlrsBPawKX_Fgi8ZIWNt1_HO2DYI84';
+const RADIUS_KM = 30;
 
 type BusinessItemType = Business;
 
@@ -46,39 +47,38 @@ type HomeScreenNavigationProp = CompositeNavigationProp<
   StackNavigationProp<AppStackParamList>
 >;
 
-const extractCity = (address: string): string => {
-  if (!address) { return ''; }
-  const parts = address.split(',');
-  if (parts.length >= 2) {
-    return parts[parts.length - 2].trim().toLowerCase().replace(/\s*-\s*\w+$/, '').trim();
-  }
-  return address.trim().toLowerCase();
+// Calcula distancia em km entre dois pontos GPS (Haversine)
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-const isSameCity = (businessAddress: string, userCity: string): boolean => {
-  if (!businessAddress || !userCity || userCity.length < 3) { return true; }
-  const bizCity = businessAddress.toLowerCase();
-  const cleanUserCity = userCity.toLowerCase().trim();
-  return bizCity.includes(cleanUserCity) || cleanUserCity.includes(bizCity);
-};
-
-const filterByCity = (businesses: Business[], city: string): Business[] => {
+// Filtra estabelecimentos por raio de distancia
+const filterByRadius = (businesses: Business[], userLat: number, userLon: number, radiusKm: number): Business[] => {
   return businesses.filter(business => {
-    const hasLocation = business.location?.latitude && business.location?.longitude;
-    if (!hasLocation) { return false; }
-    if (!city || city.length < 3) { return true; }
-    return isSameCity(business.address || '', city);
+    const lat = business.location?.latitude;
+    const lon = business.location?.longitude;
+    if (!lat || !lon) { return false; }
+    return calculateDistance(userLat, userLon, lat, lon) <= radiusKm;
   });
 };
 
 const HomeScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [userFriendlyLocation, setUserFriendlyLocation] = useState('Obtendo localizacao...');
-  const [userCity, setUserCity] = useState('');
-  const userCityRef = useRef('');
+  const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const userCoordsRef = useRef<{ lat: number; lon: number } | null>(null);
   const [mapRegion, setMapRegion] = useState<Region | null>(null);
+  const [mapKey, setMapKey] = useState(0);
   const [businessesForMap, setBusinessesForMap] = useState<Business[]>([]);
   const [allBusinessesLoaded, setAllBusinessesLoaded] = useState<Business[]>([]);
+  const allBusinessesRef = useRef<Business[]>([]);
   const [mostRecent, setMostRecent] = useState<Business[]>([]);
   const [topRated, setTopRated] = useState<Business[]>([]);
   const [promotions, setPromotions] = useState<Business[]>([]);
@@ -90,9 +90,7 @@ const HomeScreen: React.FC = () => {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [initialLoadError, setInitialLoadError] = useState<string | null>(null);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-  const [, setUserCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const mapViewRef = useRef<MapView>(null);
-  const allBusinessesRef = useRef<Business[]>([]);
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { user } = useAuth();
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
@@ -131,93 +129,66 @@ const HomeScreen: React.FC = () => {
     }
   };
 
-  const calculateBusinessesCenter = useCallback((businesses: Business[]) => {
-    const valid = businesses.filter(b => b.location?.latitude && b.location?.longitude);
-    if (valid.length === 0) { return null; }
-    const totalLat = valid.reduce((s, b) => s + b.location!.latitude, 0);
-    const totalLng = valid.reduce((s, b) => s + b.location!.longitude, 0);
-    const lats = valid.map(b => b.location!.latitude);
-    const lngs = valid.map(b => b.location!.longitude);
-    return {
-      latitude: totalLat / valid.length,
-      longitude: totalLng / valid.length,
-      latitudeDelta: Math.max(0.05, (Math.max(...lats) - Math.min(...lats)) * 1.5),
-      longitudeDelta: Math.max(0.05, (Math.max(...lngs) - Math.min(...lngs)) * 1.5),
-    };
+  const applyLocationAndFilter = useCallback((lat: number, lon: number) => {
+    const newRegion = { latitude: lat, longitude: lon, latitudeDelta: 0.05, longitudeDelta: 0.05 };
+    setUserCoords({ lat, lon });
+    userCoordsRef.current = { lat, lon };
+    setMapRegion(newRegion);
+    // Incrementa key para forcar remontagem do MapView com nova regiao
+    setMapKey(k => k + 1);
+
+    if (allBusinessesRef.current.length > 0) {
+      setBusinessesForMap(filterByRadius(allBusinessesRef.current, lat, lon, RADIUS_KM));
+    }
   }, []);
 
-  // Atualiza localizacao e filtra estabelecimentos
+  // Atualiza localizacao quando GPS muda
   useEffect(() => {
     if (realTimeLocation) {
-      const newRegion = {
-        latitude: realTimeLocation.latitude,
-        longitude: realTimeLocation.longitude,
-        latitudeDelta: 0.02,
-        longitudeDelta: 0.01,
-      };
-      setMapRegion(newRegion);
-      setUserCoordinates({ latitude: realTimeLocation.latitude, longitude: realTimeLocation.longitude });
-      setTimeout(() => { mapViewRef.current?.animateToRegion(newRegion, 1000); }, 100);
+      applyLocationAndFilter(realTimeLocation.latitude, realTimeLocation.longitude);
 
       if (GOOGLE_MAPS_API_KEY) {
         getAddressFromCoordinates(realTimeLocation.latitude, realTimeLocation.longitude, GOOGLE_MAPS_API_KEY)
           .then((address: string | null) => {
-            if (address) {
-              setUserFriendlyLocation(address);
-              const city = extractCity(address);
-              setUserCity(city);
-              userCityRef.current = city;
-              // Reaplicar filtro imediatamente com nova cidade usando ref
-              if (allBusinessesRef.current.length > 0) {
-                setBusinessesForMap(filterByCity(allBusinessesRef.current, city));
-              }
-            }
+            if (address) { setUserFriendlyLocation(address); }
           })
           .catch(() => {
             setUserFriendlyLocation(`Lat: ${realTimeLocation.latitude.toFixed(4)}, Lon: ${realTimeLocation.longitude.toFixed(4)}`);
           });
       }
     }
-  }, [realTimeLocation]);
+  }, [realTimeLocation, applyLocationAndFilter]);
 
   useEffect(() => {
     if (locationError) { setUserFriendlyLocation(locationError); }
   }, [locationError]);
 
-  // Reaplicar filtro quando cidade ou lista mudar
+  // Reaplicar filtro quando lista de negocios mudar
   useEffect(() => {
     if (allBusinessesLoaded.length > 0) {
       allBusinessesRef.current = allBusinessesLoaded;
-      setBusinessesForMap(filterByCity(allBusinessesLoaded, userCity));
+      const coords = userCoordsRef.current;
+      if (coords) {
+        setBusinessesForMap(filterByRadius(allBusinessesLoaded, coords.lat, coords.lon, RADIUS_KM));
+      } else {
+        setBusinessesForMap(allBusinessesLoaded);
+      }
     }
-  }, [userCity, allBusinessesLoaded]);
+  }, [allBusinessesLoaded]);
 
   const updateLocationStates = useCallback((latitude: number, longitude: number, friendlyName?: string) => {
-    const newRegion = { latitude, longitude, latitudeDelta: 0.02, longitudeDelta: 0.01 };
-    setUserCoordinates({ latitude, longitude });
-    setMapRegion(newRegion);
-    setTimeout(() => { mapViewRef.current?.animateToRegion(newRegion, 1000); }, 100);
-
-    const applyCity = (city: string) => {
-      setUserCity(city);
-      userCityRef.current = city;
-      if (allBusinessesRef.current.length > 0) {
-        setBusinessesForMap(filterByCity(allBusinessesRef.current, city));
-      }
-    };
-
+    applyLocationAndFilter(latitude, longitude);
     if (friendlyName) {
       setUserFriendlyLocation(friendlyName);
-      applyCity(extractCity(friendlyName));
     } else if (GOOGLE_MAPS_API_KEY) {
       getAddressFromCoordinates(latitude, longitude, GOOGLE_MAPS_API_KEY)
         .then((address: string | null) => {
-          if (address) { setUserFriendlyLocation(address); applyCity(extractCity(address)); }
+          if (address) { setUserFriendlyLocation(address); }
           else { setUserFriendlyLocation(`Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`); }
         })
         .catch(() => { setUserFriendlyLocation(`Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`); });
     }
-  }, []);
+  }, [applyLocationAndFilter]);
 
   const handleChangeLocation = async () => {
     if (!newAddress.trim()) { Alert.alert('Endereco Invalido', 'Por favor, insira um endereco.'); return; }
@@ -248,7 +219,8 @@ const HomeScreen: React.FC = () => {
         const biz = (cachedData.allActive || []).filter((b: Business) => b.location?.latitude && b.location?.longitude);
         setAllBusinessesLoaded(biz);
         allBusinessesRef.current = biz;
-        setBusinessesForMap(filterByCity(biz, userCityRef.current));
+        const coords = userCoordsRef.current;
+        setBusinessesForMap(coords ? filterByRadius(biz, coords.lat, coords.lon, RADIUS_KM) : biz);
         setIsLoadingInitialData(false);
         if (Date.now() - (cachedData.lastUpdate || 0) < 3 * 60 * 1000) { return; }
       }
@@ -271,15 +243,23 @@ const HomeScreen: React.FC = () => {
       setAllBusinessesLoaded(biz);
       allBusinessesRef.current = biz;
 
-      const currentCity = userCityRef.current;
-      const filtered = filterByCity(biz, currentCity);
-      setBusinessesForMap(filtered);
-
-      if (!realTimeLocation && filtered.length > 0) {
-        const center = calculateBusinessesCenter(filtered);
-        if (center) {
+      const coords = userCoordsRef.current;
+      if (coords) {
+        setBusinessesForMap(filterByRadius(biz, coords.lat, coords.lon, RADIUS_KM));
+      } else {
+        setBusinessesForMap(biz);
+        // Centralizar no centro dos estabelecimentos se nao tiver GPS
+        if (biz.length > 0) {
+          const lats = biz.map(b => b.location!.latitude);
+          const lons = biz.map(b => b.location!.longitude);
+          const center = {
+            latitude: lats.reduce((a, b) => a + b, 0) / lats.length,
+            longitude: lons.reduce((a, b) => a + b, 0) / lons.length,
+            latitudeDelta: Math.max(0.05, (Math.max(...lats) - Math.min(...lats)) * 1.5),
+            longitudeDelta: Math.max(0.05, (Math.max(...lons) - Math.min(...lons)) * 1.5),
+          };
           setMapRegion(center);
-          setTimeout(() => { mapViewRef.current?.animateToRegion(center, 1000); }, 100);
+          setMapKey(k => k + 1);
           setUserFriendlyLocation('Negocios na area');
         }
       }
@@ -291,7 +271,8 @@ const HomeScreen: React.FC = () => {
           setMostRecent(ec.mostRecent || []); setTopRated(ec.topRated || []); setPromotions(ec.promotions || []);
           const biz = (ec.allActive || []).filter((b: Business) => b.location?.latitude && b.location?.longitude);
           setAllBusinessesLoaded(biz); allBusinessesRef.current = biz;
-          setBusinessesForMap(filterByCity(biz, userCityRef.current));
+          const coords = userCoordsRef.current;
+          setBusinessesForMap(coords ? filterByRadius(biz, coords.lat, coords.lon, RADIUS_KM) : biz);
         } else {
           setMostRecent([]); setTopRated([]); setPromotions([]);
           setAllBusinessesLoaded([]); setBusinessesForMap([]);
@@ -299,7 +280,7 @@ const HomeScreen: React.FC = () => {
         }
       }
     } finally { setIsLoadingInitialData(false); }
-  }, [user?.userType, realTimeLocation, calculateBusinessesCenter, mostRecent.length]);
+  }, [user?.userType, mostRecent.length]);
 
   useEffect(() => { loadInitialData(); }, [loadInitialData]);
 
@@ -307,11 +288,9 @@ const HomeScreen: React.FC = () => {
     useCallback(() => {
       setSearchQuery(''); setSelectedCategoryFilter(null); setSearchResults([]);
       if (realTimeLocation) {
-        const r = { latitude: realTimeLocation.latitude, longitude: realTimeLocation.longitude, latitudeDelta: 0.02, longitudeDelta: 0.01 };
-        setMapRegion(r);
-        setTimeout(() => { mapViewRef.current?.animateToRegion(r, 300); }, 300);
+        applyLocationAndFilter(realTimeLocation.latitude, realTimeLocation.longitude);
       }
-    }, [realTimeLocation]),
+    }, [realTimeLocation, applyLocationAndFilter]),
   );
 
   const performSearch = useCallback(async () => {
@@ -465,8 +444,15 @@ const HomeScreen: React.FC = () => {
               <>
                 <View style={styles.mapContainer}>
                   {mapRegion ? (
-                    <MapView ref={mapViewRef} provider={PROVIDER_GOOGLE} style={styles.map}
-                      initialRegion={mapRegion} showsUserLocation={true} showsMyLocationButton={true}>
+                    <MapView
+                      key={mapKey}
+                      ref={mapViewRef}
+                      provider={PROVIDER_GOOGLE}
+                      style={styles.map}
+                      initialRegion={mapRegion}
+                      showsUserLocation={true}
+                      showsMyLocationButton={true}
+                    >
                       {businessesForMap.map(business => (
                         <BusinessMarker key={business.id} business={business}
                           onPress={() => navigation.navigate('BusinessDetails', { businessId: business.id })} />
@@ -496,7 +482,7 @@ const HomeScreen: React.FC = () => {
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Os 20 mais recentes</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'recent', userCity: userCity || undefined })}>
+                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'recent', userCity: userCoords ? `${userCoords.lat},${userCoords.lon}` : undefined })}>
                     <Text style={styles.seeAllText}>Ver todos</Text>
                   </TouchableOpacity>
                 </View>
@@ -507,7 +493,7 @@ const HomeScreen: React.FC = () => {
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Os top 10 mais avaliados da regiao</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'topRated', userCity: userCity || undefined })}>
+                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'topRated', userCity: userCoords ? `${userCoords.lat},${userCoords.lon}` : undefined })}>
                     <Text style={styles.seeAllText}>Ver todos</Text>
                   </TouchableOpacity>
                 </View>
@@ -518,7 +504,7 @@ const HomeScreen: React.FC = () => {
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Estabelecimentos com promocoes</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'promotions', userCity: userCity || undefined })}>
+                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'promotions', userCity: userCoords ? `${userCoords.lat},${userCoords.lon}` : undefined })}>
                     <Text style={styles.seeAllText}>Ver todas</Text>
                   </TouchableOpacity>
                 </View>
@@ -592,10 +578,6 @@ const styles = StyleSheet.create({
   backButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 12 },
   searchTitleContainer: { flex: 1, alignItems: 'center' },
   modalInput: { height: 40, borderColor: colors.lightGray, borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, marginBottom: 20, color: colors.text },
-  customMarkerContainer: { alignItems: 'center', justifyContent: 'center', width: 40, height: 40 },
-  markerImageWrapper: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.white, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: colors.white, elevation: 8, shadowColor: colors.black, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, overflow: 'hidden' },
-  customMarkerImage: { width: 36, height: 36, borderRadius: 18 },
-  defaultMarkerIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
 });
 
 export default HomeScreen;

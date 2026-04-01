@@ -107,9 +107,23 @@ const mapDocumentToBusiness = (documentSnapshot: { id: string; data: () => Recor
     throw new Error(`Dados não encontrados para o documento ${documentSnapshot.id}`);
   }
 
-  // NORMALIZAÇÃO DOS DADOS DE LOCALIZAÇÃO
-  // Verifica se o campo location existe e se contém as propriedades com underscore
-  if (data.location && typeof data.location === 'object' && '_latitude' in data.location) {
+ // CORRIGIDO: normalizar campo logotipo -> logo (Firebase usa nome em portugues)
+  if ((data as any).logotipo && !data.logo) {
+    data.logo = (data as any).logotipo as string;
+  }
+
+  // CORRIGIDO: normalizar campo localizacao -> location (Firebase usa nome em portugues)
+  if ((data as any).localização && !data.location) {
+    const loc = (data as any).localização as any;
+    if (loc._latitude !== undefined) {
+      data.location = { latitude: loc._latitude, longitude: loc._longitude };
+    } else if (loc.latitude !== undefined) {
+      data.location = { latitude: loc.latitude, longitude: loc.longitude };
+    }
+  }
+
+  // CORRIGIDO: normalizar location com underscore (GeoPoint serializado)
+  if (data.location && typeof data.location === 'object' && '_latitude' in (data.location as any)) {
     const loc = data.location as any;
     data.location = {
       latitude: loc._latitude,
@@ -118,7 +132,6 @@ const mapDocumentToBusiness = (documentSnapshot: { id: string; data: () => Recor
       city: loc.city,
     };
   }
-
   const createdAtTimestamp = data.createdAt as Timestamp | undefined;
   const updatedAtTimestamp = data.updatedAt as Timestamp | undefined;
   return {
