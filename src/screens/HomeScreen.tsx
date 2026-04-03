@@ -132,10 +132,11 @@ const HomeScreen: React.FC = () => {
   };
 
   // Centraliza o mapa e aplica filtro por distancia
+  const [mapRegion, setMapRegion] = useState<Region>(INITIAL_REGION);
   const centerMapAndFilter = useCallback((lat: number, lon: number) => {
     userCoordsRef.current = { lat, lon };
     const region = { latitude: lat, longitude: lon, latitudeDelta: 0.05, longitudeDelta: 0.05 };
-    mapViewRef.current?.animateToRegion(region, 800);
+    setMapRegion(region);
     if (allBusinessesRef.current.length > 0) {
       const filtered = filterByRadius(allBusinessesRef.current, lat, lon, RADIUS_KM);
       setBusinessesForMap(filtered);
@@ -413,7 +414,8 @@ const HomeScreen: React.FC = () => {
                     ref={mapViewRef}
                     provider={PROVIDER_GOOGLE}
                     style={styles.map}
-                    initialRegion={INITIAL_REGION}
+                    region={mapRegion}
+                    onRegionChangeComplete={setMapRegion}
                     showsUserLocation={true}
                     showsMyLocationButton={true}
                   >
@@ -546,4 +548,6 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+
+
 
