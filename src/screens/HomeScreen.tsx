@@ -40,6 +40,14 @@ import CachedImage from '../components/common/CachedImage';
 const GOOGLE_MAPS_API_KEY = 'AIzaSyBRowlrsBPawKX_Fgi8ZIWNt1_HO2DYI84';
 const RADIUS_KM = 30;
 
+// Regiao inicial do Brasil
+const INITIAL_REGION: Region = {
+  latitude: -22.2206,
+  longitude: -49.9752,
+  latitudeDelta: 0.1,
+  longitudeDelta: 0.1,
+};
+
 type BusinessItemType = Business;
 
 type HomeScreenNavigationProp = CompositeNavigationProp<
@@ -47,19 +55,16 @@ type HomeScreenNavigationProp = CompositeNavigationProp<
   StackNavigationProp<AppStackParamList>
 >;
 
-// Calcula distancia em km entre dois pontos GPS (Haversine)
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-// Filtra estabelecimentos por raio de distancia
 const filterByRadius = (businesses: Business[], userLat: number, userLon: number, radiusKm: number): Business[] => {
   return businesses.filter(business => {
     const lat = business.location?.latitude;
@@ -72,13 +77,11 @@ const filterByRadius = (businesses: Business[], userLat: number, userLon: number
 const HomeScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [userFriendlyLocation, setUserFriendlyLocation] = useState('Obtendo localizacao...');
-  const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
   const userCoordsRef = useRef<{ lat: number; lon: number } | null>(null);
-  const [mapRegion, setMapRegion] = useState<Region | null>(null);
-  const [mapKey, setMapKey] = useState(0);
+  const mapViewRef = useRef<MapView>(null);
+  const allBusinessesRef = useRef<Business[]>([]);
   const [businessesForMap, setBusinessesForMap] = useState<Business[]>([]);
   const [allBusinessesLoaded, setAllBusinessesLoaded] = useState<Business[]>([]);
-  const allBusinessesRef = useRef<Business[]>([]);
   const [mostRecent, setMostRecent] = useState<Business[]>([]);
   const [topRated, setTopRated] = useState<Business[]>([]);
   const [promotions, setPromotions] = useState<Business[]>([]);
@@ -90,10 +93,9 @@ const HomeScreen: React.FC = () => {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [initialLoadError, setInitialLoadError] = useState<string | null>(null);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-  const mapViewRef = useRef<MapView>(null);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { user } = useAuth();
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
 
   const {
     location: realTimeLocation,
@@ -129,35 +131,30 @@ const HomeScreen: React.FC = () => {
     }
   };
 
-  const applyLocationAndFilter = useCallback((lat: number, lon: number) => {
-    const newRegion = { latitude: lat, longitude: lon, latitudeDelta: 0.05, longitudeDelta: 0.05 };
-    setUserCoords({ lat, lon });
+  // Centraliza o mapa e aplica filtro por distancia
+  const centerMapAndFilter = useCallback((lat: number, lon: number) => {
     userCoordsRef.current = { lat, lon };
-    setMapRegion(newRegion);
-    // Incrementa key para forcar remontagem do MapView com nova regiao
-    setMapKey(k => k + 1);
-
+    const region = { latitude: lat, longitude: lon, latitudeDelta: 0.05, longitudeDelta: 0.05 };
+    mapViewRef.current?.animateToRegion(region, 800);
     if (allBusinessesRef.current.length > 0) {
-      setBusinessesForMap(filterByRadius(allBusinessesRef.current, lat, lon, RADIUS_KM));
+      const filtered = filterByRadius(allBusinessesRef.current, lat, lon, RADIUS_KM);
+      setBusinessesForMap(filtered);
     }
   }, []);
 
-  // Atualiza localizacao quando GPS muda
+  // Atualiza quando GPS muda
   useEffect(() => {
     if (realTimeLocation) {
-      applyLocationAndFilter(realTimeLocation.latitude, realTimeLocation.longitude);
-
+      centerMapAndFilter(realTimeLocation.latitude, realTimeLocation.longitude);
       if (GOOGLE_MAPS_API_KEY) {
         getAddressFromCoordinates(realTimeLocation.latitude, realTimeLocation.longitude, GOOGLE_MAPS_API_KEY)
           .then((address: string | null) => {
             if (address) { setUserFriendlyLocation(address); }
           })
-          .catch(() => {
-            setUserFriendlyLocation(`Lat: ${realTimeLocation.latitude.toFixed(4)}, Lon: ${realTimeLocation.longitude.toFixed(4)}`);
-          });
+          .catch(() => {});
       }
     }
-  }, [realTimeLocation, applyLocationAndFilter]);
+  }, [realTimeLocation, centerMapAndFilter]);
 
   useEffect(() => {
     if (locationError) { setUserFriendlyLocation(locationError); }
@@ -177,7 +174,7 @@ const HomeScreen: React.FC = () => {
   }, [allBusinessesLoaded]);
 
   const updateLocationStates = useCallback((latitude: number, longitude: number, friendlyName?: string) => {
-    applyLocationAndFilter(latitude, longitude);
+    centerMapAndFilter(latitude, longitude);
     if (friendlyName) {
       setUserFriendlyLocation(friendlyName);
     } else if (GOOGLE_MAPS_API_KEY) {
@@ -186,9 +183,9 @@ const HomeScreen: React.FC = () => {
           if (address) { setUserFriendlyLocation(address); }
           else { setUserFriendlyLocation(`Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`); }
         })
-        .catch(() => { setUserFriendlyLocation(`Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`); });
+        .catch(() => {});
     }
-  }, [applyLocationAndFilter]);
+  }, [centerMapAndFilter]);
 
   const handleChangeLocation = async () => {
     if (!newAddress.trim()) { Alert.alert('Endereco Invalido', 'Por favor, insira um endereco.'); return; }
@@ -211,32 +208,20 @@ const HomeScreen: React.FC = () => {
       setIsLoadingInitialData(true);
       setInitialLoadError(null);
 
-      const cachedData = await cacheService.getCachedData();
-      if (cachedData) {
-        setMostRecent(cachedData.mostRecent || []);
-        setTopRated(cachedData.topRated || []);
-        setPromotions(cachedData.promotions || []);
-        const biz = (cachedData.allActive || []).filter((b: Business) => b.location?.latitude && b.location?.longitude);
-        setAllBusinessesLoaded(biz);
-        allBusinessesRef.current = biz;
-        const coords = userCoordsRef.current;
-        setBusinessesForMap(coords ? filterByRadius(biz, coords.lat, coords.lon, RADIUS_KM) : biz);
-        setIsLoadingInitialData(false);
-        if (Date.now() - (cachedData.lastUpdate || 0) < 3 * 60 * 1000) { return; }
-      }
-
       let allBiz: Business[] = [];
       if (user?.userType === 'owner') {
         allBiz = await getAllBusinessesForOwner();
       } else {
         const [mr, tr, pr, all] = await Promise.all([
-          getMostRecentBusinesses(20), getTopRatedBusinesses(10),
-          getBusinessesWithPromotions(10), getAllActiveBusinesses(100),
+          getMostRecentBusinesses(20),
+          getTopRatedBusinesses(10),
+          getBusinessesWithPromotions(10),
+          getAllActiveBusinesses(100),
         ]);
-        setMostRecent(mr); setTopRated(tr); setPromotions(pr);
+        setMostRecent(mr);
+        setTopRated(tr);
+        setPromotions(pr);
         allBiz = all;
-        try { await cacheService.saveCachedData({ mostRecent: mr, topRated: tr, promotions: pr, allActive: all }); }
-        catch (e) { console.warn('Cache save error:', e); }
       }
 
       const biz = allBiz.filter((b: Business) => b.location?.latitude && b.location?.longitude);
@@ -248,49 +233,27 @@ const HomeScreen: React.FC = () => {
         setBusinessesForMap(filterByRadius(biz, coords.lat, coords.lon, RADIUS_KM));
       } else {
         setBusinessesForMap(biz);
-        // Centralizar no centro dos estabelecimentos se nao tiver GPS
-        if (biz.length > 0) {
-          const lats = biz.map(b => b.location!.latitude);
-          const lons = biz.map(b => b.location!.longitude);
-          const center = {
-            latitude: lats.reduce((a, b) => a + b, 0) / lats.length,
-            longitude: lons.reduce((a, b) => a + b, 0) / lons.length,
-            latitudeDelta: Math.max(0.05, (Math.max(...lats) - Math.min(...lats)) * 1.5),
-            longitudeDelta: Math.max(0.05, (Math.max(...lons) - Math.min(...lons)) * 1.5),
-          };
-          setMapRegion(center);
-          setMapKey(k => k + 1);
-          setUserFriendlyLocation('Negocios na area');
-        }
       }
+
     } catch (error) {
       console.error('Erro ao carregar dados iniciais:', error);
-      if (mostRecent.length === 0) {
-        const ec = await cacheService.getCachedData();
-        if (ec) {
-          setMostRecent(ec.mostRecent || []); setTopRated(ec.topRated || []); setPromotions(ec.promotions || []);
-          const biz = (ec.allActive || []).filter((b: Business) => b.location?.latitude && b.location?.longitude);
-          setAllBusinessesLoaded(biz); allBusinessesRef.current = biz;
-          const coords = userCoordsRef.current;
-          setBusinessesForMap(coords ? filterByRadius(biz, coords.lat, coords.lon, RADIUS_KM) : biz);
-        } else {
-          setMostRecent([]); setTopRated([]); setPromotions([]);
-          setAllBusinessesLoaded([]); setBusinessesForMap([]);
-          setInitialLoadError('Nao foi possivel carregar os dados. Verifique sua conexao e tente novamente.');
-        }
-      }
-    } finally { setIsLoadingInitialData(false); }
-  }, [user?.userType, mostRecent.length]);
+      setInitialLoadError('Nao foi possivel carregar os dados. Verifique sua conexao e tente novamente.');
+    } finally {
+      setIsLoadingInitialData(false);
+    }
+  }, [user?.userType]);
 
   useEffect(() => { loadInitialData(); }, [loadInitialData]);
 
   useFocusEffect(
     useCallback(() => {
-      setSearchQuery(''); setSelectedCategoryFilter(null); setSearchResults([]);
+      setSearchQuery('');
+      setSelectedCategoryFilter(null);
+      setSearchResults([]);
       if (realTimeLocation) {
-        applyLocationAndFilter(realTimeLocation.latitude, realTimeLocation.longitude);
+        centerMapAndFilter(realTimeLocation.latitude, realTimeLocation.longitude);
       }
-    }, [realTimeLocation, applyLocationAndFilter]),
+    }, [realTimeLocation, centerMapAndFilter]),
   );
 
   const performSearch = useCallback(async () => {
@@ -361,14 +324,14 @@ const HomeScreen: React.FC = () => {
           </View>
         </Modal>
 
-        <Modal animationType="slide" transparent={true} visible={isFilterModalVisible} onRequestClose={() => setIsFilterModalVisible(false)}>
+        <Modal animationType="slide" transparent={true} visible={isFilterModalVisible}
+          onRequestClose={() => setIsFilterModalVisible(false)}>
           <View style={styles.modalCenteredView}>
             <View style={styles.modalView}>
               <Text style={styles.modalText}>Filtros Avancados</Text>
               <Text style={styles.filterModalText}>Opcoes de filtro por data, hora, localizacao, preco, avaliacao serao adicionadas aqui.</Text>
               <View style={styles.modalButtonContainer}>
-                <Button title="Limpar" onPress={() => setIsFilterModalVisible(false)} color={colors.lightText} />
-                <Button title="Aplicar" onPress={() => setIsFilterModalVisible(false)} />
+                <Button title="Fechar" onPress={() => setIsFilterModalVisible(false)} color={colors.primary} />
               </View>
             </View>
           </View>
@@ -387,7 +350,9 @@ const HomeScreen: React.FC = () => {
           </View>
         ) : (
           <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={true} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContentContainer}>
+            nestedScrollEnabled={true} keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.scrollContentContainer}>
+
             <View style={styles.searchBarContainer}>
               <Icon name="search" size={20} color={colors.lightText} />
               <TextInput style={styles.searchInput} placeholder="Buscar estabelecimentos ou servicos"
@@ -432,48 +397,45 @@ const HomeScreen: React.FC = () => {
                 </View>
                 {isSearching && <ActivityIndicator size="small" color={colors.primary} />}
                 {!isSearching && searchResults.length === 0 && (
-                  <Text style={styles.emptyListText}>{`Nenhum resultado encontrado para "${searchQuery || selectedCategoryFilter || 'filtro selecionado'}".`}</Text>
+                  <Text style={styles.emptyListText}>{`Nenhum resultado encontrado.`}</Text>
                 )}
                 {searchResults.length > 0 && (
                   <FlatList data={searchResults} renderItem={renderInfoCard} keyExtractor={(item) => item.id}
-                    horizontal={false} showsVerticalScrollIndicator={false} contentContainerStyle={styles.verticalListContent}
+                    horizontal={false} showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.verticalListContent}
                     removeClippedSubviews={false} scrollEnabled={false} nestedScrollEnabled={true} />
                 )}
               </>
             ) : (
               <>
                 <View style={styles.mapContainer}>
-                  {mapRegion ? (
-                    <MapView
-                      key={mapKey}
-                      ref={mapViewRef}
-                      provider={PROVIDER_GOOGLE}
-                      style={styles.map}
-                      initialRegion={mapRegion}
-                      showsUserLocation={true}
-                      showsMyLocationButton={true}
-                    >
-                      {businessesForMap.map(business => (
-                        <BusinessMarker key={business.id} business={business}
-                          onPress={() => navigation.navigate('BusinessDetails', { businessId: business.id })} />
-                      ))}
-                    </MapView>
-                  ) : (
-                    <View style={[styles.map, styles.loadingContainer]}>
-                      <ActivityIndicator size="large" color={colors.primary} />
-                      <Text style={styles.loadingText}>Obtendo sua localizacao...</Text>
-                    </View>
-                  )}
+                  <MapView
+                    ref={mapViewRef}
+                    provider={PROVIDER_GOOGLE}
+                    style={styles.map}
+                    initialRegion={INITIAL_REGION}
+                    showsUserLocation={true}
+                    showsMyLocationButton={true}
+                  >
+                    {businessesForMap.map(business => (
+                      <BusinessMarker key={business.id} business={business}
+                        onPress={() => navigation.navigate('BusinessDetails', { businessId: business.id })} />
+                    ))}
+                  </MapView>
                 </View>
 
                 <Text style={styles.sectionTitle}>Categorias</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
-                  <TouchableOpacity key="Todos" style={[styles.categoryItem, selectedCategoryFilter === null && styles.activeCategoryItem]} onPress={() => handleCategoryPress('todos')}>
+                  <TouchableOpacity key="Todos"
+                    style={[styles.categoryItem, selectedCategoryFilter === null && styles.activeCategoryItem]}
+                    onPress={() => handleCategoryPress('todos')}>
                     <View style={styles.categoryIconContainer}><Icon name="apps" size={24} color={colors.white} /></View>
                     <Text style={[styles.categoryName, selectedCategoryFilter === null && styles.activeCategoryName]}>Todos</Text>
                   </TouchableOpacity>
                   {BUSINESS_CATEGORIES.map((category) => (
-                    <TouchableOpacity key={category.id} style={[styles.categoryItem, selectedCategoryFilter === category.id && styles.activeCategoryItem]} onPress={() => handleCategoryPress(category.id)}>
+                    <TouchableOpacity key={category.id}
+                      style={[styles.categoryItem, selectedCategoryFilter === category.id && styles.activeCategoryItem]}
+                      onPress={() => handleCategoryPress(category.id)}>
                       <View style={styles.categoryIconContainer}><Icon name={category.icon} size={24} color={colors.white} /></View>
                       <Text style={[styles.categoryName, selectedCategoryFilter === category.id && styles.activeCategoryName]}>{category.name}</Text>
                     </TouchableOpacity>
@@ -482,36 +444,39 @@ const HomeScreen: React.FC = () => {
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Os 20 mais recentes</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'recent', userCity: userCoords ? `${userCoords.lat},${userCoords.lon}` : undefined })}>
+                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'recent' })}>
                     <Text style={styles.seeAllText}>Ver todos</Text>
                   </TouchableOpacity>
                 </View>
                 <FlatList data={mostRecent} renderItem={renderInfoCard} keyExtractor={(item) => item.id} horizontal
-                  showsHorizontalScrollIndicator={false} style={styles.horizontalList} contentContainerStyle={styles.horizontalListContent}
+                  showsHorizontalScrollIndicator={false} style={styles.horizontalList}
+                  contentContainerStyle={styles.horizontalListContent}
                   removeClippedSubviews={false} scrollEnabled={true} nestedScrollEnabled={true}
-                  ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhum estabelecimento encontrado.</Text> : null} />
+                  ListEmptyComponent={<Text style={styles.emptyListText}>Nenhum estabelecimento encontrado.</Text>} />
 
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Os top 10 mais avaliados da regiao</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'topRated', userCity: userCoords ? `${userCoords.lat},${userCoords.lon}` : undefined })}>
+                  <Text style={styles.sectionTitle}>Os top 10 mais avaliados</Text>
+                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'topRated' })}>
                     <Text style={styles.seeAllText}>Ver todos</Text>
                   </TouchableOpacity>
                 </View>
                 <FlatList data={topRated} renderItem={renderInfoCard} keyExtractor={(item) => item.id} horizontal
-                  showsHorizontalScrollIndicator={false} style={styles.horizontalList} contentContainerStyle={styles.horizontalListContent}
+                  showsHorizontalScrollIndicator={false} style={styles.horizontalList}
+                  contentContainerStyle={styles.horizontalListContent}
                   removeClippedSubviews={false} scrollEnabled={true} nestedScrollEnabled={true}
-                  ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhum estabelecimento encontrado.</Text> : null} />
+                  ListEmptyComponent={<Text style={styles.emptyListText}>Nenhum estabelecimento encontrado.</Text>} />
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Estabelecimentos com promocoes</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'promotions', userCity: userCoords ? `${userCoords.lat},${userCoords.lon}` : undefined })}>
+                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'promotions' })}>
                     <Text style={styles.seeAllText}>Ver todas</Text>
                   </TouchableOpacity>
                 </View>
                 <FlatList data={promotions} renderItem={renderInfoCard} keyExtractor={(item) => item.id} horizontal
-                  showsHorizontalScrollIndicator={false} style={styles.horizontalList} contentContainerStyle={styles.horizontalListContent}
+                  showsHorizontalScrollIndicator={false} style={styles.horizontalList}
+                  contentContainerStyle={styles.horizontalListContent}
                   removeClippedSubviews={false} scrollEnabled={true} nestedScrollEnabled={true}
-                  ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhuma promocao encontrada.</Text> : null} />
+                  ListEmptyComponent={<Text style={styles.emptyListText}>Nenhuma promocao encontrada.</Text>} />
               </>
             )}
           </ScrollView>
@@ -581,3 +546,4 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+
