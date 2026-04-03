@@ -1,4 +1,4 @@
-name: Build APK Android
+﻿name: Build APK Android
 on:
   push:
     branches: [ main, master ]
@@ -7,47 +7,55 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout código
+      - name: Checkout codigo
         uses: actions/checkout@v4
+
       - name: Configurar Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+
       - name: Configurar Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Instalar dependências
+
+      - name: Instalar dependencias
         run: npm install
+
       - name: Configurar Android SDK
         uses: android-actions/setup-android@v3
-      - name: Dar permissão ao gradlew
+
+      - name: Dar permissao ao gradlew
         run: chmod +x android/gradlew
-      - name: Aumentar memória do Gradle
+
+      - name: Aumentar memoria do Gradle
         run: echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
-      - name: Criar keystore
+
+      - name: Restaurar keystore fixo
         run: |
-          keytool -genkey -v -keystore $GITHUB_WORKSPACE/android/app/agendmy.keystore \
-            -alias agendmy -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass agendmy123 -keypass agendmy123 \
-            -dname "CN=AgendMy, OU=Dev, O=AgendMy, L=Brasil, S=SP, C=BR"
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/android/app/agendmy-release.keystore
+
       - name: Limpar build
         run: cd android && ./gradlew clean --no-daemon
+
       - name: Gerar APK
         run: |
           cd android && ./gradlew assembleRelease \
             -PreactNativeArchitectures=arm64-v8a \
-            -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android/app/agendmy.keystore \
-            -Pandroid.injected.signing.store.password=agendmy123 \
-            -Pandroid.injected.signing.key.alias=agendmy \
-            -Pandroid.injected.signing.key.password=agendmy123 \
+            -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android/app/agendmy-release.keystore \
+            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }} \
             -x stripDebugDebugSymbols \
             --no-daemon
+
       - name: Upload do APK
         uses: actions/upload-artifact@v4
         with:
           name: agendmy-samsung
           path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 7
+
