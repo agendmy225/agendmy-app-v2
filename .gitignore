@@ -76,4 +76,4 @@ generate-icons.js
 
 # Assets
 src/assets/images/
-android/app/src/main/res/
+android/app/src/main/res/serviceAccountKey.json 
