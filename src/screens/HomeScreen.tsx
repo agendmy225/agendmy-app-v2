@@ -412,7 +412,7 @@ const HomeScreen: React.FC = () => {
                 <View style={styles.mapContainer}>
                   <MapView
                     ref={mapViewRef}
-                    provider={PROVIDER_GOOGLE}
+                    
                     style={styles.map}
                     region={mapRegion}
                     onRegionChangeComplete={setMapRegion}
@@ -548,6 +548,9 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+
+
+
 
 
 
