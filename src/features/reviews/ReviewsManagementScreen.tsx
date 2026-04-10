@@ -47,7 +47,7 @@ const ReviewsManagementScreen: React.FC = () => {
     if (!user) { return; }
 
     try {
-      // Buscar o ID do estabelecimento do proprietário atual
+      // Buscar o ID do estabelecimento do proprietÃƒÆ’Ã‚Â¡rio atual
       const businessQuery = query(
         collection(firestore, 'businesses'),
         where('ownerId', '==', user.uid),
@@ -71,7 +71,7 @@ const ReviewsManagementScreen: React.FC = () => {
     try {
       setLoading(true);
 
-      // Buscar avaliações do estabelecimento - correção: usar subcoleção dentro do business
+      // Buscar avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes do estabelecimento - correÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o: usar subcoleÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o dentro do business
       const reviewsQuery = query(
         collection(firestore, 'businesses', businessId, 'reviews'),
         orderBy('date', 'desc')
@@ -87,12 +87,12 @@ const ReviewsManagementScreen: React.FC = () => {
         });
       });
 
-      // Simplesmente definir os dados reais, ou um array vazio se não houver dados
+      // Simplesmente definir os dados reais, ou um array vazio se nÃƒÆ’Ã‚Â£o houver dados
       setReviews(reviewsData);
-      // setFilteredReviews(reviewsData); // filterReviews fará isso
+      // setFilteredReviews(reviewsData); // filterReviews farÃƒÆ’Ã‚Â¡ isso
       setLoading(false);
     } catch (error) {
-      console.error('Erro ao carregar avaliações:', error);
+      console.error('Erro ao carregar avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes:', error);
       setReviews([]); // Define array vazio em caso de erro
       setLoading(false);
     }
@@ -139,9 +139,9 @@ const ReviewsManagementScreen: React.FC = () => {
 
       setReviews(updatedReviews);
 
-      Alert.alert('Sucesso', 'Avaliação aprovada com sucesso!');
+      Alert.alert('Sucesso', 'AvaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o aprovada com sucesso!');
     } catch {
-      Alert.alert('Erro', 'Ocorreu um erro ao aprovar a avaliação. Tente novamente.');
+      Alert.alert('Erro', 'Ocorreu um erro ao aprovar a avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o. Tente novamente.');
     }
   };
 
@@ -160,9 +160,9 @@ const ReviewsManagementScreen: React.FC = () => {
 
       setReviews(updatedReviews);
 
-      Alert.alert('Sucesso', 'Avaliação rejeitada com sucesso!');
+      Alert.alert('Sucesso', 'AvaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o rejeitada com sucesso!');
     } catch {
-      Alert.alert('Erro', 'Ocorreu um erro ao rejeitar a avaliação. Tente novamente.');
+      Alert.alert('Erro', 'Ocorreu um erro ao rejeitar a avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o. Tente novamente.');
     }
   };
 
@@ -192,14 +192,14 @@ const ReviewsManagementScreen: React.FC = () => {
         status: 'responded', // Opcional: atualizar status para indicar que foi respondido
       });
 
-      // Atualizar localmente após sucesso
+      // Atualizar localmente apÃƒÆ’Ã‚Â³s sucesso
       const updatedReviews = reviews.map(review => {
         if (review.id === selectedReview.id) {
           return {
             ...review,
             response: {
               text: responseText,
-              date: Timestamp.now(), // Usar Timestamp.now() para consistência local
+              date: Timestamp.now(), // Usar Timestamp.now() para consistÃƒÆ’Ã‚Âªncia local
             },
             status: 'responded' as Review['status'], // Atualizar status localmente
           };
@@ -214,7 +214,7 @@ const ReviewsManagementScreen: React.FC = () => {
       setResponseText('');
 
       Alert.alert('Sucesso', 'Resposta enviada com sucesso!');
-      loadReviews(); // Recarregar as avaliações para refletir a mudança
+      loadReviews(); // Recarregar as avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes para refletir a mudanÃƒÆ’Ã‚Â§a
       setSubmittingResponse(false);
     } catch {
       Alert.alert('Erro', 'Ocorreu um erro ao enviar a resposta. Tente novamente.');
@@ -284,7 +284,7 @@ const ReviewsManagementScreen: React.FC = () => {
     for (let i = 1; i <= 5; i++) {
       stars.push(
         <Text key={i} style={[styles.starIcon, i <= rating && styles.filledStar]}>
-          {i <= rating ? '★' : '☆'}
+          {i <= rating ? 'ÃƒÂ¢Ã‚ËœÃ‚â€¦' : 'ÃƒÂ¢Ã‚ËœÃ‚â€ '}
         </Text>,
       );
     }
@@ -371,7 +371,7 @@ const ReviewsManagementScreen: React.FC = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Carregando avaliações...</Text>
+        <Text style={styles.loadingText}>Carregando avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes...</Text>
       </View>
     );
   }
@@ -379,13 +379,13 @@ const ReviewsManagementScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Gerenciar Avaliações</Text>
+        <Text style={styles.headerTitle}>Gerenciar AvaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes</Text>
       </View>
 
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Buscar por cliente, comentário ou profissional"
+          placeholder="Buscar por cliente, comentÃƒÆ’Ã‚Â¡rio ou profissional"
           value={searchText}
           onChangeText={setSearchText}
         />
@@ -438,12 +438,12 @@ const ReviewsManagementScreen: React.FC = () => {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Nenhuma avaliação encontrada</Text>
+            <Text style={styles.emptyText}>Nenhuma avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o encontrada</Text>
           </View>
         }
       />
 
-      {/* Modal para responder avaliação */}
+      {/* Modal para responder avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -454,13 +454,13 @@ const ReviewsManagementScreen: React.FC = () => {
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                {selectedReview?.response ? 'Editar Resposta' : 'Responder Avaliação'}
+                {selectedReview?.response ? 'Editar Resposta' : 'Responder AvaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o'}
               </Text>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setResponseModalVisible(false)}
               >
-                <Text style={styles.closeButtonText}>✕</Text>
+                <Text style={styles.closeButtonText}>ÃƒÂ¢Ã‚Å“Ã‚â€¢</Text>
               </TouchableOpacity>
             </View>
 
@@ -480,7 +480,7 @@ const ReviewsManagementScreen: React.FC = () => {
                     style={[styles.input, styles.textArea]}
                     value={responseText}
                     onChangeText={setResponseText}
-                    placeholder="Digite sua resposta para esta avaliação..."
+                    placeholder="Digite sua resposta para esta avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o..."
                     multiline
                     numberOfLines={6}
                   />

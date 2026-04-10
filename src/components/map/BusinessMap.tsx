@@ -11,7 +11,7 @@ import {
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useMarkerImage } from '../../hooks/useMarkerImage';
 import { businessLogosService } from '../../services/businessLogos';
-import { BusinessLocationIconMarker } from './BusinessLocationIconMarker'; // Marcador com ícones para BusinessLocation
+import { BusinessLocationIconMarker } from './BusinessLocationIconMarker'; // Marcador com ÃƒÆ’Ã‚Â­cones para BusinessLocation
 
 interface BusinessLocation {
   businessId: string;
@@ -19,7 +19,7 @@ interface BusinessLocation {
   latitude: number;
   longitude: number;
   description?: string;
-  category?: string; // Adicionado para suportar ícones por categoria
+  category?: string; // Adicionado para suportar ÃƒÆ’Ã‚Â­cones por categoria
 }
 
 interface BusinessMapProps {
@@ -110,7 +110,7 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
 
       const message = isConnected
         ? 'Firebase Storage conectado com sucesso!'
-        : 'Falha na conexão com Firebase Storage';
+        : 'Falha na conexÃƒÆ’Ã‚Â£o com Firebase Storage';
 
       console.log(message);
 
@@ -122,7 +122,7 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
         );
       }
     } catch (error) {
-      console.error('❌ Erro no teste de conectividade:', error);
+      console.error('ÃƒÂ¢Ã‚ÂÃ‚Å’ Erro no teste de conectividade:', error);
       setStorageConnected(false);
 
       if (showTestButton) {
@@ -138,14 +138,14 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
   };
 
   /**
-   * Executa teste automático ao montar o componente
+   * Executa teste automÃƒÆ’Ã‚Â¡tico ao montar o componente
    */
   useEffect(() => {
     testStorageConnection();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleMarkerPress = (business: BusinessLocation) => {
-    console.log(`📍 Marcador pressionado: ${business.name} (${business.businessId})`);
+    console.log(`ÃƒÂ°Ã‚Å¸Ã‚â€œÃ‚Â Marcador pressionado: ${business.name} (${business.businessId})`);
     onMarkerPress?.(business);
   };
 
@@ -158,9 +158,9 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
           {storageConnected === null ? (
             <Text style={styles.statusTesting}>Testando...</Text>
           ) : storageConnected ? (
-            <Text style={styles.statusConnected}>Conectado ✅</Text>
+            <Text style={styles.statusConnected}>Conectado ÃƒÂ¢Ã‚Å“Ã‚â€¦</Text>
           ) : (
-            <Text style={styles.statusDisconnected}>Desconectado ❌</Text>
+            <Text style={styles.statusDisconnected}>Desconectado ÃƒÂ¢Ã‚ÂÃ‚Å’</Text>
           )}
         </Text>
 
@@ -199,7 +199,7 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
       {__DEV__ && (
         <View style={styles.debugContainer}>
           <Text style={styles.debugText}>
-            Businesses: {businesses.length} | Storage: {storageConnected ? '✅' : '❌'}
+            Businesses: {businesses.length} | Storage: {storageConnected ? 'ÃƒÂ¢Ã‚Å“Ã‚â€¦' : 'ÃƒÂ¢Ã‚ÂÃ‚Å’'}
           </Text>
         </View>
       )}

@@ -22,11 +22,11 @@ const EmailVerificationScreen: React.FC = () => {
       await sendVerificationEmail();
       Alert.alert(
         'E-mail Enviado',
-        'Um novo e-mail de verificação foi enviado para sua caixa de entrada.',
+        'Um novo e-mail de verificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o foi enviado para sua caixa de entrada.',
       );
     } catch (error: unknown) {
       const err = error as Error;
-      Alert.alert('Erro', err.message || 'Não foi possível enviar o e-mail de verificação.');
+      Alert.alert('Erro', err.message || 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel enviar o e-mail de verificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o.');
     } finally {
       setIsLoading(false);
     }
@@ -46,11 +46,11 @@ const EmailVerificationScreen: React.FC = () => {
           <View style={styles.headerContainer}>
             <Text style={styles.titleText}>VERIFICAR E-MAIL</Text>
             <Text style={styles.subtitleText}>
-              Enviamos um e-mail de verificação para:
+              Enviamos um e-mail de verificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para:
             </Text>
             <Text style={styles.emailText}>{user?.email}</Text>
             <Text style={styles.instructionText}>
-              Por favor, verifique sua caixa de entrada e clique no link de verificação para ativar sua conta.
+              Por favor, verifique sua caixa de entrada e clique no link de verificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para ativar sua conta.
             </Text>
           </View>
 

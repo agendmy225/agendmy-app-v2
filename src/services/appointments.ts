@@ -19,7 +19,7 @@ import { firebaseDb, firebaseAuth } from '../config/firebase';
 
 // Tipo completo para o agendamento
 export interface Appointment {
-  id: string; // Tornar id obrigatório
+  id: string; // Tornar id obrigatÃƒÆ’Ã‚Â³rio
   businessId: string;
   serviceId: string;
   professionalId: string;
@@ -41,55 +41,55 @@ export interface Appointment {
   updatedAt?: Date;
 }
 
-// Tipo para criação de agendamento (campos obrigatórios)
+// Tipo para criaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de agendamento (campos obrigatÃƒÆ’Ã‚Â³rios)
 type AppointmentData = Omit<Appointment, 'id' | 'clientId' | 'clientEmail' | 'createdAt' | 'updatedAt'>;
 
-// Função para salvar um novo agendamento no Firestore
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para salvar um novo agendamento no Firestore
 export const saveAppointment = async (appointmentData: AppointmentData): Promise<string> => {
   try {
-    console.log('🔵 [saveAppointment] Iniciando...');
-    console.log('📊 [saveAppointment] Dados recebidos:', appointmentData);
+    console.log('ÃƒÂ°Ã‚Å¸Ã‚â€Ã‚Âµ [saveAppointment] Iniciando...');
+    console.log('ÃƒÂ°Ã‚Å¸Ã‚â€œÃ‚Å  [saveAppointment] Dados recebidos:', appointmentData);
 
-    // Verificar se o usuário está autenticado
+    // Verificar se o usuÃƒÆ’Ã‚Â¡rio estÃƒÆ’Ã‚Â¡ autenticado
     const currentUser = firebaseAuth.currentUser;
-    console.log('👤 [saveAppointment] Usuário atual:', {
+    console.log('ÃƒÂ°Ã‚Å¸Ã‚â€˜Ã‚Â¤ [saveAppointment] UsuÃƒÆ’Ã‚Â¡rio atual:', {
       uid: currentUser?.uid,
       email: currentUser?.email,
       emailVerified: currentUser?.emailVerified,
     });
 
     if (!currentUser) {
-      console.error('❌ [saveAppointment] Usuário não autenticado');
-      throw new Error('Usuário não autenticado. Por favor, faça login novamente.');
+      console.error('ÃƒÂ¢Ã‚ÂÃ‚Å’ [saveAppointment] UsuÃƒÆ’Ã‚Â¡rio nÃƒÆ’Ã‚Â£o autenticado');
+      throw new Error('UsuÃƒÆ’Ã‚Â¡rio nÃƒÆ’Ã‚Â£o autenticado. Por favor, faÃƒÆ’Ã‚Â§a login novamente.');
     }
 
     // Buscar dados do cliente para incluir o nome
     let clientName = appointmentData.clientName;
-    console.log('👤 [saveAppointment] Nome do cliente inicial:', clientName);
+    console.log('ÃƒÂ°Ã‚Å¸Ã‚â€˜Ã‚Â¤ [saveAppointment] Nome do cliente inicial:', clientName);
 
     if (!clientName && currentUser.uid) {
       try {
-        console.log('🔍 [saveAppointment] Buscando dados do usuário no Firestore...');
+        console.log('ÃƒÂ°Ã‚Å¸Ã‚â€Ã‚Â [saveAppointment] Buscando dados do usuÃƒÆ’Ã‚Â¡rio no Firestore...');
         const userDoc = await getDoc(doc(firebaseDb, 'users', currentUser.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
           clientName = userData?.name || userData?.displayName || '';
-          console.log('✅ [saveAppointment] Dados do usuário encontrados:', {
+          console.log('ÃƒÂ¢Ã‚Å“Ã‚â€¦ [saveAppointment] Dados do usuÃƒÆ’Ã‚Â¡rio encontrados:', {
             name: userData?.name,
             displayName: userData?.displayName,
             clientNameFinal: clientName,
           });
         } else {
-          console.log('⚠️ [saveAppointment] Documento do usuário não encontrado no Firestore');
+          console.log('ÃƒÂ¢Ã‚Å¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â [saveAppointment] Documento do usuÃƒÆ’Ã‚Â¡rio nÃƒÆ’Ã‚Â£o encontrado no Firestore');
         }
       } catch (userError) {
-        console.error('❌ [saveAppointment] Erro ao buscar dados do usuário:', userError);
+        console.error('ÃƒÂ¢Ã‚ÂÃ‚Å’ [saveAppointment] Erro ao buscar dados do usuÃƒÆ’Ã‚Â¡rio:', userError);
         // Silently fail
       }
     }
 
     const finalClientName = clientName || currentUser.displayName || currentUser.email?.split('@')[0] || 'Cliente';
-    console.log('👤 [saveAppointment] Nome final do cliente:', finalClientName);
+    console.log('ÃƒÂ°Ã‚Å¸Ã‚â€˜Ã‚Â¤ [saveAppointment] Nome final do cliente:', finalClientName);
 
     const appointmentToSave = {
       ...appointmentData,
@@ -100,17 +100,17 @@ export const saveAppointment = async (appointmentData: AppointmentData): Promise
       updatedAt: serverTimestamp(),
     };
 
-    console.log('💾 [saveAppointment] Dados finais para salvar:', appointmentToSave);
+    console.log('ÃƒÂ°Ã‚Å¸Ã‚â€™Ã‚Â¾ [saveAppointment] Dados finais para salvar:', appointmentToSave);
 
     try {
-      console.log('🔥 [saveAppointment] Salvando no Firestore...');
-      // Criar um novo documento na coleção 'appointments'
+      console.log('ÃƒÂ°Ã‚Å¸Ã‚â€Ã‚Â¥ [saveAppointment] Salvando no Firestore...');
+      // Criar um novo documento na coleÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o 'appointments'
       const appointmentRef = await addDoc(collection(firebaseDb, 'appointments'), appointmentToSave);
-      console.log('✅ [saveAppointment] Agendamento salvo com sucesso! ID:', appointmentRef.id);
+      console.log('ÃƒÂ¢Ã‚Å“Ã‚â€¦ [saveAppointment] Agendamento salvo com sucesso! ID:', appointmentRef.id);
       return appointmentRef.id;
     } catch (firestoreError) {
-      console.error('❌ [saveAppointment] Erro do Firestore:', firestoreError);
-      console.error('📊 [saveAppointment] Detalhes do erro do Firestore:', {
+      console.error('ÃƒÂ¢Ã‚ÂÃ‚Å’ [saveAppointment] Erro do Firestore:', firestoreError);
+      console.error('ÃƒÂ°Ã‚Å¸Ã‚â€œÃ‚Å  [saveAppointment] Detalhes do erro do Firestore:', {
         code: (firestoreError as any)?.code,
         message: (firestoreError as any)?.message,
         details: (firestoreError as any)?.details,
@@ -118,33 +118,33 @@ export const saveAppointment = async (appointmentData: AppointmentData): Promise
       throw new Error(`Erro ao salvar no banco de dados: ${(firestoreError as any)?.message || 'Erro desconhecido'}`);
     }
   } catch (error) {
-    console.error('❌ [saveAppointment] Erro geral:', error);
-    console.error('📊 [saveAppointment] Stack trace:', (error as Error)?.stack);
+    console.error('ÃƒÂ¢Ã‚ÂÃ‚Å’ [saveAppointment] Erro geral:', error);
+    console.error('ÃƒÂ°Ã‚Å¸Ã‚â€œÃ‚Å  [saveAppointment] Stack trace:', (error as Error)?.stack);
 
-    // Não mostrar Alert aqui, deixar para a tela que chama
+    // NÃƒÆ’Ã‚Â£o mostrar Alert aqui, deixar para a tela que chama
     throw error;
   }
 };
 
-// Função para cancelar um agendamento
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para cancelar um agendamento
 export const cancelAppointment = async (appointmentId: string): Promise<void> => {
   try {
-    // Verificar se o usuário está autenticado
+    // Verificar se o usuÃƒÆ’Ã‚Â¡rio estÃƒÆ’Ã‚Â¡ autenticado
     const currentUser = firebaseAuth.currentUser;
     if (!currentUser) {
-      throw new Error('Usuário não autenticado');
+      throw new Error('UsuÃƒÆ’Ã‚Â¡rio nÃƒÆ’Ã‚Â£o autenticado');
     }
 
-    // Buscar o agendamento para verificar se pertence ao usuário atual
+    // Buscar o agendamento para verificar se pertence ao usuÃƒÆ’Ã‚Â¡rio atual
     const appointmentDocSnap = await getDoc(doc(firebaseDb, 'appointments', appointmentId));
 
     if (!appointmentDocSnap.exists()) {
-      throw new Error('Agendamento não encontrado');
+      throw new Error('Agendamento nÃƒÆ’Ã‚Â£o encontrado');
     }
 
     const appointmentData = appointmentDocSnap.data();
     if (appointmentData?.clientId !== currentUser.uid) {
-      throw new Error('Você não tem permissão para cancelar este agendamento');
+      throw new Error('VocÃƒÆ’Ã‚Âª nÃƒÆ’Ã‚Â£o tem permissÃƒÆ’Ã‚Â£o para cancelar este agendamento');
     }
 
     // Atualizar o status do agendamento para 'cancelled'
@@ -153,18 +153,18 @@ export const cancelAppointment = async (appointmentId: string): Promise<void> =>
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    Alert.alert('Erro', 'Não foi possível cancelar o agendamento. Tente novamente.');
+    Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel cancelar o agendamento. Tente novamente.');
     throw error;
   }
 };
 
-// Função para buscar os agendamentos de um cliente
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para buscar os agendamentos de um cliente
 export const getClientAppointments = async (status?: 'scheduled' | 'completed' | 'cancelled'): Promise<Appointment[]> => {
   try {
-    // Verificar se o usuário está autenticado
+    // Verificar se o usuÃƒÆ’Ã‚Â¡rio estÃƒÆ’Ã‚Â¡ autenticado
     const currentUser = firebaseAuth.currentUser;
     if (!currentUser) {
-      throw new Error('Usuário não autenticado');
+      throw new Error('UsuÃƒÆ’Ã‚Â¡rio nÃƒÆ’Ã‚Â£o autenticado');
     }
 
     // Criar a consulta base usando a API modular
@@ -190,12 +190,12 @@ export const getClientAppointments = async (status?: 'scheduled' | 'completed' |
       } as Appointment;
     });
   } catch (error) {
-    Alert.alert('Erro', 'Não foi possível carregar seus agendamentos. Tente novamente.');
+    Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel carregar seus agendamentos. Tente novamente.');
     return [];
   }
 };
 
-// Função para buscar agendamentos de um estabelecimento (para proprietários)
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para buscar agendamentos de um estabelecimento (para proprietÃƒÆ’Ã‚Â¡rios)
 export const getBusinessAppointments = async (
   businessId: string,
   status?: string,
@@ -203,7 +203,7 @@ export const getBusinessAppointments = async (
   endDate?: string,
 ): Promise<Appointment[]> => {
   try {
-    // Buscar na coleção raiz 'appointments' filtrando por businessId
+    // Buscar na coleÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o raiz 'appointments' filtrando por businessId
     let queryRef = query(
       collection(firebaseDb, 'appointments'),
       where('businessId', '==', businessId),
@@ -229,7 +229,7 @@ export const getBusinessAppointments = async (
         const data = appointmentDoc.data();
         let clientName = data.clientName;
 
-        // Se não houver nome do cliente, buscar na coleção de usuários
+        // Se nÃƒÆ’Ã‚Â£o houver nome do cliente, buscar na coleÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de usuÃƒÆ’Ã‚Â¡rios
         if (!clientName && data.clientId) {
           try {
             const userDoc = await getDoc(doc(firebaseDb, 'users', data.clientId));
@@ -255,7 +255,7 @@ export const getBusinessAppointments = async (
   }
 };
 
-// Função para buscar agendamentos de um profissional
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para buscar agendamentos de um profissional
 export const getProfessionalAppointments = async (
   professionalId: string,
   status?: string,
@@ -288,7 +288,7 @@ export const getProfessionalAppointments = async (
   }
 };
 
-// Função para atualizar status de um agendamento
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para atualizar status de um agendamento
 export const updateAppointmentStatus = async (
   appointmentId: string,
   status: Appointment['status'],
@@ -310,7 +310,7 @@ export const updateAppointmentStatus = async (
   }
 };
 
-// Função para buscar um agendamento específico
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para buscar um agendamento especÃƒÆ’Ã‚Â­fico
 export const getAppointmentById = async (appointmentId: string): Promise<Appointment | null> => {
   try {
     const docSnap = await getDoc(doc(firebaseDb, 'appointments', appointmentId));
@@ -328,7 +328,7 @@ export const getAppointmentById = async (appointmentId: string): Promise<Appoint
   }
 };
 
-// Função para reagendar um agendamento
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para reagendar um agendamento
 export const rescheduleAppointment = async (
   appointmentId: string,
   newDate: string,
@@ -346,7 +346,7 @@ export const rescheduleAppointment = async (
   }
 };
 
-// Função para buscar agendamentos em um período
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para buscar agendamentos em um perÃƒÆ’Ã‚Â­odo
 export const getAppointmentsByDateRange = async (
   businessId: string,
   startDate: string,
@@ -375,7 +375,7 @@ export const getAppointmentsByDateRange = async (
   }
 };
 
-// Função para obter estatísticas de agendamentos
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para obter estatÃƒÆ’Ã‚Â­sticas de agendamentos
 export const getAppointmentStats = async (businessId: string, period: 'today' | 'week' | 'month'): Promise<{
   total: number;
   confirmed: number;
@@ -440,11 +440,11 @@ export const getAppointmentStats = async (businessId: string, period: 'today' | 
   }
 };
 
-// Função para verificar disponibilidade de horário
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para verificar disponibilidade de horÃƒÆ’Ã‚Â¡rio
 export const checkTimeSlotAvailability = async (
   professionalId: string,
   date: string,
-  time: string, // <-- O parâmetro 'time' foi adicionado aqui (corrigindo um bug potencial)
+  time: string, // <-- O parÃƒÆ’Ã‚Â¢metro 'time' foi adicionado aqui (corrigindo um bug potencial)
   duration: number = 60,
 ): Promise<boolean> => {
   try {
@@ -456,14 +456,14 @@ export const checkTimeSlotAvailability = async (
     );
     const snapshot = await getDocs(queryRef);
 
-    const requestedStart = new Date(`${date}T${time}`); // Agora 'time' está disponível
+    const requestedStart = new Date(`${date}T${time}`); // Agora 'time' estÃƒÆ’Ã‚Â¡ disponÃƒÆ’Ã‚Â­vel
     const requestedEnd = new Date(requestedStart.getTime() + duration * 60000);
     for (const availabilityDoc of snapshot.docs) {
       const appointment = availabilityDoc.data() as Appointment;
       const existingStart = new Date(`${appointment.date}T${appointment.time}`);
       const existingEnd = new Date(existingStart.getTime() + (parseInt(appointment.duration, 10) || 60) * 60000);
 
-      // Verifica se há sobreposição
+      // Verifica se hÃƒÆ’Ã‚Â¡ sobreposiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
       if (requestedStart < existingEnd && requestedEnd > existingStart) {
         return false;
       }
@@ -475,7 +475,7 @@ export const checkTimeSlotAvailability = async (
   }
 };
 
-// Função para marcar como falta (no-show)
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para marcar como falta (no-show)
 export const markNoShow = async (appointmentId: string): Promise<void> => {
   try {
     await updateDoc(doc(firebaseDb, 'appointments', appointmentId), {
@@ -487,7 +487,7 @@ export const markNoShow = async (appointmentId: string): Promise<void> => {
   }
 };
 
-// Função para enviar lembrete (placeholder - implementar com notificações push)
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para enviar lembrete (placeholder - implementar com notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes push)
 export const sendReminder = async (appointmentId: string): Promise<void> => {
   try {
     await updateDoc(doc(firebaseDb, 'appointments', appointmentId), {
@@ -500,21 +500,21 @@ export const sendReminder = async (appointmentId: string): Promise<void> => {
   }
 };
 
-// Função para verificar se um cliente tem agendamentos concluídos com um negócio específico
+// FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para verificar se um cliente tem agendamentos concluÃƒÆ’Ã‚Â­dos com um negÃƒÆ’Ã‚Â³cio especÃƒÆ’Ã‚Â­fico
 export const hasCompletedAppointmentWithBusiness = async (userId: string | undefined, businessId: string): Promise<boolean> => {
   try {
-    // Verificar se o usuário está autenticado
+    // Verificar se o usuÃƒÆ’Ã‚Â¡rio estÃƒÆ’Ã‚Â¡ autenticado
     if (!userId) {
       return false;
     }
 
-    // Criar consulta para buscar agendamentos concluídos do usuário com o negócio
+    // Criar consulta para buscar agendamentos concluÃƒÆ’Ã‚Â­dos do usuÃƒÆ’Ã‚Â¡rio com o negÃƒÆ’Ã‚Â³cio
     const queryRef = query(
       collection(firebaseDb, 'appointments'),
       where('clientId', '==', userId),
       where('businessId', '==', businessId),
       where('status', '==', 'completed'),
-      limit(1), // Só precisamos saber se existe pelo menos um
+      limit(1), // SÃƒÆ’Ã‚Â³ precisamos saber se existe pelo menos um
     );
 
     const snapshot = await getDocs(queryRef);

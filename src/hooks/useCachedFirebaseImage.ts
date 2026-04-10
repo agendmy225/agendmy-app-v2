@@ -11,11 +11,11 @@ export const useCachedFirebaseImage = (storagePath: string | null | undefined) =
 
     const loadImage = async () => {
       if (!storagePath || storagePath.includes('placeholder')) {
-        console.warn('⚠️ StoragePath inválido ou placeholder:', storagePath);
+        console.warn('ÃƒÂ¢Ã‚Å¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â StoragePath invÃƒÆ’Ã‚Â¡lido ou placeholder:', storagePath);
         if (isMounted) {
           setImageSource(null);
           setLoading(false);
-          setError('Caminho de storage inválido');
+          setError('Caminho de storage invÃƒÆ’Ã‚Â¡lido');
         }
         return;
       }
@@ -26,25 +26,25 @@ export const useCachedFirebaseImage = (storagePath: string | null | undefined) =
           setError(null);
         }
         
-        console.log('🔄 HOOK - Carregando imagem REDIMENSIONADA:', storagePath);
+        console.log('ÃƒÂ°Ã‚Å¸Ã‚â€Ã‚â€ž HOOK - Carregando imagem REDIMENSIONADA:', storagePath);
         
-        // Usar o serviço de cache NOVO com redimensionamento real
+        // Usar o serviÃƒÆ’Ã‚Â§o de cache NOVO com redimensionamento real
         const cachedImageBase64 = await imageCacheService.getImage(storagePath);
         
         if (isMounted) {
           if (cachedImageBase64) {
-            console.log('✅ Imagem 50x50px carregada:', storagePath);
+            console.log('ÃƒÂ¢Ã‚Å“Ã‚â€¦ Imagem 50x50px carregada:', storagePath);
             setImageSource(cachedImageBase64);
             setError(null);
           } else {
-            console.error('❌ Falha ao carregar/redimensionar imagem:', storagePath);
+            console.error('ÃƒÂ¢Ã‚ÂÃ‚Å’ Falha ao carregar/redimensionar imagem:', storagePath);
             setImageSource(null);
             setError('Erro ao carregar imagem');
           }
           setLoading(false);
         }
       } catch (err) {
-        console.error('❌ Erro no useCachedFirebaseImage:', err);
+        console.error('ÃƒÂ¢Ã‚ÂÃ‚Å’ Erro no useCachedFirebaseImage:', err);
         if (isMounted) {
           setImageSource(null);
           setError(`Erro ao carregar imagem: ${err}`);

@@ -74,7 +74,7 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
     const dates: string[] = [];
     const today = new Date();
 
-    // Gerar próximos 7 dias
+    // Gerar prÃƒÆ’Ã‚Â³ximos 7 dias
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
@@ -82,7 +82,7 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
       const dayName = date.toLocaleDateString('pt-BR', { weekday: 'long' });
       const dayKey = getDayKey(dayName);
 
-      // Verificar se o negócio está aberto neste dia
+      // Verificar se o negÃƒÆ’Ã‚Â³cio estÃƒÆ’Ã‚Â¡ aberto neste dia
       if (business.workingHours[dayKey]?.open) {
         dates.push(date.toISOString().split('T')[0]);
       }
@@ -160,11 +160,11 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
   const getDayKey = (dayName: string): string => {
     const dayMap: { [key: string]: string } = {
       'segunda-feira': 'monday',
-      'terça-feira': 'tuesday',
+      'terÃƒÆ’Ã‚Â§a-feira': 'tuesday',
       'quarta-feira': 'wednesday',
       'quinta-feira': 'thursday',
       'sexta-feira': 'friday',
-      'sábado': 'saturday',
+      'sÃƒÆ’Ã‚Â¡bado': 'saturday',
       'domingo': 'sunday',
     };
     return dayMap[dayName.toLowerCase()] || 'monday';
@@ -186,7 +186,7 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
     if (slot.available) {
       onSelectTimeSlot(selectedDate, slot.time, slot.professionalId);
     } else {
-      Alert.alert('Horário indisponível', 'Este horário já está ocupado.');
+      Alert.alert('HorÃƒÆ’Ã‚Â¡rio indisponÃƒÆ’Ã‚Â­vel', 'Este horÃƒÆ’Ã‚Â¡rio jÃƒÆ’Ã‚Â¡ estÃƒÆ’Ã‚Â¡ ocupado.');
     }
   };
 
@@ -209,9 +209,9 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Horários Disponíveis</Text>
+            <Text style={styles.modalTitle}>HorÃƒÆ’Ã‚Â¡rios DisponÃƒÆ’Ã‚Â­veis</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>×</Text>
+              <Text style={styles.closeButtonText}>ÃƒÆ’Ã‚â€”</Text>
             </TouchableOpacity>
           </View>
 
@@ -222,12 +222,12 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
           {availableDates.length === 0 ? (
             <View style={styles.noSlotsContainer}>
               <Text style={styles.noSlotsText}>
-                Não há horários disponíveis nos próximos dias.
+                NÃƒÆ’Ã‚Â£o hÃƒÆ’Ã‚Â¡ horÃƒÆ’Ã‚Â¡rios disponÃƒÆ’Ã‚Â­veis nos prÃƒÆ’Ã‚Â³ximos dias.
               </Text>
             </View>
           ) : (
             <>
-              {/* Seleção de Data */}
+              {/* SeleÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de Data */}
               <View style={styles.dateContainer}>
                 <Text style={styles.sectionTitle}>Selecione o dia:</Text>
                 <ScrollView
@@ -255,9 +255,9 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
-              </View>              {/* Horários Disponíveis */}
+              </View>              {/* HorÃƒÆ’Ã‚Â¡rios DisponÃƒÆ’Ã‚Â­veis */}
               <View style={styles.timeSlotsContainer}>
-                <Text style={styles.sectionTitle}>Horários:</Text>
+                <Text style={styles.sectionTitle}>HorÃƒÆ’Ã‚Â¡rios:</Text>
                 {isLoadingSlots ? (
                   <View style={styles.loadingContainer}>
                     <ActivityIndicator size="small" color={colors.primary} />
@@ -267,11 +267,11 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
                   <ScrollView style={styles.slotsScroll}>
                     {timeSlots.length === 0 ? (
                       <Text style={styles.noSlotsText}>
-                        Nenhum horário disponível para este dia.
+                        Nenhum horÃƒÆ’Ã‚Â¡rio disponÃƒÆ’Ã‚Â­vel para este dia.
                       </Text>
                     ) : timeSlots.filter(slot => slot.available).length === 0 ? (
                       <Text style={styles.noSlotsText}>
-                        Todos os horários estão ocupados para este dia. Tente outro dia.
+                        Todos os horÃƒÆ’Ã‚Â¡rios estÃƒÆ’Ã‚Â£o ocupados para este dia. Tente outro dia.
                       </Text>
                     ) : (
                       timeSlots.map((slot) => (

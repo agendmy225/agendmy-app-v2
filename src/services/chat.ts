@@ -33,14 +33,14 @@ export interface Chat {
   unreadCount?: number;
   clientId?: string;
   businessId?: string;
-  ownerId?: string; // ID do proprietário do estabelecimento
-  businessName?: string; // Nome do estabelecimento para facilitar exibição
+  ownerId?: string; // ID do proprietÃƒÆ’Ã‚Â¡rio do estabelecimento
+  businessName?: string; // Nome do estabelecimento para facilitar exibiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
 }
 
 export type Conversation = Chat;
 
 export const createOrGetChat = async (currentUserId: string, otherUserId: string, businessId?: string, businessName?: string): Promise<string> => {
-  // Validação reforçada: ambos UIDs devem ser strings diferentes e não vazias
+  // ValidaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o reforÃƒÆ’Ã‚Â§ada: ambos UIDs devem ser strings diferentes e nÃƒÆ’Ã‚Â£o vazias
   if (
     !currentUserId ||
     !otherUserId ||
@@ -48,7 +48,7 @@ export const createOrGetChat = async (currentUserId: string, otherUserId: string
     typeof otherUserId !== 'string' ||
     currentUserId === otherUserId
   ) {
-    throw new Error('IDs de participantes inválidos para criação de chat.');
+    throw new Error('IDs de participantes invÃƒÆ’Ã‚Â¡lidos para criaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de chat.');
   }
 
   const chatsRef = collection(firebaseDb, 'chats');
@@ -71,17 +71,17 @@ export const createOrGetChat = async (currentUserId: string, otherUserId: string
     return (existingChat as Chat).id;
   }
 
-  // Garante que participants sempre será um array de duas strings distintas
+  // Garante que participants sempre serÃƒÆ’Ã‚Â¡ um array de duas strings distintas
   const participants = [currentUserId, otherUserId];
 
-  // Dados do chat para criação
+  // Dados do chat para criaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
   const chatData: any = {
     participants,
     lastMessage: null,
     updatedAt: serverTimestamp(),
   };
 
-  // Se temos informações do negócio, adicionar aos dados
+  // Se temos informaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes do negÃƒÆ’Ã‚Â³cio, adicionar aos dados
   if (businessId) {
     chatData.businessId = businessId;
   }
@@ -89,16 +89,16 @@ export const createOrGetChat = async (currentUserId: string, otherUserId: string
     chatData.businessName = businessName;
   }
 
-  // Tentar identificar quem é client e quem é owner baseado nas coleções
+  // Tentar identificar quem ÃƒÆ’Ã‚Â© client e quem ÃƒÆ’Ã‚Â© owner baseado nas coleÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes
   try {
-    // Verificar se currentUserId está na coleção clients
+    // Verificar se currentUserId estÃƒÆ’Ã‚Â¡ na coleÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o clients
     const clientDoc = await getDocs(query(collection(firebaseDb, 'clients'), where('userId', '==', currentUserId)));
 
     if (!clientDoc.empty) {
       chatData.clientId = currentUserId;
       chatData.ownerId = otherUserId;
     } else {
-      // Verificar se otherUserId está na coleção clients
+      // Verificar se otherUserId estÃƒÆ’Ã‚Â¡ na coleÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o clients
       const otherClientDoc = await getDocs(query(collection(firebaseDb, 'clients'), where('userId', '==', otherUserId)));
       if (!otherClientDoc.empty) {
         chatData.clientId = otherUserId;
@@ -106,8 +106,8 @@ export const createOrGetChat = async (currentUserId: string, otherUserId: string
       }
     }
   } catch (error) {
-    // Se não conseguir identificar, continua sem esses campos específicos
-    console.log('Não foi possível identificar tipos de usuário:', error);
+    // Se nÃƒÆ’Ã‚Â£o conseguir identificar, continua sem esses campos especÃƒÆ’Ã‚Â­ficos
+    console.log('NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel identificar tipos de usuÃƒÆ’Ã‚Â¡rio:', error);
   }
 
   const newChatRef = await addDoc(chatsRef, chatData);
@@ -145,7 +145,7 @@ export const deleteMessage = async (chatId: string, messageId: string): Promise<
     await deleteDoc(messageRef);
   } catch (error) {
     console.error('Erro ao excluir mensagem:', error);
-    throw new Error('Não foi possível excluir a mensagem. Tente novamente.');
+    throw new Error('NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel excluir a mensagem. Tente novamente.');
   }
 };
 

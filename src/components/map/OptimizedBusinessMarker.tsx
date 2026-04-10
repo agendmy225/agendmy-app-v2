@@ -33,26 +33,26 @@ export const OptimizedBusinessMarker: React.FC<BusinessMarkerProps> = memo(({ bu
     }
   }, [imageLoaded, imageError]);
 
-  // Não renderiza se não tiver localização
+  // NÃƒÆ’Ã‚Â£o renderiza se nÃƒÆ’Ã‚Â£o tiver localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
   if (!business.location?.latitude || !business.location?.longitude) {
     return null;
   }
 
   const handleImageLoad = () => {
-    console.log(`✅ Imagem carregada para ${business.name}`);
+    console.log(`ÃƒÂ¢Ã‚Å“Ã‚â€¦ Imagem carregada para ${business.name}`);
     setImageLoaded(true);
     setImageError(false);
   };
 
   const handleImageError = () => {
-    console.error(`❌ Erro ao carregar imagem para ${business.name}`);
+    console.error(`ÃƒÂ¢Ã‚ÂÃ‚Å’ Erro ao carregar imagem para ${business.name}`);
     setImageError(true);
     setImageLoaded(false);
   };
 
   return (
     <Marker
-      key={`marker_${business.id}`} // Key única para evitar reutilização
+      key={`marker_${business.id}`} // Key ÃƒÆ’Ã‚Âºnica para evitar reutilizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
       coordinate={{
         latitude: business.location.latitude,
         longitude: business.location.longitude,
@@ -60,7 +60,7 @@ export const OptimizedBusinessMarker: React.FC<BusinessMarkerProps> = memo(({ bu
       onPress={onPress}
       title={business.name}
       description={business.description}
-      // CRÍTICO: Só para de rastrear mudanças quando tudo estiver renderizado
+      // CRÃƒÆ’Ã‚ÂTICO: SÃƒÆ’Ã‚Â³ para de rastrear mudanÃƒÆ’Ã‚Â§as quando tudo estiver renderizado
       tracksViewChanges={!isRenderComplete}
     >
       <View style={styles.markerContainer}>

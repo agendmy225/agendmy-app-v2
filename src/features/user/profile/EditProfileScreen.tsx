@@ -32,7 +32,7 @@ const EditProfileScreen: React.FC = () => {
   const [profileImageUri, setProfileImageUri] = useState<string | null>(user?.photoURL || null);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null); // Imagem selecionada localmente
-  // Efeito para atualizar a imagem de perfil quando o usuário for atualizado no contexto
+  // Efeito para atualizar a imagem de perfil quando o usuÃƒÆ’Ã‚Â¡rio for atualizado no contexto
   useEffect(() => {
     if (user?.photoURL && !selectedImageUri) {
       setProfileImageUri(user.photoURL);
@@ -50,7 +50,7 @@ const EditProfileScreen: React.FC = () => {
       // Atualiza imediatamente a interface com a nova foto selecionada
       const newUri = result.assets[0].uri;
       setSelectedImageUri(newUri); // Nova imagem selecionada
-      setProfileImageUri(newUri); // Atualiza também a URI principal para exibição
+      setProfileImageUri(newUri); // Atualiza tambÃƒÆ’Ã‚Â©m a URI principal para exibiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
       setIsProfileModalVisible(false);
     }
   };
@@ -79,7 +79,7 @@ const EditProfileScreen: React.FC = () => {
         return;
       }
       Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
-      // Limpa a imagem selecionada após salvar com sucesso
+      // Limpa a imagem selecionada apÃƒÆ’Ã‚Â³s salvar com sucesso
       setSelectedImageUri(null);
       navigation.goBack();
     } catch (error: unknown) {
@@ -91,9 +91,9 @@ const EditProfileScreen: React.FC = () => {
 
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
 
-  // Função para criar source da imagem
+  // FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para criar source da imagem
   const getProfileImageSource = () => {
-    // Prioriza a imagem selecionada, depois a do perfil, depois a padrão
+    // Prioriza a imagem selecionada, depois a do perfil, depois a padrÃƒÆ’Ã‚Â£o
     const imageUri = selectedImageUri || profileImageUri;
     if (imageUri) {
       return { uri: imageUri };
@@ -110,7 +110,7 @@ const EditProfileScreen: React.FC = () => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.sectionTitle}>Alterar foto de perfil</Text>
-          <Text style={styles.modalSubtitle}>A nova foto aparecerá imediatamente. Lembre-se de salvar para confirmar as alterações.</Text>
+          <Text style={styles.modalSubtitle}>A nova foto aparecerÃƒÆ’Ã‚Â¡ imediatamente. Lembre-se de salvar para confirmar as alteraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes.</Text>
           <TouchableOpacity style={styles.selectPhotoButton} onPress={handleSelectProfileImage}>
             <Text style={styles.saveButtonText}>Escolher foto da galeria</Text>
           </TouchableOpacity>
@@ -123,7 +123,7 @@ const EditProfileScreen: React.FC = () => {
 
     <TouchableOpacity onPress={() => setIsProfileModalVisible(true)} style={styles.profileImageContainer}>
       <Image
-        key={`profile-image-${selectedImageUri || profileImageUri}`} // Força re-render quando uma nova imagem é selecionada
+        key={`profile-image-${selectedImageUri || profileImageUri}`} // ForÃƒÆ’Ã‚Â§a re-render quando uma nova imagem ÃƒÆ’Ã‚Â© selecionada
         source={profileImageSource}
         style={styles.profileImage}
         resizeMode="cover" // Garante que a imagem seja redimensionada corretamente
@@ -177,7 +177,7 @@ const EditProfileScreen: React.FC = () => {
       {isUploading ? (
         <Text style={styles.saveButtonText}>Salvando...</Text>
       ) : (
-        <Text style={styles.saveButtonText}>Salvar Alterações</Text>
+        <Text style={styles.saveButtonText}>Salvar AlteraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes</Text>
       )}
     </TouchableOpacity>
   </View>

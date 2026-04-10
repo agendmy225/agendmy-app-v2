@@ -42,13 +42,13 @@ export const BusinessLocationMarker: React.FC<BusinessLocationMarkerProps> = mem
   }, [imageLoaded, imageError]);
 
   const handleImageLoad = () => {
-    console.log(`✅ FastImage carregada para ${business.name}`);
+    console.log(`ÃƒÂ¢Ã‚Å“Ã‚â€¦ FastImage carregada para ${business.name}`);
     setImageLoaded(true);
     setImageError(false);
   };
 
   const handleImageError = () => {
-    console.error(`❌ Erro FastImage para ${business.name}`);
+    console.error(`ÃƒÂ¢Ã‚ÂÃ‚Å’ Erro FastImage para ${business.name}`);
     setImageError(true);
     setImageLoaded(false);
   };
@@ -63,12 +63,12 @@ export const BusinessLocationMarker: React.FC<BusinessLocationMarkerProps> = mem
       onPress={onPress}
       title={business.name}
       description={business.description}
-      // CRÍTICO: Para quando renderização estiver completa
+      // CRÃƒÆ’Ã‚ÂTICO: Para quando renderizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o estiver completa
       tracksViewChanges={!isRenderComplete}
     >
       <View style={styles.markerContainer}>
         <View style={styles.markerWrapper}>
-          {/* Por enquanto, vamos usar apenas o marcador padrão com inicial */}
+          {/* Por enquanto, vamos usar apenas o marcador padrÃƒÆ’Ã‚Â£o com inicial */}
           <View style={styles.defaultMarker}>
             <Text style={styles.defaultMarkerText}>
               {business.name.charAt(0).toUpperCase()}

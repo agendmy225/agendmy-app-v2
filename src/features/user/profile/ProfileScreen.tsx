@@ -39,7 +39,7 @@ const ProfileScreen: React.FC = () => {
     }
   };
 
-  // Iniciais do nome do usuário para o avatar
+  // Iniciais do nome do usuÃƒÆ’Ã‚Â¡rio para o avatar
   const getInitials = () => {
     if (!user?.displayName) {
       return 'U';
@@ -65,7 +65,7 @@ const ProfileScreen: React.FC = () => {
             <Text style={styles.avatarText}>{getInitials()}</Text>
           )}
         </View>
-        <Text style={styles.userName}>{user?.displayName || 'Usuário'}</Text>
+        <Text style={styles.userName}>{user?.displayName || 'UsuÃƒÆ’Ã‚Â¡rio'}</Text>
         <Text style={styles.userEmail}>{user?.email || 'email@exemplo.com'}</Text>
       </View>
 
@@ -78,7 +78,7 @@ const ProfileScreen: React.FC = () => {
         >
           <Icon name="edit" size={22} color={colors.text} style={styles.menuIcon} />
           <Text style={styles.menuText}>Editar Perfil</Text>
-          <Text style={styles.menuArrow}>›</Text>
+          <Text style={styles.menuArrow}>ÃƒÂ¢Ã‚â‚¬Ã‚Âº</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -104,7 +104,7 @@ const ProfileScreen: React.FC = () => {
           onPress={() => navigation.navigate('PaymentMethods')}
         >
           <Icon name="credit-card" size={24} color={colors.primary} style={styles.menuIcon} />
-          <Text style={styles.menuText}>Métodos de Pagamento</Text>
+          <Text style={styles.menuText}>MÃƒÆ’Ã‚Â©todos de Pagamento</Text>
           <Icon name="chevron-right" size={24} color={colors.lightText} />
         </TouchableOpacity>
 
@@ -114,7 +114,7 @@ const ProfileScreen: React.FC = () => {
         >
           <Icon name="help-outline" size={22} color={colors.text} style={styles.menuIcon} />
           <Text style={styles.menuText}>Suporte</Text>
-          <Text style={styles.menuArrow}>›</Text>
+          <Text style={styles.menuArrow}>ÃƒÂ¢Ã‚â‚¬Ã‚Âº</Text>
         </TouchableOpacity>
       </View>
 
@@ -124,7 +124,7 @@ const ProfileScreen: React.FC = () => {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>AGENDMY</Text>
-        <Text style={styles.versionText}>Versão 1.0.0</Text>
+        <Text style={styles.versionText}>VersÃƒÆ’Ã‚Â£o 1.0.0</Text>
       </View>
     </ScrollView>
   );
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
-    overflow: 'hidden', // Garante que a imagem não saia do círculo
+    overflow: 'hidden', // Garante que a imagem nÃƒÆ’Ã‚Â£o saia do cÃƒÆ’Ã‚Â­rculo
   },
   avatarImage: {
     width: '100%',
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.lightGray,
   },
   menuIcon: {
-    // fontSize: 20, // Size é controlado pelo componente Icon
+    // fontSize: 20, // Size ÃƒÆ’Ã‚Â© controlado pelo componente Icon
     marginRight: 16,
   },
   menuText: {

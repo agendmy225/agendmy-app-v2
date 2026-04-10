@@ -1,4 +1,4 @@
-﻿// Following React Native Firebase v22 modular API patterns
+ÃƒÂ¯Ã‚Â»Ã‚Â¿// Following React Native Firebase v22 modular API patterns
 // https://rnfirebase.io/migrating-to-v22
 import {
   addDoc,
@@ -15,7 +15,7 @@ import {
   where,
 } from '@react-native-firebase/firestore';
 import { firebaseDb } from '../config/firebase';
-import { getCoordinatesFromAddress } from './maps'; // Adicionado: Importa a função de geocodificação
+import { getCoordinatesFromAddress } from './maps'; // Adicionado: Importa a funÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de geocodificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
 import Config from 'react-native-config';
 
 export interface Business {
@@ -42,7 +42,7 @@ export interface Business {
     address?: string;
     city?: string;
   };
-  category: string; // UMA categoria só, não array
+  category: string; // UMA categoria sÃƒÆ’Ã‚Â³, nÃƒÆ’Ã‚Â£o array
   rating: number;
   reviewCount: number;
   workingHours: {
@@ -91,7 +91,7 @@ export interface CreateBusinessData {
   imageUrl?: string;
   coverImage?: string;
   logo?: string;
-  category: string; // UMA categoria só
+  category: string; // UMA categoria sÃƒÆ’Ã‚Â³
   workingHours: Business['workingHours'];
   policies: Business['policies'];
   notifications: Business['notifications'];
@@ -104,7 +104,7 @@ const COLLECTION_NAME = 'businesses';
 const mapDocumentToBusiness = (documentSnapshot: { id: string; data: () => Record<string, unknown> | undefined; exists: () => boolean }): Business => {
   const data = documentSnapshot.data();
   if (!data) {
-    throw new Error(`Dados não encontrados para o documento ${documentSnapshot.id}`);
+    throw new Error(`Dados nÃƒÆ’Ã‚Â£o encontrados para o documento ${documentSnapshot.id}`);
   }
 
  // CORRIGIDO: normalizar campo logotipo -> logo (Firebase usa nome em portugues)
@@ -113,8 +113,8 @@ const mapDocumentToBusiness = (documentSnapshot: { id: string; data: () => Recor
   }
 
   // CORRIGIDO: normalizar campo localizacao -> location (Firebase usa nome em portugues)
-  if ((data as any).localização && !data.location) {
-    const loc = (data as any).localização as any;
+  if ((data as any).localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o && !data.location) {
+    const loc = (data as any).localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o as any;
     if (loc._latitude !== undefined) {
       data.location = { latitude: loc._latitude, longitude: loc._longitude };
     } else if (loc.latitude !== undefined) {
@@ -228,11 +228,11 @@ export const searchBusinesses = async (
         orderBy('rating', 'desc'),
       );
     } else {
-      // Ordenação padrão quando não há busca por texto ou categoria
+      // OrdenaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o padrÃƒÆ’Ã‚Â£o quando nÃƒÆ’Ã‚Â£o hÃƒÆ’Ã‚Â¡ busca por texto ou categoria
       firestoreQueryBuilder = query(firestoreQueryBuilder, orderBy('rating', 'desc'));
     }
 
-    // Aplicar filtros adicionais (exceto categoria que já foi aplicada no bloco principal)
+    // Aplicar filtros adicionais (exceto categoria que jÃƒÆ’Ã‚Â¡ foi aplicada no bloco principal)
     if (filters?.city) {
       firestoreQueryBuilder = query(firestoreQueryBuilder, where('location.city', '==', filters.city));
     }
@@ -246,8 +246,8 @@ export const searchBusinesses = async (
 
     let businesses = querySnapshot.docs.map(mapDocumentToBusiness);
 
-    // Se não conseguiu encontrar resultados por nome e há um termo de busca,
-    // tenta buscar pela categoria ou descrição no lado cliente
+    // Se nÃƒÆ’Ã‚Â£o conseguiu encontrar resultados por nome e hÃƒÆ’Ã‚Â¡ um termo de busca,
+    // tenta buscar pela categoria ou descriÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o no lado cliente
     if (businesses.length === 0 && searchTermProvided) {
       console.log('Primeira busca sem resultados, tentando busca ampliada...');
 
@@ -264,7 +264,7 @@ export const searchBusinesses = async (
 
       const searchTermLower = searchText.toLowerCase().trim();
 
-      // Filtrar localmente por nome, categoria ou descrição
+      // Filtrar localmente por nome, categoria ou descriÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
       businesses = allBusinesses.filter((business: Business) => {
         const nameMatch = business.name.toLowerCase().includes(searchTermLower);
         const categoryMatch = business.category && business.category.toLowerCase().includes(searchTermLower);
@@ -277,15 +277,15 @@ export const searchBusinesses = async (
             case 'barbearias':
               return business.category === 'barbearias' || business.category === 'barbearia';
             case 'estetica':
-            case 'estética':
+            case 'estÃƒÆ’Ã‚Â©tica':
             case 'esteticas':
-            case 'estéticas':
-              return business.category === 'estetica' || business.category === 'estética';
+            case 'estÃƒÆ’Ã‚Â©ticas':
+              return business.category === 'estetica' || business.category === 'estÃƒÆ’Ã‚Â©tica';
             case 'salao':
-            case 'salão':
+            case 'salÃƒÆ’Ã‚Â£o':
             case 'saloes':
-            case 'salões':
-              return business.category === 'saloes-beleza' || business.category === 'salão-beleza';
+            case 'salÃƒÆ’Ã‚Âµes':
+              return business.category === 'saloes-beleza' || business.category === 'salÃƒÆ’Ã‚Â£o-beleza';
             case 'pet':
             case 'pet shop':
             case 'petshop':
@@ -321,7 +321,7 @@ export const searchBusinesses = async (
   } catch (error) {
     console.error('Erro ao buscar estabelecimentos:', error);
 
-    // Se houve erro na consulta principal e há um termo de busca, tentar uma busca de fallback
+    // Se houve erro na consulta principal e hÃƒÆ’Ã‚Â¡ um termo de busca, tentar uma busca de fallback
     if (searchText.trim().length > 0) {
       try {
         console.log('Tentando busca de fallback devido ao erro...');
@@ -347,11 +347,11 @@ export const searchBusinesses = async (
               case 'barbearias':
                 return business.category === 'barbearias' || business.category === 'barbearia';
               case 'estetica':
-              case 'estética':
-                return business.category === 'estetica' || business.category === 'estética';
+              case 'estÃƒÆ’Ã‚Â©tica':
+                return business.category === 'estetica' || business.category === 'estÃƒÆ’Ã‚Â©tica';
               case 'salao':
-              case 'salão':
-                return business.category === 'saloes-beleza' || business.category === 'salão-beleza';
+              case 'salÃƒÆ’Ã‚Â£o':
+                return business.category === 'saloes-beleza' || business.category === 'salÃƒÆ’Ã‚Â£o-beleza';
               case 'pet':
               case 'pet shop':
               case 'petshop':
@@ -367,7 +367,7 @@ export const searchBusinesses = async (
         return filteredBusinesses.slice(0, 20);
       } catch (fallbackError) {
         console.error('Erro na busca de fallback:', fallbackError);
-        throw new Error('Não foi possível realizar a busca. Tente novamente.');
+        throw new Error('NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel realizar a busca. Tente novamente.');
       }
     }
 
@@ -423,7 +423,7 @@ export const createBusiness = async (data: CreateBusinessData): Promise<Business
     const docRef = await addDoc(businessesCollectionRef, docData);
     const newBusiness = await getBusinessById(docRef.id);
     if (!newBusiness) {
-      throw new Error('Erro ao criar estabelecimento, não foi possível buscar após a criação.');
+      throw new Error('Erro ao criar estabelecimento, nÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel buscar apÃƒÆ’Ã‚Â³s a criaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o.');
     }
     return newBusiness;
   } catch (error) {
@@ -450,7 +450,7 @@ export const updateBusiness = async (id: string, data: Partial<Business>): Promi
     await updateDoc(docRef, updatePayload);
     const updatedBusiness = await getBusinessById(id);
     if (!updatedBusiness) {
-      throw new Error('Estabelecimento não encontrado após atualização');
+      throw new Error('Estabelecimento nÃƒÆ’Ã‚Â£o encontrado apÃƒÆ’Ã‚Â³s atualizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o');
     }
     return updatedBusiness;
   } catch (error) {
@@ -476,7 +476,7 @@ export const updateBusinessRating = async (businessId: string, newRating: number
   try {
     const business: Business | null = await getBusinessById(businessId);
     if (!business) {
-      throw new Error('Estabelecimento não encontrado para atualizar rating');
+      throw new Error('Estabelecimento nÃƒÆ’Ã‚Â£o encontrado para atualizar rating');
     }
     const totalRating = (business.rating || 0) * (business.reviewCount || 0) + newRating;
     const newReviewCount = (business.reviewCount || 0) + 1;
@@ -487,7 +487,7 @@ export const updateBusinessRating = async (businessId: string, newRating: number
     });
   } catch (error) {
 
-    throw new Error('Erro ao atualizar avaliação');
+    throw new Error('Erro ao atualizar avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o');
   }
 };
 
@@ -515,25 +515,25 @@ export const getBusinessesWithPromotions = async (limitNum: number = 10): Promis
 
 export const createQuickBusiness = async (ownerId: string, businessName: string, address: string): Promise<string> => {
   try {
-    // Obter coordenadas do endereço
+    // Obter coordenadas do endereÃƒÆ’Ã‚Â§o
     const coords = await getCoordinatesFromAddress(address, Config.GOOGLE_MAPS_API_KEY || '');
     if (!coords) {
-      throw new Error('Não foi possível obter coordenadas para o endereço fornecido.');
+      throw new Error('NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel obter coordenadas para o endereÃƒÆ’Ã‚Â§o fornecido.');
     }
 
     // Create a business with minimal required data
     const quickBusinessData: CreateBusinessData = {
       ownerId: ownerId,
       name: businessName,
-      description: 'Descrição do negócio a ser preenchida',
-      address: address, // Usa o endereço fornecido
+      description: 'DescriÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o do negÃƒÆ’Ã‚Â³cio a ser preenchida',
+      address: address, // Usa o endereÃƒÆ’Ã‚Â§o fornecido
       phone: 'Telefone a ser preenchido',
       email: 'Email a ser preenchido',
       category: 'outros',
-      location: { // Adiciona o campo de localização
+      location: { // Adiciona o campo de localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
         latitude: coords.latitude,
         longitude: coords.longitude,
-        address: coords.address || address, // Opcional: usa o endereço formatado da geocodificação
+        address: coords.address || address, // Opcional: usa o endereÃƒÆ’Ã‚Â§o formatado da geocodificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
       },
       workingHours: {
         monday: { open: true, start: '09:00', end: '18:00' },
@@ -578,8 +578,8 @@ export const createQuickBusiness = async (ownerId: string, businessName: string,
 
     return businessId;
   } catch (error) {
-    console.error('Erro ao criar negócio:', error); // Log do erro para debug
-    throw new Error('Erro ao criar negócio');
+    console.error('Erro ao criar negÃƒÆ’Ã‚Â³cio:', error); // Log do erro para debug
+    throw new Error('Erro ao criar negÃƒÆ’Ã‚Â³cio');
   }
 };
 
@@ -620,7 +620,7 @@ export const getAllActiveBusinesses = async (limitNum: number = 50): Promise<Bus
 export const getAllBusinessesForOwner = async (limitNum: number = 200): Promise<Business[]> => {
   try {
     const businessesCollectionRef = collection(firebaseDb, 'businesses');
-    // Para proprietários, não filtramos por `active`, apenas ordenamos e limitamos
+    // Para proprietÃƒÆ’Ã‚Â¡rios, nÃƒÆ’Ã‚Â£o filtramos por `active`, apenas ordenamos e limitamos
     const q = query(
       businessesCollectionRef,
       orderBy('createdAt', 'desc'),

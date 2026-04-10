@@ -33,17 +33,17 @@ const SupportScreen: React.FC = () => {
       id: 'booking',
       title: 'Agendamentos',
       icon: 'event',
-      description: 'Problemas com reservas e horários',
+      description: 'Problemas com reservas e horÃƒÆ’Ã‚Â¡rios',
     },
     {
       id: 'payment',
       title: 'Pagamentos',
       icon: 'payment',
-      description: 'Cobranças, reembolsos, cartões',
+      description: 'CobranÃƒÆ’Ã‚Â§as, reembolsos, cartÃƒÆ’Ã‚Âµes',
     },
     {
       id: 'technical',
-      title: 'Problemas técnicos',
+      title: 'Problemas tÃƒÆ’Ã‚Â©cnicos',
       icon: 'build',
       description: 'Erros no app, travamentos',
     },
@@ -51,25 +51,25 @@ const SupportScreen: React.FC = () => {
       id: 'other',
       title: 'Outros assuntos',
       icon: 'help-outline',
-      description: 'Sugestões, reclamações gerais',
+      description: 'SugestÃƒÆ’Ã‚Âµes, reclamaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes gerais',
     },
   ];
 
   const handleSendMessage = async () => {
     if (!selectedTopic) {
-      Alert.alert('Atenção', 'Por favor, selecione um tópico para sua mensagem.');
+      Alert.alert('AtenÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o', 'Por favor, selecione um tÃƒÆ’Ã‚Â³pico para sua mensagem.');
       return;
     }
 
     if (!message.trim()) {
-      Alert.alert('Atenção', 'Por favor, escreva sua mensagem.');
+      Alert.alert('AtenÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o', 'Por favor, escreva sua mensagem.');
       return;
     }
 
     // Enviar por email automaticamente
     const email = 'agendmy@gmail.com';
     const topicTitle = supportTopics.find(t => t.id === selectedTopic)?.title;
-    const subject = topicTitle || 'Solicitação de Suporte - App AGENDMY';
+    const subject = topicTitle || 'SolicitaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de Suporte - App AGENDMY';
     const body = `${message.trim()}`;
 
     // Primeira tentativa: usando mailto
@@ -78,7 +78,7 @@ const SupportScreen: React.FC = () => {
     try {
       await Linking.openURL(mailtoUrl);
       
-      // Mostrar confirmação após tentar abrir o email
+      // Mostrar confirmaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o apÃƒÆ’Ã‚Â³s tentar abrir o email
       Alert.alert(
         'Email Aberto!',
         'O aplicativo de email foi aberto com sua mensagem. Complete o envio no seu aplicativo de email.',
@@ -95,7 +95,7 @@ const SupportScreen: React.FC = () => {
     } catch (error) {
       console.error('Erro ao abrir mailto:', error);
       
-      // Segunda tentativa: usando intent específico para Android
+      // Segunda tentativa: usando intent especÃƒÆ’Ã‚Â­fico para Android
       try {
         const gmailUrl = `googlegmail://co?to=${email}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         await Linking.openURL(gmailUrl);
@@ -118,7 +118,7 @@ const SupportScreen: React.FC = () => {
         
         Alert.alert(
           'Erro ao abrir email',
-          'Não foi possível abrir o aplicativo de e-mail automaticamente.\n\nEnvie manualmente para: agendmy@gmail.com\n\nAssunto: ' + subject + '\n\nMensagem: ' + body,
+          'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel abrir o aplicativo de e-mail automaticamente.\n\nEnvie manualmente para: agendmy@gmail.com\n\nAssunto: ' + subject + '\n\nMensagem: ' + body,
           [
             { text: 'OK' },
           ]
@@ -128,7 +128,7 @@ const SupportScreen: React.FC = () => {
   };
 
   const handleCallSupport = async () => {
-    const phoneNumber = '11999999999'; // Número de suporte
+    const phoneNumber = '11999999999'; // NÃƒÆ’Ã‚Âºmero de suporte
     const telUrl = `tel:${phoneNumber}`;
     
     try {
@@ -136,19 +136,19 @@ const SupportScreen: React.FC = () => {
       if (canOpen) {
         await Linking.openURL(telUrl);
       } else {
-        Alert.alert('Erro', 'Não foi possível abrir o aplicativo de telefone.');
+        Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel abrir o aplicativo de telefone.');
       }
     } catch (error) {
       console.error('Erro ao abrir telefone:', error);
-      Alert.alert('Erro', 'Não foi possível fazer a ligação.');
+      Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel fazer a ligaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o.');
     }
   };
 
   const handleEmailSupport = async () => {
     const email = 'agendmy@gmail.com';
     const topicTitle = selectedTopic ? supportTopics.find(t => t.id === selectedTopic)?.title : null;
-    const subject = topicTitle || 'Solicitação de Suporte - App AGENDMY';
-    const body = message.trim() || 'Mensagem enviada através do app AGENDMY';
+    const subject = topicTitle || 'SolicitaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de Suporte - App AGENDMY';
+    const body = message.trim() || 'Mensagem enviada atravÃƒÆ’Ã‚Â©s do app AGENDMY';
 
     // Primeira tentativa: usando mailto
     const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -158,7 +158,7 @@ const SupportScreen: React.FC = () => {
     } catch (error) {
       console.error('Erro ao abrir mailto:', error);
       
-      // Segunda tentativa: usando intent específico do Gmail
+      // Segunda tentativa: usando intent especÃƒÆ’Ã‚Â­fico do Gmail
       try {
         const gmailUrl = `googlegmail://co?to=${email}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         await Linking.openURL(gmailUrl);
@@ -167,15 +167,15 @@ const SupportScreen: React.FC = () => {
         
         Alert.alert(
           'Erro ao abrir email',
-          'Não foi possível abrir o aplicativo de e-mail automaticamente.\n\nEmail: agendmy@gmail.com'
+          'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel abrir o aplicativo de e-mail automaticamente.\n\nEmail: agendmy@gmail.com'
         );
       }
     }
   };
 
   const handleWhatsAppSupport = async () => {
-    const phoneNumber = '5511999999999'; // Número com código do país
-    const text = 'Olá, preciso de ajuda com o app AGENDMY';
+    const phoneNumber = '5511999999999'; // NÃƒÆ’Ã‚Âºmero com cÃƒÆ’Ã‚Â³digo do paÃƒÆ’Ã‚Â­s
+    const text = 'OlÃƒÆ’Ã‚Â¡, preciso de ajuda com o app AGENDMY';
     const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(text)}`;
     
     try {
@@ -183,11 +183,11 @@ const SupportScreen: React.FC = () => {
       if (canOpen) {
         await Linking.openURL(whatsappUrl);
       } else {
-        Alert.alert('WhatsApp não disponível', 'WhatsApp não está instalado neste dispositivo.');
+        Alert.alert('WhatsApp nÃƒÆ’Ã‚Â£o disponÃƒÆ’Ã‚Â­vel', 'WhatsApp nÃƒÆ’Ã‚Â£o estÃƒÆ’Ã‚Â¡ instalado neste dispositivo.');
       }
     } catch (error) {
       console.error('Erro ao abrir WhatsApp:', error);
-      Alert.alert('Erro', 'Não foi possível abrir o WhatsApp.');
+      Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel abrir o WhatsApp.');
     }
   };
 
@@ -207,7 +207,7 @@ const SupportScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Como podemos ajudar?</Text>
           <Text style={styles.sectionDescription}>
-            Selecione um tópico abaixo ou entre em contato diretamente conosco.
+            Selecione um tÃƒÆ’Ã‚Â³pico abaixo ou entre em contato diretamente conosco.
           </Text>
         </View>
 
@@ -307,11 +307,11 @@ const SupportScreen: React.FC = () => {
                 if (canOpen) {
                   await Linking.openURL(faqUrl);
                 } else {
-                  Alert.alert('Erro', 'Não foi possível abrir o link das perguntas frequentes.');
+                  Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel abrir o link das perguntas frequentes.');
                 }
               } catch (error) {
                 console.error('Erro ao abrir FAQ:', error);
-                Alert.alert('Erro', 'Não foi possível abrir as perguntas frequentes.');
+                Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel abrir as perguntas frequentes.');
               }
             }}
           >

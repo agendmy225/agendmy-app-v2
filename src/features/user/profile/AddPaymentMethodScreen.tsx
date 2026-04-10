@@ -22,7 +22,7 @@ const AddPaymentMethodScreen: React.FC = () => {
         >
           <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Adicionar Cartão</Text>
+        <Text style={styles.headerTitle}>Adicionar CartÃƒÆ’Ã‚Â£o</Text>
       </View>
 
       <View style={styles.content}>
@@ -30,7 +30,7 @@ const AddPaymentMethodScreen: React.FC = () => {
           <Icon name="credit-card" size={64} color={colors.lightText} />
           <Text style={styles.comingSoonTitle}>Em Breve</Text>
           <Text style={styles.comingSoonText}>
-            A funcionalidade de adicionar cartões estará disponível em breve.
+            A funcionalidade de adicionar cartÃƒÆ’Ã‚Âµes estarÃƒÆ’Ã‚Â¡ disponÃƒÆ’Ã‚Â­vel em breve.
           </Text>
         </View>
       </View>

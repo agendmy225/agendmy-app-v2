@@ -65,7 +65,7 @@ interface BusinessSettings {
     transfer: boolean;
     inApp: boolean;
   };
-  defaultCommissionRate: number; // taxa padrão de comissão (0-1)
+  defaultCommissionRate: number; // taxa padrÃƒÆ’Ã‚Â£o de comissÃƒÆ’Ã‚Â£o (0-1)
 }
 
 const BusinessSettingsScreen: React.FC = () => {
@@ -126,16 +126,16 @@ const BusinessSettingsScreen: React.FC = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      // A navegação para a tela de login/welcome será tratada pelo AppNavigator
+      // A navegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para a tela de login/welcome serÃƒÆ’Ã‚Â¡ tratada pelo AppNavigator
     } catch {
-      Alert.alert('Erro', 'Não foi possível fazer logout. Tente novamente.');
+      Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel fazer logout. Tente novamente.');
     }
   };
 
   const fetchBusinessId = React.useCallback(async () => { // Envolver com useCallback
     if (!user) { return; }
 
-    try {      // Buscar o ID do estabelecimento do proprietário atual
+    try {      // Buscar o ID do estabelecimento do proprietÃƒÆ’Ã‚Â¡rio atual
       const businessSnapshot = await getDocs(
         query(
           collection(firestore, 'businesses'),
@@ -148,11 +148,11 @@ const BusinessSettingsScreen: React.FC = () => {
         const businessDoc = businessSnapshot.docs[0];
         setBusinessId(businessDoc.id);
       } else {
-        // Se não encontrar um estabelecimento, criar um novo com dados padrão
+        // Se nÃƒÆ’Ã‚Â£o encontrar um estabelecimento, criar um novo com dados padrÃƒÆ’Ã‚Â£o
         const newBusinessData = {
           ownerId: user.uid,
-          name: `Negócio de ${user.displayName || user.email}`,
-          description: 'Descrição do seu novo estabelecimento.',
+          name: `NegÃƒÆ’Ã‚Â³cio de ${user.displayName || user.email}`,
+          description: 'DescriÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o do seu novo estabelecimento.',
           address: '',
           addressNumber: '',
           addressComplement: '',
@@ -200,26 +200,26 @@ const BusinessSettingsScreen: React.FC = () => {
         setBusinessId(newBusinessRef.id);
       }
     } catch (error) {
-      console.error("Erro ao buscar ou criar negócio:", error);
-      Alert.alert("Erro", "Não foi possível carregar ou criar os dados do seu negócio.");
+      console.error("Erro ao buscar ou criar negÃƒÆ’Ã‚Â³cio:", error);
+      Alert.alert("Erro", "NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel carregar ou criar os dados do seu negÃƒÆ’Ã‚Â³cio.");
       setLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
     fetchBusinessId();
-  }, [fetchBusinessId]); // Adicionar fetchBusinessId como dependência
+  }, [fetchBusinessId]); // Adicionar fetchBusinessId como dependÃƒÆ’Ã‚Âªncia
 
   const loadBusinessSettings = React.useCallback(async () => {
     if (!businessId) { return; }
 
     try {
-      setLoading(true);      // Buscar configurações do estabelecimento
+      setLoading(true);      // Buscar configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes do estabelecimento
       const businessDoc = await getDoc(doc(firestore, 'businesses', businessId));
 
       if (businessDoc.exists()) {
         const businessData = businessDoc.data() as BusinessSettings;        // Garantir que todos os campos existam
-        // Usar uma cópia do estado 'settings' para evitar referências stale no merge
+        // Usar uma cÃƒÆ’Ã‚Â³pia do estado 'settings' para evitar referÃƒÆ’Ã‚Âªncias stale no merge
         setSettings(prevSettings => ({
           id: businessDoc.id,
           name: businessData.name || prevSettings.name,
@@ -253,7 +253,7 @@ const BusinessSettingsScreen: React.FC = () => {
 
       setLoading(false);
     } catch (error) {
-      console.error("Erro ao carregar configurações do negócio:", error);
+      console.error("Erro ao carregar configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes do negÃƒÆ’Ã‚Â³cio:", error);
       setLoading(false);
     }
   }, [businessId]); // Remover settings daqui, pois usamos prevSettings
@@ -269,20 +269,20 @@ const BusinessSettingsScreen: React.FC = () => {
     setRefreshing(true);
     await loadBusinessSettings();
     setRefreshing(false);
-  }, [loadBusinessSettings]); // Adicionar loadBusinessSettings como dependência
+  }, [loadBusinessSettings]); // Adicionar loadBusinessSettings como dependÃƒÆ’Ã‚Âªncia
   const handleSaveSettings = async () => {
     if (!businessId) { return; }
 
     try {
       setSaving(true);      // Validar dados
       if (!settings.name.trim()) {
-        Alert.alert('Erro', 'O nome do estabelecimento é obrigatório.');
+        Alert.alert('Erro', 'O nome do estabelecimento ÃƒÆ’Ã‚Â© obrigatÃƒÆ’Ã‚Â³rio.');
         setSaving(false);
         return;
       }
 
       if (!settings.category || settings.category.trim() === '') {
-        Alert.alert('Erro', 'A categoria do estabelecimento é obrigatória.');
+        Alert.alert('Erro', 'A categoria do estabelecimento ÃƒÆ’Ã‚Â© obrigatÃƒÆ’Ã‚Â³ria.');
         setSaving(false);
         return;
       }
@@ -291,10 +291,10 @@ const BusinessSettingsScreen: React.FC = () => {
       const dataToSave = {
         ...settings,
         updatedAt: serverTimestamp(),
-      };      // Geocodificação automática do endereço
+      };      // GeocodificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o automÃƒÆ’Ã‚Â¡tica do endereÃƒÆ’Ã‚Â§o
       if (settings.address && settings.address.trim()) {
         try {
-          // Concatenar endereço completo para geocodificação
+          // Concatenar endereÃƒÆ’Ã‚Â§o completo para geocodificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
           let fullAddress = settings.address.trim();
           if (settings.addressNumber && settings.addressNumber.trim()) {
             fullAddress += `, ${settings.addressNumber.trim()}`;
@@ -313,29 +313,29 @@ const BusinessSettingsScreen: React.FC = () => {
           } else {
             Alert.alert(
               'Aviso',
-              'Não foi possível validar o endereço. O negócio pode não aparecer corretamente no mapa.',
+              'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel validar o endereÃƒÆ’Ã‚Â§o. O negÃƒÆ’Ã‚Â³cio pode nÃƒÆ’Ã‚Â£o aparecer corretamente no mapa.',
               [{ text: 'OK' }],
             );
           }
         } catch (error) {
-          console.error("Erro ao validar endereço:", error);
+          console.error("Erro ao validar endereÃƒÆ’Ã‚Â§o:", error);
           Alert.alert(
             'Aviso',
-            'Erro ao validar o endereço. O negócio pode não aparecer corretamente no mapa.',
+            'Erro ao validar o endereÃƒÆ’Ã‚Â§o. O negÃƒÆ’Ã‚Â³cio pode nÃƒÆ’Ã‚Â£o aparecer corretamente no mapa.',
             [{ text: 'OK' }],
           );
         }
-      }      // Atualizar configurações no Firestore
+      }      // Atualizar configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes no Firestore
       const businessDocRef = doc(firestore, 'businesses', businessId);
       await updateDoc(businessDocRef, dataToSave);
 
       setHasChanges(false);
-      Alert.alert('Sucesso', 'Configurações salvas com sucesso!');
+      Alert.alert('Sucesso', 'ConfiguraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes salvas com sucesso!');
 
       setSaving(false);
     } catch (error) {
-      console.error("Erro ao salvar configurações:", error);
-      Alert.alert('Erro', 'Ocorreu um erro ao salvar as configurações. Tente novamente.');
+      console.error("Erro ao salvar configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes:", error);
+      Alert.alert('Erro', 'Ocorreu um erro ao salvar as configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes. Tente novamente.');
       setSaving(false);
     }
   };
@@ -378,12 +378,12 @@ const BusinessSettingsScreen: React.FC = () => {
   };
   const handleUploadLogo = async () => {
     if (!businessId) {
-      Alert.alert('Erro', 'ID do negócio não encontrado');
+      Alert.alert('Erro', 'ID do negÃƒÆ’Ã‚Â³cio nÃƒÆ’Ã‚Â£o encontrado');
       return;
     }
 
     if (!user) {
-      Alert.alert('Erro', 'Usuário não autenticado. Faça login novamente.');
+      Alert.alert('Erro', 'UsuÃƒÆ’Ã‚Â¡rio nÃƒÆ’Ã‚Â£o autenticado. FaÃƒÆ’Ã‚Â§a login novamente.');
       return;
     }
 
@@ -400,23 +400,23 @@ const BusinessSettingsScreen: React.FC = () => {
         },
       );
 
-      // Deletar logo anterior se existir e não for placeholder
+      // Deletar logo anterior se existir e nÃƒÆ’Ã‚Â£o for placeholder
       if (settings.logo && !settings.logo.includes('placeholder')) {
         await deleteImageFromFirebase(settings.logo);
       }
 
-      // Atualizar configurações com nova URL
+      // Atualizar configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes com nova URL
       updateSettings('logo', result.storagePath);
 
       Alert.alert('Sucesso', 'Logo atualizado com sucesso!');
     } catch (error) {
       if (error instanceof Error && !error.message.includes('cancelada')) {
         console.error("Erro ao fazer upload do logo:", error);
-        let errorMessage = 'Não foi possível fazer upload do logo.';
-        if (error.message.includes('não autorizado')) {
-          errorMessage = 'Erro de autorização. Verifique as configurações do Firebase Storage.';
-        } else if (error.message.includes('conexão')) {
-          errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        let errorMessage = 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel fazer upload do logo.';
+        if (error.message.includes('nÃƒÆ’Ã‚Â£o autorizado')) {
+          errorMessage = 'Erro de autorizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o. Verifique as configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes do Firebase Storage.';
+        } else if (error.message.includes('conexÃƒÆ’Ã‚Â£o')) {
+          errorMessage = 'Erro de conexÃƒÆ’Ã‚Â£o. Verifique sua internet e tente novamente.';
         }
         Alert.alert('Erro', errorMessage);
       }
@@ -427,12 +427,12 @@ const BusinessSettingsScreen: React.FC = () => {
   };
   const handleUploadCoverImage = async () => {
     if (!businessId) {
-      Alert.alert('Erro', 'ID do negócio não encontrado');
+      Alert.alert('Erro', 'ID do negÃƒÆ’Ã‚Â³cio nÃƒÆ’Ã‚Â£o encontrado');
       return;
     }
 
     if (!user) {
-      Alert.alert('Erro', 'Usuário não autenticado. Faça login novamente.');
+      Alert.alert('Erro', 'UsuÃƒÆ’Ã‚Â¡rio nÃƒÆ’Ã‚Â£o autenticado. FaÃƒÆ’Ã‚Â§a login novamente.');
       return;
     }
 
@@ -449,23 +449,23 @@ const BusinessSettingsScreen: React.FC = () => {
         },
       );
 
-      // Deletar imagem anterior se existir e não for placeholder
+      // Deletar imagem anterior se existir e nÃƒÆ’Ã‚Â£o for placeholder
       if (settings.coverImage && !settings.coverImage.includes('placeholder')) {
         await deleteImageFromFirebase(settings.coverImage);
       }
 
-      // Atualizar configurações com nova URL
+      // Atualizar configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes com nova URL
       updateSettings('coverImage', result.storagePath);
 
       Alert.alert('Sucesso', 'Imagem de capa atualizada com sucesso!');
     } catch (error) {
       if (error instanceof Error && !error.message.includes('cancelada')) {
         console.error("Erro ao fazer upload da imagem de capa:", error);
-        let errorMessage = 'Não foi possível fazer upload da imagem de capa.';
-        if (error.message.includes('não autorizado')) {
-          errorMessage = 'Erro de autorização. Verifique as configurações do Firebase Storage.';
-        } else if (error.message.includes('conexão')) {
-          errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        let errorMessage = 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel fazer upload da imagem de capa.';
+        if (error.message.includes('nÃƒÆ’Ã‚Â£o autorizado')) {
+          errorMessage = 'Erro de autorizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o. Verifique as configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes do Firebase Storage.';
+        } else if (error.message.includes('conexÃƒÆ’Ã‚Â£o')) {
+          errorMessage = 'Erro de conexÃƒÆ’Ã‚Â£o. Verifique sua internet e tente novamente.';
         }
         Alert.alert('Erro', errorMessage);
       }
@@ -493,7 +493,7 @@ const BusinessSettingsScreen: React.FC = () => {
               Alert.alert('Sucesso', 'Logo removido com sucesso!');
             } catch (error) {
               console.error("Erro ao remover logo:", error);
-              Alert.alert('Erro', 'Não foi possível remover o logo.');
+              Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel remover o logo.');
             }
           },
         },
@@ -519,7 +519,7 @@ const BusinessSettingsScreen: React.FC = () => {
               Alert.alert('Sucesso', 'Imagem de capa removida com sucesso!');
             } catch (error) {
               console.error("Erro ao remover imagem de capa:", error);
-              Alert.alert('Erro', 'Não foi possível remover a imagem de capa.');
+              Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel remover a imagem de capa.');
             }
           },
         },
@@ -540,7 +540,7 @@ const BusinessSettingsScreen: React.FC = () => {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Descrição</Text>
+        <Text style={styles.inputLabel}>DescriÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
           value={settings.description}
@@ -561,7 +561,7 @@ const BusinessSettingsScreen: React.FC = () => {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Número</Text>
+        <Text style={styles.inputLabel}>NÃƒÆ’Ã‚Âºmero</Text>
         <TextInput
           style={styles.input}
           value={settings.addressNumber}
@@ -603,7 +603,7 @@ const BusinessSettingsScreen: React.FC = () => {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Logo do Negócio</Text>
+        <Text style={styles.inputLabel}>Logo do NegÃƒÆ’Ã‚Â³cio</Text>
 
         {settings.logo && (
           <View style={styles.imagePreviewContainer}>
@@ -648,7 +648,7 @@ const BusinessSettingsScreen: React.FC = () => {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Imagem de Capa do Negócio</Text>
+        <Text style={styles.inputLabel}>Imagem de Capa do NegÃƒÆ’Ã‚Â³cio</Text>
 
         {settings.coverImage && (
           <View style={styles.imagePreviewContainer}>
@@ -706,7 +706,7 @@ const BusinessSettingsScreen: React.FC = () => {
             ))}
           </Picker>
         </View>
-        <Text style={styles.inputHelper}>Escolha uma categoria que melhor descreve seu negócio</Text>
+        <Text style={styles.inputHelper}>Escolha uma categoria que melhor descreve seu negÃƒÆ’Ã‚Â³cio</Text>
       </View>
     </View>
   );
@@ -714,11 +714,11 @@ const BusinessSettingsScreen: React.FC = () => {
   const renderWorkingHoursSettings = () => {
     const days = [
       { key: 'monday', label: 'Segunda-feira' },
-      { key: 'tuesday', label: 'Terça-feira' },
+      { key: 'tuesday', label: 'TerÃƒÆ’Ã‚Â§a-feira' },
       { key: 'wednesday', label: 'Quarta-feira' },
       { key: 'thursday', label: 'Quinta-feira' },
       { key: 'friday', label: 'Sexta-feira' },
-      { key: 'saturday', label: 'Sábado' },
+      { key: 'saturday', label: 'SÃƒÆ’Ã‚Â¡bado' },
       { key: 'sunday', label: 'Domingo' },
     ];
 
@@ -747,7 +747,7 @@ const BusinessSettingsScreen: React.FC = () => {
                     placeholder="09:00"
                   />
                 </View>
-                <Text style={styles.timeSeparator}>até</Text>
+                <Text style={styles.timeSeparator}>atÃƒÆ’Ã‚Â©</Text>
                 <View style={styles.timeInputContainer}>
                   <Text style={styles.timeLabel}>Fechamento</Text>
                   <TextInput
@@ -780,7 +780,7 @@ const BusinessSettingsScreen: React.FC = () => {
           keyboardType="numeric"
         />
         <Text style={styles.inputHelper}>
-          Tempo mínimo antes do agendamento para cancelamento sem taxa
+          Tempo mÃƒÆ’Ã‚Â­nimo antes do agendamento para cancelamento sem taxa
         </Text>
       </View>
 
@@ -802,7 +802,7 @@ const BusinessSettingsScreen: React.FC = () => {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Taxa de Não Comparecimento (%)</Text>
+        <Text style={styles.inputLabel}>Taxa de NÃƒÆ’Ã‚Â£o Comparecimento (%)</Text>
         <TextInput
           style={styles.input}
           value={(settings.policies.noShowFee * 100).toString()}
@@ -814,7 +814,7 @@ const BusinessSettingsScreen: React.FC = () => {
           keyboardType="numeric"
         />
         <Text style={styles.inputHelper}>
-          Percentual cobrado quando o cliente não comparece
+          Percentual cobrado quando o cliente nÃƒÆ’Ã‚Â£o comparece
         </Text>
       </View>
 
@@ -840,7 +840,7 @@ const BusinessSettingsScreen: React.FC = () => {
   const renderNotificationsSettings = () => (
     <View style={styles.sectionContent}>
       <View style={styles.switchContainer}>
-        <Text style={styles.switchLabel}>Confirmação de Agendamento</Text>
+        <Text style={styles.switchLabel}>ConfirmaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de Agendamento</Text>
         <Switch
           value={settings.notifications.confirmationEnabled}
           onValueChange={(value) => updateNestedSettings('notifications', 'confirmationEnabled', value)}
@@ -849,7 +849,7 @@ const BusinessSettingsScreen: React.FC = () => {
         />
       </View>
       <Text style={styles.switchHelper}>
-        Enviar notificação ao cliente quando um agendamento for confirmado
+        Enviar notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o ao cliente quando um agendamento for confirmado
       </Text>
 
       <View style={styles.switchContainer}>
@@ -893,7 +893,7 @@ const BusinessSettingsScreen: React.FC = () => {
       </View>
 
       <View style={styles.switchContainer}>
-        <Text style={styles.switchLabel}>Cartão de Crédito</Text>
+        <Text style={styles.switchLabel}>CartÃƒÆ’Ã‚Â£o de CrÃƒÆ’Ã‚Â©dito</Text>
         <Switch
           value={settings.paymentMethods.creditCard}
           onValueChange={(value) => updateNestedSettings('paymentMethods', 'creditCard', value)}
@@ -903,7 +903,7 @@ const BusinessSettingsScreen: React.FC = () => {
       </View>
 
       <View style={styles.switchContainer}>
-        <Text style={styles.switchLabel}>Cartão de Débito</Text>
+        <Text style={styles.switchLabel}>CartÃƒÆ’Ã‚Â£o de DÃƒÆ’Ã‚Â©bito</Text>
         <Switch
           value={settings.paymentMethods.debitCard}
           onValueChange={(value) => updateNestedSettings('paymentMethods', 'debitCard', value)}
@@ -923,7 +923,7 @@ const BusinessSettingsScreen: React.FC = () => {
       </View>
 
       <View style={styles.switchContainer}>
-        <Text style={styles.switchLabel}>Transferência Bancária</Text>
+        <Text style={styles.switchLabel}>TransferÃƒÆ’Ã‚Âªncia BancÃƒÆ’Ã‚Â¡ria</Text>
         <Switch
           value={settings.paymentMethods.transfer}
           onValueChange={(value) => updateNestedSettings('paymentMethods', 'transfer', value)}
@@ -945,7 +945,7 @@ const BusinessSettingsScreen: React.FC = () => {
       <View style={styles.divider} />
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Taxa de Comissão Padrão (%)</Text>
+        <Text style={styles.inputLabel}>Taxa de ComissÃƒÆ’Ã‚Â£o PadrÃƒÆ’Ã‚Â£o (%)</Text>
         <TextInput
           style={styles.input}
           value={(settings.defaultCommissionRate * 100).toString()}
@@ -957,7 +957,7 @@ const BusinessSettingsScreen: React.FC = () => {
           keyboardType="numeric"
         />
         <Text style={styles.inputHelper}>
-          Percentual padrão de comissão para profissionais
+          Percentual padrÃƒÆ’Ã‚Â£o de comissÃƒÆ’Ã‚Â£o para profissionais
         </Text>
       </View>
     </View>
@@ -984,7 +984,7 @@ const BusinessSettingsScreen: React.FC = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Carregando configurações...</Text>
+        <Text style={styles.loadingText}>Carregando configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes...</Text>
       </View>
     );
   }
@@ -992,7 +992,7 @@ const BusinessSettingsScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Configurações do Estabelecimento</Text>
+        <Text style={styles.headerTitle}>ConfiguraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes do Estabelecimento</Text>
       </View>
 
       <View style={styles.tabsContainer}>
@@ -1010,7 +1010,7 @@ const BusinessSettingsScreen: React.FC = () => {
             onPress={() => setActiveSection('workingHours')}
           >
             <Text style={[styles.tabText, activeSection === 'workingHours' && styles.activeTabText]}>
-              Horários
+              HorÃƒÆ’Ã‚Â¡rios
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -1018,7 +1018,7 @@ const BusinessSettingsScreen: React.FC = () => {
             onPress={() => setActiveSection('policies')}
           >
             <Text style={[styles.tabText, activeSection === 'policies' && styles.activeTabText]}>
-              Políticas
+              PolÃƒÆ’Ã‚Â­ticas
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -1026,7 +1026,7 @@ const BusinessSettingsScreen: React.FC = () => {
             onPress={() => setActiveSection('notifications')}
           >
             <Text style={[styles.tabText, activeSection === 'notifications' && styles.activeTabText]}>
-              Notificações
+              NotificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -1048,20 +1048,20 @@ const BusinessSettingsScreen: React.FC = () => {
       >
         {renderContent()}
 
-        {/* Botão de Logout */}
+        {/* BotÃƒÆ’Ã‚Â£o de Logout */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
           <Text style={styles.logoutButtonText}>Sair da Conta</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      {hasChanges && !saving && ( // Mostrar botão Salvar apenas se houver mudanças e não estiver salvando
+      {hasChanges && !saving && ( // Mostrar botÃƒÆ’Ã‚Â£o Salvar apenas se houver mudanÃƒÆ’Ã‚Â§as e nÃƒÆ’Ã‚Â£o estiver salvando
         <View style={styles.footer}>
           <TouchableOpacity
             style={styles.saveButton}
             onPress={handleSaveSettings}
             disabled={saving}
           >
-            <Text style={styles.saveButtonText}>Salvar Alterações</Text>
+            <Text style={styles.saveButtonText}>Salvar AlteraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes</Text>
           </TouchableOpacity>
         </View>
       )}

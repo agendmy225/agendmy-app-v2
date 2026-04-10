@@ -1,4 +1,4 @@
-﻿// OwnerHomeScreen.tsx - Corrigido
+ÃƒÂ¯Ã‚Â»Ã‚Â¿// OwnerHomeScreen.tsx - Corrigido
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -486,7 +486,7 @@ const OwnerHomeScreen: React.FC = () => {
                   style={{ flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: 'center', backgroundColor: filterMinRating === r ? colors.primary : colors.lightGray }}
                 >
                   <Text style={{ fontSize: 13, color: filterMinRating === r ? colors.white : colors.text, fontWeight: filterMinRating === r ? '600' : '400' }}>
-                    {r === 0 ? 'Todas' : `${r}+â˜…`}
+                    {r === 0 ? 'Todas' : `${r}+ÃƒÆ’Ã‚Â¢Ãƒâ€¹Ã‚Å“ÃƒÂ¢Ã‚â‚¬Ã‚Â¦`}
                   </Text>
                 </TouchableOpacity>
               ))}

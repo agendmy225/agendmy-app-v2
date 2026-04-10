@@ -43,15 +43,15 @@ const RegisterScreen: React.FC = () => {
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
+      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatÃƒÆ’Ã‚Â³rios.');
       return;
     }
     if (!passwordValidation.isValid) {
-      Alert.alert('Senha Inválida', passwordValidation.errors.join('\n'));
+      Alert.alert('Senha InvÃƒÆ’Ã‚Â¡lida', passwordValidation.errors.join('\n'));
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert('Erro', 'As senhas não coincidem.');
+      Alert.alert('Erro', 'As senhas nÃƒÆ’Ã‚Â£o coincidem.');
       return;
     }
     if (userType === 'owner' && !establishmentName) {
@@ -64,7 +64,7 @@ const RegisterScreen: React.FC = () => {
       await signUp(name, email, password, userType as 'client' | 'owner', establishmentName);
     } catch (error) {
       const err = error as Error;
-      Alert.alert('Erro no Cadastro', err.message || 'Não foi possível criar a conta.');
+      Alert.alert('Erro no Cadastro', err.message || 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel criar a conta.');
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +85,7 @@ const RegisterScreen: React.FC = () => {
               Agend<Text style={styles.logoAccent}>My</Text>
             </Text>
             <Text style={styles.clientTypeText}>
-              {userType === 'client' ? 'CLIENTE' : 'PROPRIETÁRIO'}
+              {userType === 'client' ? 'CLIENTE' : 'PROPRIETÃƒÆ’Ã‚ÂRIO'}
             </Text>
             <Text style={styles.welcomeText}>CADASTRO</Text>
             <Text style={styles.registerText}>Cadastre-se agora!</Text>
@@ -207,7 +207,7 @@ const RegisterScreen: React.FC = () => {
               style={styles.loginButton}
               onPress={() => navigation.navigate('Login', { userType })}
             >
-              <Text style={styles.loginButtonText}>Já está cadastrado? Faça login aqui.</Text>
+              <Text style={styles.loginButtonText}>JÃƒÆ’Ã‚Â¡ estÃƒÆ’Ã‚Â¡ cadastrado? FaÃƒÆ’Ã‚Â§a login aqui.</Text>
             </TouchableOpacity>
           </View>
 

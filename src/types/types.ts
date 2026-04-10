@@ -1,6 +1,6 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 
-// Tipos para a navegação do aplicativo
+// Tipos para a navegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o do aplicativo
 
 export type UserType = 'client' | 'owner';
 
@@ -21,14 +21,14 @@ export type ClientTabParamList = {
 };
 
 export type AppStackParamList = {
-  // Telas de autenticação
+  // Telas de autenticaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
   Welcome: undefined;
   Login: { userType: UserType };
   Register: { userType: UserType };
   ForgotPassword: undefined;
   EmailVerification: undefined;
 
-  // Navegação principal
+  // NavegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o principal
   ClientTabs: NavigatorScreenParams<ClientTabParamList>;
   OwnerTabs: NavigatorScreenParams<OwnerTabParamList>;
 
@@ -60,7 +60,7 @@ export type AppStackParamList = {
     professionalId: string;
     date?: string;
     time?: string;
-    sessions?: { date: string; time: string }[]; // Para pacotes com múltiplas sessões
+    sessions?: { date: string; time: string }[]; // Para pacotes com mÃƒÆ’Ã‚Âºltiplas sessÃƒÆ’Ã‚Âµes
   };
   Review: {
     businessId: string;
@@ -68,27 +68,27 @@ export type AppStackParamList = {
     serviceId: string | null; // Allow null for general business reviews
     professionalId?: string;
     professionalName?: string;
-    appointmentId?: string; // Tornar opcional para permitir avaliações gerais
+    appointmentId?: string; // Tornar opcional para permitir avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes gerais
   };
   Favorites: undefined; // Adicionar tela de Favoritos
-  EditProfile: undefined; // Adicionar tela de Edição de Perfil
-  PaymentMethods: undefined; // Tela de métodos de pagamento
-  AddPaymentMethod: undefined; // Tela para adicionar cartão
-  EditPaymentMethod: { paymentMethodId: string }; // Tela para editar cartão
+  EditProfile: undefined; // Adicionar tela de EdiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de Perfil
+  PaymentMethods: undefined; // Tela de mÃƒÆ’Ã‚Â©todos de pagamento
+  AddPaymentMethod: undefined; // Tela para adicionar cartÃƒÆ’Ã‚Â£o
+  EditPaymentMethod: { paymentMethodId: string }; // Tela para editar cartÃƒÆ’Ã‚Â£o
   Support: undefined; // Tela de suporte
   ChatList: undefined; // Tela de lista de conversas
 
-  // Telas do proprietário
-  BusinessManagement: undefined; // Genérico, pode ser usado ou removido se não for o caso
-  ServiceManagement: undefined; // Já existe, acessado via Hub
-  AppointmentManagement: undefined; // Já existe, é uma aba e também pode ser acessado via Stack se necessário
-  DashboardScreen: undefined; // Adicionando para navegação via Hub
-  ProfessionalManagementScreen: undefined; // Adicionando para navegação via Hub
+  // Telas do proprietÃƒÆ’Ã‚Â¡rio
+  BusinessManagement: undefined; // GenÃƒÆ’Ã‚Â©rico, pode ser usado ou removido se nÃƒÆ’Ã‚Â£o for o caso
+  ServiceManagement: undefined; // JÃƒÆ’Ã‚Â¡ existe, acessado via Hub
+  AppointmentManagement: undefined; // JÃƒÆ’Ã‚Â¡ existe, ÃƒÆ’Ã‚Â© uma aba e tambÃƒÆ’Ã‚Â©m pode ser acessado via Stack se necessÃƒÆ’Ã‚Â¡rio
+  DashboardScreen: undefined; // Adicionando para navegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o via Hub
+  ProfessionalManagementScreen: undefined; // Adicionando para navegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o via Hub
   ProfessionalAppointmentsScreen: undefined; // Nova tela para gerenciar agendamentos por profissional
-  FinancialReportsScreen: undefined; // Adicionando para navegação via Hub
-  ReviewsManagementScreen: undefined; // Adicionando para navegação via Hub
-  BusinessSettingsScreen: undefined; // Adicionando para navegação via Hub
-  ChatManagementScreen: undefined; // Adicionando para navegação via Hub
+  FinancialReportsScreen: undefined; // Adicionando para navegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o via Hub
+  ReviewsManagementScreen: undefined; // Adicionando para navegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o via Hub
+  BusinessSettingsScreen: undefined; // Adicionando para navegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o via Hub
+  ChatManagementScreen: undefined; // Adicionando para navegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o via Hub
   PromotionManagement: undefined;
   BusinessHub: undefined; // A tela do Hub em si, caso precise ser navegada como Stack screen
 
@@ -97,18 +97,18 @@ export type AppStackParamList = {
     appointmentId: string;
     amount: number; // Valor em unidade principal (ex: 10.50 para R$10,50)
     currency?: string; // ex: 'BRL', 'USD'
-    description?: string; // Descrição do que está sendo pago
-    businessName?: string; // Nome do estabelecimento para exibição
+    description?: string; // DescriÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o do que estÃƒÆ’Ã‚Â¡ sendo pago
+    businessName?: string; // Nome do estabelecimento para exibiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
   };
 };
 
-// Tipos para navegação das abas do proprietário
+// Tipos para navegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o das abas do proprietÃƒÆ’Ã‚Â¡rio
 export type OwnerTabParamList = {
-  OwnerHome: undefined; // Nova aba inicial idêntica ao CLIENT
+  OwnerHome: undefined; // Nova aba inicial idÃƒÆ’Ã‚Âªntica ao CLIENT
   AppointmentManagement: undefined; // Mantida
   BusinessHub: undefined; // Nova aba agregadora
-  // As telas abaixo agora são acessadas via Stack a partir do BusinessHub,
-  // então elas devem estar no AppStackParamList se forem navegadas diretamente
+  // As telas abaixo agora sÃƒÆ’Ã‚Â£o acessadas via Stack a partir do BusinessHub,
+  // entÃƒÆ’Ã‚Â£o elas devem estar no AppStackParamList se forem navegadas diretamente
   // ou serem parte de um Stack aninhado dentro do BusinessHub.
   // Dashboard: undefined;
   // ServiceManagement: undefined;
@@ -118,7 +118,7 @@ export type OwnerTabParamList = {
   // BusinessSettings: undefined;
 };
 ;
-  category: string; // UMA categoria só, não array
+  category: string; // UMA categoria sÃƒÆ’Ã‚Â³, nÃƒÆ’Ã‚Â£o array
   rating: number;
   reviewCount: number;
   workingHours: {

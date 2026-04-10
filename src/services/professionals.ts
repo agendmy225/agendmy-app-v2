@@ -69,7 +69,7 @@ export const getProfessionalsByBusiness = async (businessId: string): Promise<Pr
   }
 };
 
-// Buscar um profissional específico
+// Buscar um profissional especÃƒÆ’Ã‚Â­fico
 export const getProfessionalById = async (professionalId: string): Promise<Professional | null> => {
   try {
     const professionalDocRef = doc(firebaseDb, 'professionals', professionalId);
@@ -149,7 +149,7 @@ export const deleteProfessional = async (professionalId: string): Promise<void> 
   }
 };
 
-// Atualizar serviços de um profissional
+// Atualizar serviÃƒÆ’Ã‚Â§os de um profissional
 export const updateProfessionalServices = async (professionalId: string, serviceIds: string[]): Promise<void> => {
   try {
     const professionalDocRef = doc(firebaseDb, 'professionals', professionalId);
@@ -178,10 +178,10 @@ export const updateProfessionalSchedule = async (
   }
 };
 
-// Calcular e atualizar a média de avaliações de um profissional
+// Calcular e atualizar a mÃƒÆ’Ã‚Â©dia de avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de um profissional
 export const updateProfessionalRating = async (professionalId: string): Promise<number> => {
   try {
-    // Buscar todas as avaliações deste profissional
+    // Buscar todas as avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes deste profissional
     const reviewsRef = collection(firebaseDb, 'reviews');
     const q = query(reviewsRef, where('professionalId', '==', professionalId));
     const reviewsSnapshot = await getDocs(q);
@@ -198,7 +198,7 @@ export const updateProfessionalRating = async (professionalId: string): Promise<
 
     const averageRating = count > 0 ? totalRating / count : 0;
 
-    // Atualizar a média no documento do profissional
+    // Atualizar a mÃƒÆ’Ã‚Â©dia no documento do profissional
     const professionalDocRef = doc(firebaseDb, 'professionals', professionalId);
     await updateDoc(professionalDocRef, {
       rating: averageRating,

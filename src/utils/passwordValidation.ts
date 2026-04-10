@@ -8,32 +8,32 @@ export const validatePassword = (password: string): PasswordValidation => {
     const errors: string[] = [];
     let strength: 'weak' | 'medium' | 'strong' = 'weak';
 
-    // Verificar comprimento mínimo
+    // Verificar comprimento mÃƒÆ’Ã‚Â­nimo
     if (password.length < 8) {
         errors.push('A senha deve ter pelo menos 8 caracteres');
     }
 
-    // Verificar se contém pelo menos uma letra minúscula
+    // Verificar se contÃƒÆ’Ã‚Â©m pelo menos uma letra minÃƒÆ’Ã‚Âºscula
     if (!/[a-z]/.test(password)) {
-        errors.push('A senha deve conter pelo menos uma letra minúscula');
+        errors.push('A senha deve conter pelo menos uma letra minÃƒÆ’Ã‚Âºscula');
     }
 
-    // Verificar se contém pelo menos uma letra maiúscula
+    // Verificar se contÃƒÆ’Ã‚Â©m pelo menos uma letra maiÃƒÆ’Ã‚Âºscula
     if (!/[A-Z]/.test(password)) {
-        errors.push('A senha deve conter pelo menos uma letra maiúscula');
+        errors.push('A senha deve conter pelo menos uma letra maiÃƒÆ’Ã‚Âºscula');
     }
 
-    // Verificar se contém pelo menos um número
+    // Verificar se contÃƒÆ’Ã‚Â©m pelo menos um nÃƒÆ’Ã‚Âºmero
     if (!/\d/.test(password)) {
-        errors.push('A senha deve conter pelo menos um número');
+        errors.push('A senha deve conter pelo menos um nÃƒÆ’Ã‚Âºmero');
     }
 
-    // Verificar se contém pelo menos um caractere especial
+    // Verificar se contÃƒÆ’Ã‚Â©m pelo menos um caractere especial
     if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
         errors.push('A senha deve conter pelo menos um caractere especial');
     }
 
-    // Determinar força da senha
+    // Determinar forÃƒÆ’Ã‚Â§a da senha
     const hasLower = /[a-z]/.test(password);
     const hasUpper = /[A-Z]/.test(password);
     const hasNumber = /\d/.test(password);
@@ -75,7 +75,7 @@ export const getPasswordStrengthText = (strength: 'weak' | 'medium' | 'strong'):
         case 'weak':
             return 'Fraca';
         case 'medium':
-            return 'Média';
+            return 'MÃƒÆ’Ã‚Â©dia';
         case 'strong':
             return 'Forte';
         default:

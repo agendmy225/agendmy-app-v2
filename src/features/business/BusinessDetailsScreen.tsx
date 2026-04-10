@@ -1,26 +1,21 @@
-﻿import { RouteProp, useFocusEffect, useNavigation, useRoute, CompositeNavigationProp } from '@react-navigation/native'; // Import useFocusEffect
+ÃƒÂ¯Ã‚Â»Ã‚Â¿import { RouteProp, useFocusEffect, useNavigation, useRoute, CompositeNavigationProp } from '@react-navigation/native'; // Import useFocusEffect
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BusinessMarker } from './components/BusinessMarker';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Image,
-  ImageBackground,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity, Linking,
-  View,
-} from 'react-native';
+
+    $items = $args[0].Groups[1].Value
+    if ($items -notmatch 'Linking') {
+        $items = $items.TrimEnd() + "`n  Linking,"
+    }
+    "import {$items} from 'react-native';"
+
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ProfessionalPortfolioModal from '../professional/ProfessionalPortfolioModal';
 import ServiceDetailsModal from '../service/ServiceDetailsModal';
 import TimeSlotsModal from '../appointment/components/TimeSlotsModal';
 import { colors } from '../../constants/colors';
-import { useAuth } from '../auth/context/AuthContext'; // J├í importado
+import { useAuth } from '../auth/context/AuthContext'; // JÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡ importado
 import { HomeStackParamList, AppStackParamList } from '../../types/types';
 import { hasCompletedAppointmentWithBusiness } from '../../services/appointments';
 import { Business, getBusinessById } from '../../services/businesses';
@@ -47,7 +42,7 @@ const BusinessDetailsScreen: React.FC = () => {
   const navigation = useNavigation<BusinessDetailsScreenNavigationProp>();
   const route = useRoute<BusinessDetailsScreenRouteProp>();
   const { businessId } = route.params;
-  const { favorites, toggleFavorite, user } = useAuth(); // Usar user ao inv├®s de currentUser
+  const { favorites, toggleFavorite, user } = useAuth(); // Usar user ao invÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â©s de currentUser
 
   const [business, setBusiness] = useState<Business | null>(null);
   const [services, setServices] = useState<Service[]>([]);
@@ -64,7 +59,7 @@ const BusinessDetailsScreen: React.FC = () => {
   const [isBookingAvailable, setIsBookingAvailable] = useState(false);
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
   const [isPortfolioModalVisible, setIsPortfolioModalVisible] = useState(false);
-  const [mapKey, setMapKey] = useState(0); // For├ºa re-render do mapa
+  const [mapKey, setMapKey] = useState(0); // ForÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§a re-render do mapa
 
   // Hook para carregar imagem de capa do Firebase Storage
   const { imageSource: coverImageSource, loading: coverImageLoading } = useCachedFirebaseImage(business?.coverImage);
@@ -72,11 +67,11 @@ const BusinessDetailsScreen: React.FC = () => {
   const fullAddress = useMemo(() => {
     if (!business?.address) return '';
 
-    // Verificar se o n├║mero j├í est├í inclu├¡do no endere├ºo principal
+    // Verificar se o nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Âºmero jÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡ estÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡ incluÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­do no endereÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o principal
     const address = business.address || '';
     const number = business.addressNumber || '';
 
-    // Se o n├║mero j├í estiver no endere├ºo, n├úo duplicar
+    // Se o nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Âºmero jÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡ estiver no endereÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o, nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o duplicar
     const addressWithNumber = number && !address.includes(number)
       ? `${address}, ${number}`
       : address;
@@ -92,11 +87,11 @@ const BusinessDetailsScreen: React.FC = () => {
   // useEffect(() => { // Change this to useFocusEffect
   useFocusEffect(
     useCallback(() => {
-      // Adicionado um "guarda" para garantir que o usu├írio exista antes de carregar os dados.
-      // Isso previne uma condi├º├úo de corrida onde a tela tenta carregar dados
-      // antes que o contexto de autentica├º├úo esteja totalmente inicializado.
+      // Adicionado um "guarda" para garantir que o usuÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡rio exista antes de carregar os dados.
+      // Isso previne uma condiÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o de corrida onde a tela tenta carregar dados
+      // antes que o contexto de autenticaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o esteja totalmente inicializado.
       if (!user) {
-        return; // Sai se o usu├írio ainda n├úo estiver carregado.
+        return; // Sai se o usuÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡rio ainda nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o estiver carregado.
       }
 
       const loadData = async () => {
@@ -117,14 +112,14 @@ const BusinessDetailsScreen: React.FC = () => {
           ]);
 
           if (businessData) {
-            console.log('BusinessDetailsScreen: Dados do neg├│cio carregados com sucesso:', businessData.name);
+            console.log('BusinessDetailsScreen: Dados do negÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â³cio carregados com sucesso:', businessData.name);
             console.log('BusinessDetailsScreen: Reviews carregadas:', reviewsData.length);
 
-            // Recalcular a contagem de avalia├º├Áes para este neg├│cio
+            // Recalcular a contagem de avaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Âµes para este negÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â³cio
             try {
               await updateBusinessRating(businessId);
             } catch (error) {
-              console.error('Erro ao recalcular rating do neg├│cio:', error);
+              console.error('Erro ao recalcular rating do negÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â³cio:', error);
               // Silently handle the error - rating recalculation is not critical
             }
 
@@ -136,7 +131,7 @@ const BusinessDetailsScreen: React.FC = () => {
 
             console.log('BusinessDetailsScreen: Pode avaliar?', hasCompletedAppointment);
 
-            // For├ºa re-render do mapa quando business muda
+            // ForÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§a re-render do mapa quando business muda
             setMapKey(prev => prev + 1);
 
             // Verificar disponibilidade dos profissionais
@@ -145,25 +140,25 @@ const BusinessDetailsScreen: React.FC = () => {
                 const availabilityMap = await checkMultipleProfessionalsAvailability(
                   professionalsData,
                   businessData,
-                  7, // Verificar pr├│ximos 7 dias
+                  7, // Verificar prÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â³ximos 7 dias
                 );
                 setProfessionalAvailability(availabilityMap);
               } catch {
-                // Em caso de erro, marcar todos como dispon├¡veis para n├úo bloquear funcionalidade
+                // Em caso de erro, marcar todos como disponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­veis para nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o bloquear funcionalidade
                 const fallbackMap = new Map<string, boolean>();
                 professionalsData.forEach(prof => fallbackMap.set(prof.id, true));
                 setProfessionalAvailability(fallbackMap);
               }
             }
 
-            // Definir localiza├º├úo (preferir dados da cole├º├úo businessLocations)
-            // A localiza├º├úo agora ├® gerenciada diretamente pela propriedade business.location
+            // Definir localizaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o (preferir dados da coleÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o businessLocations)
+            // A localizaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o agora ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â© gerenciada diretamente pela propriedade business.location
 
             setIsBookingAvailable(businessData ? isBusinessOpen(businessData) : false);
           } else {
             Alert.alert(
               'Erro',
-              'N├úo foi poss├¡vel carregar os dados do estabelecimento.',
+              'NÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o foi possÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel carregar os dados do estabelecimento.',
               [{ text: 'OK', onPress: () => navigation.goBack() }]
             );
           }
@@ -184,7 +179,7 @@ const BusinessDetailsScreen: React.FC = () => {
         // Optional: cleanup function if needed when screen goes out of focus
         // console.log('BusinessDetailsScreen unfocused');
       };
-    }, [businessId, navigation, user]), // Adicionado `user` ├ás depend├¬ncias
+    }, [businessId, navigation, user]), // Adicionado `user` ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â s dependÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Âªncias
   );
 
   useEffect(() => {
@@ -205,9 +200,9 @@ const BusinessDetailsScreen: React.FC = () => {
     if (!business) {
       return;
     }
-    // Os campos necess├írios para toggleFavorite no AuthContext s├úo:
+    // Os campos necessÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡rios para toggleFavorite no AuthContext sÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o:
     // id, name, address, rating, imageUrl, coverImage
-    // O objeto 'business' j├í deve conter esses campos.
+    // O objeto 'business' jÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡ deve conter esses campos.
     try {
       await toggleFavorite({
         id: business.id, name: business.name,
@@ -216,7 +211,7 @@ const BusinessDetailsScreen: React.FC = () => {
         imageUrl: business.imageUrl,
         coverImage: business.coverImage,
       });
-      // O estado local isFavorite ser├í atualizado pelo useEffect acima quando 'favorites' mudar no contexto.
+      // O estado local isFavorite serÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡ atualizado pelo useEffect acima quando 'favorites' mudar no contexto.
     } catch {
       // Erro ao adicionar/remover favorito - ignora silenciosamente
     }
@@ -250,21 +245,21 @@ const BusinessDetailsScreen: React.FC = () => {
   };
 
   const handleBookNow = () => {
-    // Se houver apenas um servi├ºo, abre a sele├º├úo de profissional diretamente
+    // Se houver apenas um serviÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o, abre a seleÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o de profissional diretamente
     if (filteredServices.length === 1) {
       handleServiceSelect(filteredServices[0]);
       return;
     }
 
-    // Se houver m├║ltiplos servi├ºos, mostra um alerta para o usu├írio escolher
+    // Se houver mÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Âºltiplos serviÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§os, mostra um alerta para o usuÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡rio escolher
     const serviceOptions = filteredServices.map((service) => ({
       text: service.name,
       onPress: () => handleServiceSelect(service),
     }));
 
     Alert.alert(
-      'Escolher Servi├ºo',
-      'Selecione o servi├ºo que deseja agendar:',
+      'Escolher ServiÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o',
+      'Selecione o serviÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o que deseja agendar:',
       [
         ...serviceOptions,
         { text: 'Cancelar', style: 'cancel' },
@@ -293,7 +288,7 @@ const BusinessDetailsScreen: React.FC = () => {
   const handleSendMessage = async () => {
     if (business && user && user.userType === 'client') {
       try {
-        // Criar ou obter o chat entre cliente e propriet├írio do estabelecimento
+        // Criar ou obter o chat entre cliente e proprietÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡rio do estabelecimento
         const chatId = await createOrGetChat(user.uid, business.ownerId, business.id, business.name);
 
         navigation.navigate('Chat', {
@@ -306,7 +301,7 @@ const BusinessDetailsScreen: React.FC = () => {
       } catch {
         Alert.alert(
           'Erro',
-          'N├úo foi poss├¡vel iniciar a conversa. Tente novamente.',
+          'NÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o foi possÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel iniciar a conversa. Tente novamente.',
           [{ text: 'OK' }],
         );
       }
@@ -354,7 +349,7 @@ const BusinessDetailsScreen: React.FC = () => {
             styles.ratingIcon,
             !isAvailable && styles.professionalTextDisabled,
           ]}>
-            Ô¡É
+            ÃƒÆ’Ã‚Â¢Ãƒâ€šÃ‚Â­Ãƒâ€šÃ‚Â
           </Text>
           <Text style={[
             styles.ratingText,
@@ -370,7 +365,7 @@ const BusinessDetailsScreen: React.FC = () => {
         )}
         {!isAvailable && (
           <View style={styles.unavailableOverlay}>
-            <Text style={styles.unavailableText}>Indispon├¡vel</Text>
+            <Text style={styles.unavailableText}>IndisponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -379,7 +374,7 @@ const BusinessDetailsScreen: React.FC = () => {
 
   const formatReviewDate = (date: any) => {
     try {
-      if (!date) return 'Data n├úo dispon├¡vel';
+      if (!date) return 'Data nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o disponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel';
 
       // Se for um Timestamp do Firebase
       if (date.seconds) {
@@ -396,10 +391,10 @@ const BusinessDetailsScreen: React.FC = () => {
         return new Date(date).toLocaleDateString('pt-BR');
       }
 
-      return 'Data n├úo dispon├¡vel';
+      return 'Data nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o disponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel';
     } catch (error) {
-      console.error('Erro ao formatar data da avalia├º├úo:', error);
-      return 'Data n├úo dispon├¡vel';
+      console.error('Erro ao formatar data da avaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o:', error);
+      return 'Data nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o disponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel';
     }
   };
 
@@ -436,7 +431,7 @@ const BusinessDetailsScreen: React.FC = () => {
       ) : business ? (
         <>
           <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Header com imagem e bot├Áes */}
+            {/* Header com imagem e botÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Âµes */}
             <View style={styles.headerContainer}>
               <ImageBackground
                 source={{
@@ -461,22 +456,22 @@ const BusinessDetailsScreen: React.FC = () => {
                 </View>
               </ImageBackground>
             </View>
-            {/* Informa├º├Áes do neg├│cio */}
+            {/* InformaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Âµes do negÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â³cio */}
             <View style={styles.businessInfoContainer}>
-              <Text style={styles.businessName}>{business?.name || 'Nome n├úo dispon├¡vel'}</Text>
+              <Text style={styles.businessName}>{business?.name || 'Nome nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o disponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel'}</Text>
               <View style={styles.ratingRow}>
                 <Icon name="star" size={16} color={colors.primary} style={styles.ratingIcon} />
                 <Text style={styles.ratingValue}>{business.rating?.toFixed(1) || 'N/A'}</Text>
-                <Text style={styles.reviewCount}>({business.reviewCount || 0} avalia├º├Áes)</Text>
+                <Text style={styles.reviewCount}>({business.reviewCount || 0} avaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Âµes)</Text>
               </View>
               <View style={styles.addressRow}>
                 <Icon name="location-on" size={16} color={colors.text} style={styles.addressIcon} />
-                <Text style={styles.addressText} numberOfLines={1}>{fullAddress || 'Endere├ºo n├úo dispon├¡vel'}</Text>
+                <Text style={styles.addressText} numberOfLines={1}>{fullAddress || 'EndereÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o disponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel'}</Text>
               </View>
               <View style={styles.hoursRow}>
                 <Icon name="schedule" size={16} color={colors.text} style={styles.hoursIcon} />
-                {/* L├│gica para exibir hor├írio de funcionamento */}
-                <Text style={styles.hoursText}>Aberto ┬À {business.workingHours?.monday?.start || '09:00'} - {business.workingHours?.monday?.end || '18:00'}</Text>
+                {/* LÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â³gica para exibir horÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡rio de funcionamento */}
+                <Text style={styles.hoursText}>Aberto ÃƒÆ’Ã‚â€šÃƒâ€šÃ‚Â· {business.workingHours?.monday?.start || '09:00'} - {business.workingHours?.monday?.end || '18:00'}</Text>
               </View>
               <TouchableOpacity style={styles.seeAllPhotosButton}>
                 <Text style={styles.seeAllPhotosText}>Ver todas as fotos</Text>
@@ -488,18 +483,18 @@ const BusinessDetailsScreen: React.FC = () => {
               <Text style={styles.description}>{business.description}</Text>
             </View>
 
-            {/* Se├º├úo de Contatos */}
+            {/* SeÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o de Contatos */}
             <View style={styles.contactContainer}>
               <Text style={styles.sectionTitle}>Contato</Text>
               <View style={styles.contactRow}>
                 <Icon name="phone" size={16} color={colors.text} style={styles.contactIcon} />
-                <Text style={styles.contactText}>{business.phone || 'Telefone n├úo informado'}</Text>
+                <Text style={styles.contactText}>{business.phone || 'Telefone nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o informado'}</Text>
               </View>
               <View style={styles.contactRow}>
                 <Icon name="email" size={16} color={colors.text} style={styles.contactIcon} />
-                <Text style={styles.contactText}>{business.email || 'Email n├úo informado'}</Text>
+                <Text style={styles.contactText}>{business.email || 'Email nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o informado'}</Text>
               </View>
-              {/* Bot├úo de mensagem apenas para clientes */}
+              {/* BotÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o de mensagem apenas para clientes */}
               {user?.userType === 'client' && (
                 <TouchableOpacity style={styles.messageButton} onPress={handleSendMessage}>
                   <Icon name="chat" size={18} color={colors.white} style={styles.messageButtonIcon} />
@@ -508,7 +503,7 @@ const BusinessDetailsScreen: React.FC = () => {
               )}
             </View>
 
-            {/* Categorias de servi├ºos */}
+            {/* Categorias de serviÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§os */}
             <View style={styles.categoriesContainer}>
               <ScrollView
                 horizontal
@@ -537,9 +532,9 @@ const BusinessDetailsScreen: React.FC = () => {
               </ScrollView>
             </View>
 
-            {/* Lista de servi├ºos */}
+            {/* Lista de serviÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§os */}
             <View style={styles.servicesContainer}>
-              <Text style={styles.sectionTitle}>Servi├ºos</Text>
+              <Text style={styles.sectionTitle}>ServiÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§os</Text>
               {filteredServices.length > 0 ? (
                 filteredServices.map((service) => (
                   <View key={service.id} style={styles.serviceCard}>
@@ -547,7 +542,7 @@ const BusinessDetailsScreen: React.FC = () => {
                       <Text style={styles.serviceName}>{service.name}</Text>
                       <Text style={styles.serviceDescription}>{service.description}</Text>
                       <View style={styles.serviceDetails}>
-                        <Text style={styles.serviceDuration}>ÔÅ▒´©Å {service.duration}</Text>
+                        <Text style={styles.serviceDuration}>ÃƒÆ’Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â±ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â {service.duration}</Text>
                         <Text style={styles.servicePrice}>R$ {service.price.toFixed(2)}</Text>
                       </View>
                     </View>
@@ -572,15 +567,15 @@ const BusinessDetailsScreen: React.FC = () => {
                               } else {
                                 Alert.alert(
                                   'Erro',
-                                  'Dados do estabelecimento ou servi├ºo n├úo dispon├¡veis.',
+                                  'Dados do estabelecimento ou serviÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o disponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­veis.',
                                   [{ text: 'OK' }],
                                 );
                               }
                             } catch (error) {
-                              console.error('Erro ao navegar para tela de avalia├º├úo de servi├ºo:', error);
+                              console.error('Erro ao navegar para tela de avaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o de serviÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o:', error);
                               Alert.alert(
                                 'Erro',
-                                'N├úo foi poss├¡vel abrir a tela de avalia├º├úo. Tente novamente.',
+                                'NÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o foi possÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel abrir a tela de avaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o. Tente novamente.',
                                 [{ text: 'OK' }],
                               );
                             }
@@ -593,7 +588,7 @@ const BusinessDetailsScreen: React.FC = () => {
                   </View>
                 ))
               ) : (
-                <Text style={styles.noReviewsText}>Nenhum servi├ºo encontrado para esta categoria.</Text>
+                <Text style={styles.noReviewsText}>Nenhum serviÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o encontrado para esta categoria.</Text>
               )}
             </View>
 
@@ -610,10 +605,10 @@ const BusinessDetailsScreen: React.FC = () => {
               />
             </View>
 
-            {/* Avalia├º├Áes */}
+            {/* AvaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Âµes */}
             <View style={styles.reviewsContainer}>
               <View style={styles.reviewsHeaderContainer}>
-                <Text style={styles.sectionTitle}>Avalia├º├Áes ({String(reviews.length)})</Text>
+                <Text style={styles.sectionTitle}>AvaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Âµes ({String(reviews.length)})</Text>
                 <TouchableOpacity
                   style={[
                     styles.addReviewButton,
@@ -623,32 +618,32 @@ const BusinessDetailsScreen: React.FC = () => {
                     if (canReview) {
                       try {
                         if (business?.id && business?.name) {
-                          console.log('Navegando para tela de avalia├º├úo geral do business:', business.id);
+                          console.log('Navegando para tela de avaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o geral do business:', business.id);
                           navigation.navigate('Review', {
                             businessId: business.id,
                             businessName: business.name,
                             serviceId: null, // General business review, no specific service
-                            // appointmentId n├úo ├® necess├írio para avalia├º├úo geral do neg├│cio
+                            // appointmentId nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â© necessÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡rio para avaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o geral do negÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â³cio
                           });
                         } else {
                           Alert.alert(
                             'Erro',
-                            'Dados do estabelecimento n├úo dispon├¡veis.',
+                            'Dados do estabelecimento nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o disponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­veis.',
                             [{ text: 'OK' }],
                           );
                         }
                       } catch (error) {
-                        console.error('Erro ao navegar para tela de avalia├º├úo:', error);
+                        console.error('Erro ao navegar para tela de avaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o:', error);
                         Alert.alert(
                           'Erro',
-                          'N├úo foi poss├¡vel abrir a tela de avalia├º├úo. Tente novamente.',
+                          'NÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o foi possÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel abrir a tela de avaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o. Tente novamente.',
                           [{ text: 'OK' }],
                         );
                       }
                     } else {
                       Alert.alert(
-                        'Avalia├º├úo n├úo dispon├¡vel',
-                        'S├│ ├® poss├¡vel avaliar ap├│s realiza├º├úo de servi├ºo.',
+                        'AvaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o disponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel',
+                        'SÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â³ ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â© possÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel avaliar apÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â³s realizaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o de serviÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o.',
                         [{ text: 'OK' }],
                       );
                     }
@@ -671,13 +666,13 @@ const BusinessDetailsScreen: React.FC = () => {
                   showsHorizontalScrollIndicator={false}
                 />
               ) : (
-                <Text style={styles.noReviewsText}>Ainda n├úo h├í avalia├º├Áes para este estabelecimento.</Text>
+                <Text style={styles.noReviewsText}>Ainda nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o hÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡ avaliaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Âµes para este estabelecimento.</Text>
               )}
             </View>
 
-            {/* Localiza├º├úo */}
+            {/* LocalizaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Localiza├º├úo</Text>
+              <Text style={styles.sectionTitle}>LocalizaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o</Text>
               {business?.location?.latitude && business?.location?.longitude ? (
                 <View style={styles.mapContainer}>
                   <MapView
@@ -689,16 +684,6 @@ const BusinessDetailsScreen: React.FC = () => {
                       longitude: business.location.longitude,
                       latitudeDelta: 0.01,
                       longitudeDelta: 0.01,
-                    }}
-                    camera={{
-                      center: {
-                        latitude: business.location.latitude,
-                        longitude: business.location.longitude,
-                      },
-                      pitch: 0,
-                      heading: 0,
-                      altitude: 1000,
-                      zoom: 16,
                     }}
                     scrollEnabled={true}
                     zoomEnabled={true}
@@ -713,25 +698,35 @@ const BusinessDetailsScreen: React.FC = () => {
                       onPress={() => { }}
                     />
                   </MapView>
+                  <TouchableOpacity
+                    style={styles.directionsButton}
+                    onPress={() => {
+                      const lat = business.location.latitude;
+                      const lon = business.location.longitude;
+                      Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`);
+                    }}
+                  >
+                    <Text style={styles.directionsButtonText}>Como chegar</Text>
+                  </TouchableOpacity>
                 </View>
               ) : business?.address ? (
                 <View style={styles.mapContainer}>
                   <View style={styles.mapPlaceholder}>
                     <Icon name="location-on" size={48} color={colors.primary} />
                     <Text style={styles.mapPlaceholderText}>
-                      Localizando endere├ºo no mapa...
+                      Localizando endereÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o no mapa...
                     </Text>
                     <Text style={styles.addressText}>{business.address}</Text>
                   </View>
                 </View>
               ) : (
-                <Text style={styles.noReviewsText}>Localiza├º├úo n├úo dispon├¡vel.</Text>
+                <Text style={styles.noReviewsText}>LocalizaÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o disponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel.</Text>
               )}
-              <Text style={styles.addressText}>{fullAddress || 'Endere├ºo n├úo informado'}</Text>
+              <Text style={styles.addressText}>{fullAddress || 'EndereÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o informado'}</Text>
             </View>
           </ScrollView>
 
-          {/* Bot├úo de reserva */}
+          {/* BotÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o de reserva */}
           <View style={styles.bookingButtonContainer}>
             <TouchableOpacity
               style={[
@@ -745,23 +740,23 @@ const BusinessDetailsScreen: React.FC = () => {
                 styles.bookingButtonText,
                 !isBookingAvailable && styles.disabledButtonText,
               ]}>
-                {isBookingAvailable ? 'Reservar' : 'Indispon├¡vel no momento'}
+                {isBookingAvailable ? 'Reservar' : 'IndisponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­vel no momento'}
               </Text>
             </TouchableOpacity>
           </View>
 
-          {/* Modal de detalhes do servi├ºo */}
+          {/* Modal de detalhes do serviÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§o */}
           {selectedService && (
             <ServiceDetailsModal
               visible={isModalVisible}
               onClose={handleCloseModal}
               onSchedule={handleScheduleService}
-              service={selectedService!} // Usar non-null assertion se temos certeza que selectedService n├úo ├® null aqui
+              service={selectedService!} // Usar non-null assertion se temos certeza que selectedService nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â© null aqui
               professionals={professionals}
             />
           )}
 
-          {/* Modal de sele├º├úo de hor├írios */}
+          {/* Modal de seleÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o de horÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â¡rios */}
           {selectedService && business && (
             <TimeSlotsModal
               visible={isTimeSlotsModalVisible}
@@ -774,7 +769,7 @@ const BusinessDetailsScreen: React.FC = () => {
               )}
             />
           )}
-          {/* Modal de portf├│lio do profissional */}
+          {/* Modal de portfÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â³lio do profissional */}
           {isPortfolioModalVisible && selectedProfessional && (
             <ProfessionalPortfolioModal
               visible={isPortfolioModalVisible}
@@ -787,7 +782,7 @@ const BusinessDetailsScreen: React.FC = () => {
           )}
         </>) : (
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Estabelecimento n├úo encontrado</Text>
+          <Text style={styles.loadingText}>Estabelecimento nÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o encontrado</Text>
         </View>
       )}
     </View>
@@ -1170,7 +1165,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     textAlign: 'center',
   },
-  // Estilos para profissionais indispon├¡veis
+  // Estilos para profissionais indisponÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â­veis
   professionalCardDisabled: {
     opacity: 0.5,
   },
@@ -1202,7 +1197,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 4,
   },
-  // Estilos para a se├º├úo de contatos
+  // Estilos para a seÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â§ÃƒÆ’Ã‚Æ’Ãƒâ€šÃ‚Â£o de contatos
   contactContainer: {
     padding: 16,
     borderBottomWidth: 1,
@@ -1250,6 +1245,22 @@ const styles = StyleSheet.create({
     height: 24,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  directionsButton: {
+    backgroundColor: colors.primary,
+    flexDirection: `row`,
+    alignItems: `center`,
+    justifyContent: `center`,
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+    marginHorizontal: 16,
+  },
+  directionsButtonText: {
+    color: `#ffffff`,
+    fontSize: 16,
+    fontWeight: `bold`,
+    marginLeft: 8,
   },
 });
 

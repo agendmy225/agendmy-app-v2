@@ -12,7 +12,7 @@ export interface NotificationSettings {
   news: boolean;
 }
 
-// Solicitar permissão para notificações
+// Solicitar permissÃƒÆ’Ã‚Â£o para notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes
 export const requestNotificationPermission = async (): Promise<boolean> => {
   const authStatus = await messaging().requestPermission();
   const enabled =
@@ -24,11 +24,11 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
 // Registrar token do dispositivo
 export const registerDeviceToken = async (userId: string): Promise<void> => {
   try {
-    // Verificar se já tem permissão
+    // Verificar se jÃƒÆ’Ã‚Â¡ tem permissÃƒÆ’Ã‚Â£o
     const enabled = await requestNotificationPermission();
 
     if (!enabled) {
-      throw new Error('Permissão para notificações não concedida');
+      throw new Error('PermissÃƒÆ’Ã‚Â£o para notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes nÃƒÆ’Ã‚Â£o concedida');
     }
 
 
@@ -37,14 +37,14 @@ export const registerDeviceToken = async (userId: string): Promise<void> => {
 
     if (token) {
       // Salvar token no Firestore usando API modular
-      // Salva em users/{userId}/tokens/{token} — mesmo path usado pela Cloud Function
+      // Salva em users/{userId}/tokens/{token} ÃƒÂ¢Ã‚â‚¬Ã‚â€ mesmo path usado pela Cloud Function
       await setDoc(doc(firestore, 'users', userId, 'tokens', token), {
         token,
         platform: Platform.OS,
         updatedAt: serverTimestamp(),
       }, { merge: true });
 
-      // Salvar localmente para referência
+      // Salvar localmente para referÃƒÆ’Ã‚Âªncia
       await AsyncStorage.setItem('fcmToken', token);
     }
   } catch (error) {
@@ -52,7 +52,7 @@ export const registerDeviceToken = async (userId: string): Promise<void> => {
   }
 };
 
-// Salvar configurações de notificação
+// Salvar configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
 export const saveNotificationSettings = async (settings: NotificationSettings): Promise<void> => {
   try {
     await setDoc(doc(firestore, 'notificationSettings', settings.userId), settings, { merge: true });
@@ -61,7 +61,7 @@ export const saveNotificationSettings = async (settings: NotificationSettings): 
   }
 };
 
-// Obter configurações de notificação
+// Obter configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
 export const getNotificationSettings = async (userId: string): Promise<NotificationSettings | null> => {
   try {
     const settingsDoc = await getDoc(doc(firestore, 'notificationSettings', userId));
@@ -70,7 +70,7 @@ export const getNotificationSettings = async (userId: string): Promise<Notificat
       return settingsDoc.data() as NotificationSettings;
     }
 
-    // Configurações padrão
+    // ConfiguraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes padrÃƒÆ’Ã‚Â£o
     const defaultSettings: NotificationSettings = {
       userId,
       appointmentReminders: true,
@@ -79,7 +79,7 @@ export const getNotificationSettings = async (userId: string): Promise<Notificat
       news: false,
     };
 
-    // Salvar configurações padrão
+    // Salvar configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes padrÃƒÆ’Ã‚Â£o
     await saveNotificationSettings(defaultSettings);
 
     return defaultSettings;
@@ -88,7 +88,7 @@ export const getNotificationSettings = async (userId: string): Promise<Notificat
   }
 };
 
-// Enviar notificação de lembrete de agendamento
+// Enviar notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de lembrete de agendamento
 export const sendAppointmentReminder = async (
   userId: string,
   appointmentId: string,
@@ -98,7 +98,7 @@ export const sendAppointmentReminder = async (
   appointmentTime: string,
 ): Promise<void> => {
   try {
-    // Verificar configurações do usuário
+    // Verificar configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes do usuÃƒÆ’Ã‚Â¡rio
     const settings = await getNotificationSettings(userId);
 
     if (!settings || !settings.appointmentReminders) {
@@ -108,13 +108,13 @@ export const sendAppointmentReminder = async (
     // Formatar data
     const formattedDate = appointmentDate.toLocaleDateString('pt-BR');
 
-    // Criar notificação no Firestore (para histórico) usando API modular
+    // Criar notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o no Firestore (para histÃƒÆ’Ã‚Â³rico) usando API modular
     await addDoc(collection(firestore, 'notifications'), {
       userId,
       appointmentId,
       type: 'reminder',
       title: 'Lembrete de Agendamento',
-      body: `Você tem um agendamento de ${serviceName} em ${businessName} amanhã, ${formattedDate} às ${appointmentTime}.`,
+      body: `VocÃƒÆ’Ã‚Âª tem um agendamento de ${serviceName} em ${businessName} amanhÃƒÆ’Ã‚Â£, ${formattedDate} ÃƒÆ’Ã‚Â s ${appointmentTime}.`,
       data: {
         appointmentId,
         businessName,
@@ -130,7 +130,7 @@ export const sendAppointmentReminder = async (
   }
 };
 
-// Enviar notificação de confirmação de agendamento
+// Enviar notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de confirmaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de agendamento
 export const sendAppointmentConfirmation = async (
   userId: string,
   appointmentId: string,
@@ -140,7 +140,7 @@ export const sendAppointmentConfirmation = async (
   appointmentTime: string,
 ): Promise<void> => {
   try {
-    // Verificar configurações do usuário
+    // Verificar configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes do usuÃƒÆ’Ã‚Â¡rio
     const settings = await getNotificationSettings(userId);
 
     if (!settings || !settings.appointmentConfirmations) {
@@ -150,13 +150,13 @@ export const sendAppointmentConfirmation = async (
     // Formatar data
     const formattedDate = appointmentDate.toLocaleDateString('pt-BR');
 
-    // Criar notificação no Firestore (para histórico) usando API modular
+    // Criar notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o no Firestore (para histÃƒÆ’Ã‚Â³rico) usando API modular
     await addDoc(collection(firestore, 'notifications'), {
       userId,
       appointmentId,
       type: 'confirmation',
       title: 'Agendamento Confirmado',
-      body: `Seu agendamento de ${serviceName} em ${businessName} foi confirmado para ${formattedDate} às ${appointmentTime}.`,
+      body: `Seu agendamento de ${serviceName} em ${businessName} foi confirmado para ${formattedDate} ÃƒÆ’Ã‚Â s ${appointmentTime}.`,
       data: {
         appointmentId,
         businessName,
@@ -172,7 +172,7 @@ export const sendAppointmentConfirmation = async (
   }
 };
 
-// Obter histórico de notificações
+// Obter histÃƒÆ’Ã‚Â³rico de notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes
 export const getNotificationHistory = async (userId: string, limitCount = 20): Promise<unknown[]> => {
   try {
     const notificationsQuery = query(
@@ -199,7 +199,7 @@ export const getNotificationHistory = async (userId: string, limitCount = 20): P
   }
 };
 
-// Marcar notificação como lida
+// Marcar notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o como lida
 export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
   try {
     await updateDoc(doc(firestore, 'notifications', notificationId), {
@@ -210,19 +210,19 @@ export const markNotificationAsRead = async (notificationId: string): Promise<vo
   }
 };
 
-// Configurar listeners para notificações em foreground
+// Configurar listeners para notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes em foreground
 export const setupNotificationListeners = (): (() => void) => {
   const unsubscribe = messaging().onMessage(async () => {
-    // Processar notificação recebida com o app em foreground
-    // Aqui você pode mostrar uma notificação local ou atualizar a UI
+    // Processar notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o recebida com o app em foreground
+    // Aqui vocÃƒÆ’Ã‚Âª pode mostrar uma notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o local ou atualizar a UI
     // Por exemplo, usando a biblioteca react-native-push-notification
   });
   return unsubscribe;
 };
 
-// Configurar handler para notificações em background/killed state
+// Configurar handler para notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes em background/killed state
 export const setupBackgroundHandler = (): void => {
   messaging().setBackgroundMessageHandler(async () => {
-    // Não é necessário fazer nada aqui, o sistema Android mostrará a notificação automaticamente
+    // NÃƒÆ’Ã‚Â£o ÃƒÆ’Ã‚Â© necessÃƒÆ’Ã‚Â¡rio fazer nada aqui, o sistema Android mostrarÃƒÆ’Ã‚Â¡ a notificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o automaticamente
   });
 };
