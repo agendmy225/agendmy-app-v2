@@ -43,7 +43,7 @@ const StorageImage: React.FC<StorageImageProps> = ({ storagePath, style, default
         });
     } else {
       setIsLoading(false);
-      setHasError(true); // Se nÃƒÆ’Ã‚Â£o houver caminho, considere como um erro para mostrar o fallback
+      setHasError(true); // Se não houver caminho, considere como um erro para mostrar o fallback
     }
 
     return () => {

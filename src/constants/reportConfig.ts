@@ -1,16 +1,16 @@
-// ConfiguraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes para relatÃƒÆ’Ã‚Â³rios financeiros
+// Configurações para relatórios financeiros
 export const REPORT_CONFIG = {
-  // IMPORTANTE: NÃƒÆ’Ã‚Æ’O usar valor fixo - sempre usar configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o do usuÃƒÆ’Ã‚Â¡rio
-  // Se nÃƒÆ’Ã‚Â£o houver configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o, o sistema deve alertar o usuÃƒÆ’Ã‚Â¡rio para configurar
+  // IMPORTANTE: NÃO usar valor fixo - sempre usar configuração do usuário
+  // Se não houver configuração, o sistema deve alertar o usuário para configurar
   DEFAULT_COMMISSION_RATE: null, // Removido valor fixo
   
-  // ConfiguraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de formataÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
+  // Configurações de formatação
   CURRENCY_LOCALE: 'pt-BR',
   CURRENCY_CODE: 'BRL',
   
-  // PerÃƒÆ’Ã‚Â­odos disponÃƒÆ’Ã‚Â­veis para relatÃƒÆ’Ã‚Â³rios
+  // Períodos disponíveis para relatórios
   AVAILABLE_PERIODS: [
-    { value: 'daily', label: 'DiÃƒÆ’Ã‚Â¡rio' },
+    { value: 'daily', label: 'Diário' },
     { value: 'weekly', label: 'Semanal' },
     { value: 'monthly', label: 'Mensal' },
     { value: 'yearly', label: 'Anual' },
@@ -23,14 +23,14 @@ export const REPORT_CONFIG = {
   // Status de agendamentos cancelados
   CANCELED_STATUSES: ['canceled', 'cancelled'],
   
-  // ConfiguraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de cache
+  // Configurações de cache
   CACHE_DURATION_MS: 5 * 60 * 1000, // 5 minutos
 } as const;
 
 export type ReportPeriod = typeof REPORT_CONFIG.AVAILABLE_PERIODS[number]['value'];
 
 /**
- * Formata valor monetÃƒÆ’Ã‚Â¡rio no padrÃƒÆ’Ã‚Â£o brasileiro
+ * Formata valor monetário no padrão brasileiro
  */
 export const formatCurrency = (value: number): string => {
   const numValue = typeof value === 'number' ? value : parseFloat(value as string) || 0;
@@ -48,14 +48,14 @@ export const isRevenueStatus = (status: string): boolean => {
 };
 
 /**
- * Verifica se um status de agendamento ÃƒÆ’Ã‚Â© de cancelamento
+ * Verifica se um status de agendamento é de cancelamento
  */
 export const isCanceledStatus = (status: string): boolean => {
   return REPORT_CONFIG.CANCELED_STATUSES.includes(status as any);
 };
 
 /**
- * Valida se um valor monetÃƒÆ’Ã‚Â¡rio ÃƒÆ’Ã‚Â© vÃƒÆ’Ã‚Â¡lido
+ * Valida se um valor monetário é válido
  */
 export const isValidPrice = (price: unknown): price is number => {
   if (typeof price === 'number') {
@@ -69,7 +69,7 @@ export const isValidPrice = (price: unknown): price is number => {
 };
 
 /**
- * Converte um valor para nÃƒÆ’Ã‚Âºmero monetÃƒÆ’Ã‚Â¡rio vÃƒÆ’Ã‚Â¡lido
+ * Converte um valor para número monetário válido
  */
 export const toValidPrice = (price: unknown): number => {
   if (typeof price === 'number') {

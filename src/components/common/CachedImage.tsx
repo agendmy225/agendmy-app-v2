@@ -16,13 +16,13 @@ const CachedImage: React.FC<CachedImageProps> = ({ storagePath, style, resizeMod
   const [imageLoadComplete, setImageLoadComplete] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Mostra loading apenas enquanto o hook estÃƒÆ’Ã‚Â¡ carregando E a imagem nÃƒÆ’Ã‚Â£o foi carregada ainda
+  // Mostra loading apenas enquanto o hook está carregando E a imagem não foi carregada ainda
   const isLoading = loading && !imageLoadComplete;
 
-  // Mostra erro se: hook tem erro OU falha no carregamento da imagem OU nÃƒÆ’Ã‚Â£o tem imageSource
+  // Mostra erro se: hook tem erro OU falha no carregamento da imagem OU não tem imageSource
   const hasError = error || imageError || (!loading && !imageSource);
 
-  // LÃƒÆ’Ã‚Â³gica de renderizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o simplificada
+  // Lógica de renderização simplificada
   if (hasError) {
     if (defaultSource) {
       return <Image source={defaultSource} style={style} resizeMode={resizeMode} />;
@@ -60,7 +60,7 @@ const CachedImage: React.FC<CachedImageProps> = ({ storagePath, style, resizeMod
     );
   }
 
-  // Fallback final (nÃƒÆ’Ã‚Â£o deveria chegar aqui normalmente)
+  // Fallback final (não deveria chegar aqui normalmente)
   return (
     <View style={[style, styles.placeholder]}>
       <ActivityIndicator color={colors.primary} />

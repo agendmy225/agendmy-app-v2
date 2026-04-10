@@ -36,7 +36,7 @@ const ServiceManagementScreen: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [businessId, setBusinessId] = useState<string | null>(null);
 
-  // Estado para o modal de adiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o/ediÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de serviÃƒÆ’Ã‚Â§o
+  // Estado para o modal de adição/edição de serviço
   const [modalVisible, setModalVisible] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [serviceName, setServiceName] = useState('');
@@ -45,10 +45,10 @@ const ServiceManagementScreen: React.FC = () => {
   const [serviceDuration, setServiceDuration] = useState('');
   const [serviceCategory, setServiceCategory] = useState('');
   const [selectedProfessionals, setSelectedProfessionals] = useState<string[]>([]);
-  const [numSessions, setNumSessions] = useState('1'); // Campo para nÃƒÆ’Ã‚Âºmero de sessÃƒÆ’Ã‚Âµes
-  const [baseServiceId, setBaseServiceId] = useState(''); // ID do serviÃƒÆ’Ã‚Â§o base para pacotes
-  const [isCreatingPackage, setIsCreatingPackage] = useState(false); // Se estÃƒÆ’Ã‚Â¡ criando pacote
-  const [userModifiedName, setUserModifiedName] = useState(false); // Se usuÃƒÆ’Ã‚Â¡rio modificou o nome manualmente
+  const [numSessions, setNumSessions] = useState('1'); // Campo para número de sessões
+  const [baseServiceId, setBaseServiceId] = useState(''); // ID do serviço base para pacotes
+  const [isCreatingPackage, setIsCreatingPackage] = useState(false); // Se está criando pacote
+  const [userModifiedName, setUserModifiedName] = useState(false); // Se usuário modificou o nome manualmente
 
   const loadBusinessData = useCallback(async () => {
     if (!user) return;
@@ -66,7 +66,7 @@ const ServiceManagementScreen: React.FC = () => {
       }
       return null;
     } catch {
-      Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel carregar os dados do estabelecimento.');
+      Alert.alert('Erro', 'Não foi possível carregar os dados do estabelecimento.');
       return null;
     }
   }, [user]);
@@ -82,7 +82,7 @@ const ServiceManagementScreen: React.FC = () => {
       setFilteredServices(servicesData);
       setProfessionals(professionalsData);
     } catch {
-      Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel carregar os dados.');
+      Alert.alert('Erro', 'Não foi possível carregar os dados.');
     } finally {
       setLoading(false);
     }
@@ -143,9 +143,9 @@ const ServiceManagementScreen: React.FC = () => {
         service.id === id ? { ...service, active: !currentStatus } : service,
       );
       setServices(updatedServices);
-      Alert.alert('Sucesso', `ServiÃƒÆ’Ã‚Â§o ${!currentStatus ? 'ativado' : 'desativado'} com sucesso!`);
+      Alert.alert('Sucesso', `Serviço ${!currentStatus ? 'ativado' : 'desativado'} com sucesso!`);
     } catch {
-      Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel atualizar o status do serviÃƒÆ’Ã‚Â§o');
+      Alert.alert('Erro', 'Não foi possível atualizar o status do serviço');
     }
   };
 
@@ -157,10 +157,10 @@ const ServiceManagementScreen: React.FC = () => {
     setServiceDuration('');
     setServiceCategory('');
     setSelectedProfessionals([]);
-    setNumSessions('1'); // Reset para 1 sessÃƒÆ’Ã‚Â£o (serviÃƒÆ’Ã‚Â§o normal)
-    setBaseServiceId(''); // Reset serviÃƒÆ’Ã‚Â§o base
+    setNumSessions('1'); // Reset para 1 sessão (serviço normal)
+    setBaseServiceId(''); // Reset serviço base
     setIsCreatingPackage(false); // Reset modo pacote
-    setUserModifiedName(false); // Reset flag de modificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
+    setUserModifiedName(false); // Reset flag de modificação
     setModalVisible(true);
   };
 
@@ -172,22 +172,22 @@ const ServiceManagementScreen: React.FC = () => {
     setServiceDuration(service.duration);
     setServiceCategory(service.category);
     setSelectedProfessionals(service.professionalIds || []);
-    setNumSessions(service.numSessions?.toString() || '1'); // Carregar nÃƒÆ’Ã‚Âºmero de sessÃƒÆ’Ã‚Âµes ou padrÃƒÆ’Ã‚Â£o 1
-    setBaseServiceId(''); // Reset para ediÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
+    setNumSessions(service.numSessions?.toString() || '1'); // Carregar número de sessões ou padrão 1
+    setBaseServiceId(''); // Reset para edição
     setIsCreatingPackage(false); // Reset modo pacote
-    setUserModifiedName(false); // Reset flag de modificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
+    setUserModifiedName(false); // Reset flag de modificação
     setModalVisible(true);
   };
 
-  // FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para lidar com mudanÃƒÆ’Ã‚Â§a no nÃƒÆ’Ã‚Âºmero de sessÃƒÆ’Ã‚Âµes
+  // Função para lidar com mudança no número de sessões
   const handleNumSessionsChange = (value: string) => {
     setNumSessions(value);
     const sessions = parseInt(value, 10);
 
     if (sessions > 1 && !editingService) {
-      // Se for pacote e nÃƒÆ’Ã‚Â£o estiver editando, habilitar modo criaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de pacote
+      // Se for pacote e não estiver editando, habilitar modo criação de pacote
       setIsCreatingPackage(true);
-      // Reset outros campos para forÃƒÆ’Ã‚Â§ar seleÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de serviÃƒÆ’Ã‚Â§o base
+      // Reset outros campos para forçar seleção de serviço base
       if (!baseServiceId) {
         setServiceName('');
         setServiceDescription('');
@@ -197,7 +197,7 @@ const ServiceManagementScreen: React.FC = () => {
       }
     } else {
       setIsCreatingPackage(false);
-      setBaseServiceId(''); // Reset serviÃƒÆ’Ã‚Â§o base se voltar para serviÃƒÆ’Ã‚Â§o simples
+      setBaseServiceId(''); // Reset serviço base se voltar para serviço simples
     }
   };
 
@@ -208,74 +208,74 @@ const ServiceManagementScreen: React.FC = () => {
         : [...prev, professionalId],
     );
   };
-  // FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para selecionar serviÃƒÆ’Ã‚Â§o base para pacote
+  // Função para selecionar serviço base para pacote
   const handleSelectBaseService = (serviceId: string) => {
     const baseService = services.find(s => s.id === serviceId);
     if (baseService) {
       setBaseServiceId(serviceId);
-      // NÃƒÆ’Ã‚Â£o sobrescrever o nome se o usuÃƒÆ’Ã‚Â¡rio jÃƒÆ’Ã‚Â¡ modificou manualmente
+      // Não sobrescrever o nome se o usuário já modificou manualmente
       if (!userModifiedName) {
-        setServiceName(`${numSessions || 1}x ${baseService.name || 'ServiÃƒÆ’Ã‚Â§o'}`);
+        setServiceName(`${numSessions || 1}x ${baseService.name || 'Serviço'}`);
       }
       setServiceDescription(baseService.description || '');
       setServiceDuration(baseService.duration || '');
       setServiceCategory(baseService.category || '');
-      // Usar preÃƒÆ’Ã‚Â§o do serviÃƒÆ’Ã‚Â§o base como sugestÃƒÆ’Ã‚Â£o inicial em vez de vazio
+      // Usar preço do serviço base como sugestão inicial em vez de vazio
       setServicePrice((baseService.price || 0).toString());
     }
-  };  // Atualizar nome do pacote quando mudar nÃƒÆ’Ã‚Âºmero de sessÃƒÆ’Ã‚Âµes
+  };  // Atualizar nome do pacote quando mudar número de sessões
   const updatePackageName = useCallback(() => {
     if (baseServiceId && parseInt(numSessions, 10) > 1 && !userModifiedName) {
       const baseService = services.find(s => s.id === baseServiceId);
       if (baseService) {
-        setServiceName(`${numSessions || 1}x ${baseService.name || 'ServiÃƒÆ’Ã‚Â§o'}`);
+        setServiceName(`${numSessions || 1}x ${baseService.name || 'Serviço'}`);
       }
     }
   }, [baseServiceId, numSessions, services, userModifiedName]);
 
-  // Efeito para atualizar nome do pacote quando nÃƒÆ’Ã‚Âºmero de sessÃƒÆ’Ã‚Âµes muda
+  // Efeito para atualizar nome do pacote quando número de sessões muda
   useEffect(() => {
     updatePackageName();
   }, [updatePackageName]);
 
-  // FunÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para lidar com mudanÃƒÆ’Ã‚Â§as manuais no nome
+  // Função para lidar com mudanças manuais no nome
   const handleServiceNameChange = (name: string) => {
     setServiceName(name);
-    setUserModifiedName(true); // Marcar que usuÃƒÆ’Ã‚Â¡rio modificou o nome
+    setUserModifiedName(true); // Marcar que usuário modificou o nome
   };
   const saveService = async () => {
     if (!businessId) {
-      Alert.alert('Erro', 'ID do estabelecimento nÃƒÆ’Ã‚Â£o encontrado.');
+      Alert.alert('Erro', 'ID do estabelecimento não encontrado.');
       return;
     }
 
-    // ValidaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o bÃƒÆ’Ã‚Â¡sica
+    // Validação básica
     if (!serviceName || !servicePrice || !serviceDuration || !serviceCategory) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatÃƒÆ’Ã‚Â³rios.');
+      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
-    // ValidaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o especÃƒÆ’Ã‚Â­fica para pacotes
+    // Validação específica para pacotes
     const sessions = parseInt(numSessions, 10);
     if (sessions > 1 && !editingService && !baseServiceId) {
-      Alert.alert('Erro', 'Para criar um pacote, vocÃƒÆ’Ã‚Âª deve:\n\n1. Definir o nÃƒÆ’Ã‚Âºmero de sessÃƒÆ’Ã‚Âµes (maior que 1)\n2. Selecionar um serviÃƒÆ’Ã‚Â§o base na lista exibida\n3. Definir o preÃƒÆ’Ã‚Â§o do pacote\n\nPor favor, selecione um serviÃƒÆ’Ã‚Â§o base primeiro.');
+      Alert.alert('Erro', 'Para criar um pacote, você deve:\n\n1. Definir o número de sessões (maior que 1)\n2. Selecionar um serviço base na lista exibida\n3. Definir o preço do pacote\n\nPor favor, selecione um serviço base primeiro.');
       return;
     }
 
     if (!user) {
-      Alert.alert('Erro', 'UsuÃƒÆ’Ã‚Â¡rio nÃƒÆ’Ã‚Â£o encontrado.');
+      Alert.alert('Erro', 'Usuário não encontrado.');
       return;
     }
 
     try {
       const price = parseFloat(servicePrice);
       if (isNaN(price) || price <= 0) {
-        Alert.alert('Erro', 'Por favor, informe um preÃƒÆ’Ã‚Â§o vÃƒÆ’Ã‚Â¡lido.');
+        Alert.alert('Erro', 'Por favor, informe um preço válido.');
         return;
       }
 
-      console.log('ÃƒÂ°Ã‚Å¸Ã‚â€Ã‚Â§ ValidaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes passaram, construindo serviceData...');
-      console.log('ÃƒÂ°Ã‚Å¸Ã‚â€œÃ‚Å  Dados do formulÃƒÆ’Ã‚Â¡rio:', {
+      console.log('🔧 Validações passaram, construindo serviceData...');
+      console.log('📊 Dados do formulário:', {
         name: serviceName,
         description: serviceDescription,
         price,
@@ -292,7 +292,7 @@ const ServiceManagementScreen: React.FC = () => {
         duration: serviceDuration.trim(),
         category: serviceCategory.trim(),
         professionalIds: selectedProfessionals.length > 0 ? selectedProfessionals : [],
-        active: true, // Default para true em novos serviÃƒÆ’Ã‚Â§os
+        active: true, // Default para true em novos serviços
       };
 
       // Adicionar numSessions apenas se for maior que 1 (evita undefined no Firestore)
@@ -301,11 +301,11 @@ const ServiceManagementScreen: React.FC = () => {
         serviceData.numSessions = sessionsCount;
       }
 
-      console.log('ÃƒÂ°Ã‚Å¸Ã‚â€œÃ‚Â¦ ServiceData final construÃƒÆ’Ã‚Â­do:', serviceData);
+      console.log('📦 ServiceData final construído:', serviceData);
 
       if (editingService) {
-        // Editar serviÃƒÆ’Ã‚Â§o existente
-        console.log('ÃƒÂ¢Ã‚Å“Ã‚ÂÃƒÂ¯Ã‚Â¸Ã‚Â Editando serviÃƒÆ’Ã‚Â§o existente:', editingService.id);
+        // Editar serviço existente
+        console.log('✏️ Editando serviço existente:', editingService.id);
         await updateService(businessId, editingService.id, serviceData);
 
         // Atualizar localmente
@@ -313,31 +313,31 @@ const ServiceManagementScreen: React.FC = () => {
           service.id === editingService.id ? { ...service, ...serviceData } : service,
         );
         setServices(updatedServices);
-        Alert.alert('Sucesso', 'ServiÃƒÆ’Ã‚Â§o atualizado com sucesso!');
+        Alert.alert('Sucesso', 'Serviço atualizado com sucesso!');
       } else {
-        // Adicionar novo serviÃƒÆ’Ã‚Â§o (profissionais jÃƒÆ’Ã‚Â¡ incluÃƒÆ’Ã‚Â­dos no serviceData)
-        console.log('ÃƒÂ°Ã‚Å¸Ã‚â€Ã‚â€ž Criando novo serviÃƒÆ’Ã‚Â§o com dados:', serviceData);
-        console.log('ÃƒÂ°Ã‚Å¸Ã‚â€œÃ‚Â BusinessID:', businessId);
+        // Adicionar novo serviço (profissionais já incluídos no serviceData)
+        console.log('🔄 Criando novo serviço com dados:', serviceData);
+        console.log('📍 BusinessID:', businessId);
 
         const newServiceData = { ...serviceData, businessId };
-        console.log('ÃƒÂ°Ã‚Å¸Ã‚ÂÃ‚Â¢ Dados completos para criaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o:', newServiceData);
+        console.log('🏢 Dados completos para criação:', newServiceData);
 
         const newService = await createService(businessId, newServiceData);
-        console.log('ÃƒÂ¢Ã‚Å“Ã‚â€¦ ServiÃƒÆ’Ã‚Â§o criado com sucesso:', newService);
+        console.log('✅ Serviço criado com sucesso:', newService);
 
         // Adicionar localmente
         setServices([...services, newService]);
-        Alert.alert('Sucesso', 'ServiÃƒÆ’Ã‚Â§o criado com sucesso!');
+        Alert.alert('Sucesso', 'Serviço criado com sucesso!');
       }
 
       setModalVisible(false);
     } catch (error) {
-      console.error('ÃƒÂ¢Ã‚ÂÃ‚Å’ Erro detalhado ao salvar serviÃƒÆ’Ã‚Â§o:', error);
-      console.error('ÃƒÂ°Ã‚Å¸Ã‚â€Ã‚Â Tipo do erro:', typeof error);
-      console.error('ÃƒÂ°Ã‚Å¸Ã‚â€œÃ‚Å  Stack trace:', (error as Error)?.stack);
-      console.error('ÃƒÂ°Ã‚Å¸Ã‚â€™Ã‚Â¬ Mensagem do erro:', (error as Error)?.message);
+      console.error('❌ Erro detalhado ao salvar serviço:', error);
+      console.error('🔍 Tipo do erro:', typeof error);
+      console.error('📊 Stack trace:', (error as Error)?.stack);
+      console.error('💬 Mensagem do erro:', (error as Error)?.message);
 
-      let errorMessage = 'Ocorreu um erro ao salvar o serviÃƒÆ’Ã‚Â§o. Tente novamente.';
+      let errorMessage = 'Ocorreu um erro ao salvar o serviço. Tente novamente.';
       if (error instanceof Error) {
         errorMessage = `Erro: ${error.message}`;
       }
@@ -349,8 +349,8 @@ const ServiceManagementScreen: React.FC = () => {
   const handleDeleteService = async (id: string) => {
     if (!businessId) return;
     Alert.alert(
-      'Confirmar exclusÃƒÆ’Ã‚Â£o',
-      'Tem certeza que deseja excluir este serviÃƒÆ’Ã‚Â§o? Esta aÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o nÃƒÆ’Ã‚Â£o pode ser desfeita.',
+      'Confirmar exclusão',
+      'Tem certeza que deseja excluir este serviço? Esta ação não pode ser desfeita.',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -364,9 +364,9 @@ const ServiceManagementScreen: React.FC = () => {
               // Atualizar localmente
               const updatedServices = services.filter(service => service.id !== id);
               setServices(updatedServices);
-              Alert.alert('Sucesso', 'ServiÃƒÆ’Ã‚Â§o excluÃƒÆ’Ã‚Â­do com sucesso!');
+              Alert.alert('Sucesso', 'Serviço excluído com sucesso!');
             } catch {
-              Alert.alert('Erro', 'Ocorreu um erro ao excluir o serviÃƒÆ’Ã‚Â§o. Tente novamente.');
+              Alert.alert('Erro', 'Ocorreu um erro ao excluir o serviço. Tente novamente.');
             }
           },
         },
@@ -378,7 +378,7 @@ const ServiceManagementScreen: React.FC = () => {
     if (!item || !item.id) {
       return (
         <View style={styles.serviceCard}>
-          <Text style={styles.serviceName}>Erro: ServiÃƒÆ’Ã‚Â§o invÃƒÆ’Ã‚Â¡lido</Text>
+          <Text style={styles.serviceName}>Erro: Serviço inválido</Text>
         </View>
       );
     }
@@ -395,16 +395,16 @@ const ServiceManagementScreen: React.FC = () => {
           </View>
         </View>
 
-        <Text style={styles.serviceDescription}>{String(item.description || 'Sem descriÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o')}</Text>
+        <Text style={styles.serviceDescription}>{String(item.description || 'Sem descrição')}</Text>
 
         <View style={styles.serviceDetails}>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>PreÃƒÆ’Ã‚Â§o:</Text>
+            <Text style={styles.detailLabel}>Preço:</Text>
             <Text style={styles.detailValue}>R$ {(item.price || 0).toFixed(2)}</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>DuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o:</Text>
-            <Text style={styles.detailValue}>{String(item.duration || 'NÃƒÆ’Ã‚Â£o informado')}</Text>
+            <Text style={styles.detailLabel}>Duração:</Text>
+            <Text style={styles.detailValue}>{String(item.duration || 'Não informado')}</Text>
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>Categoria:</Text>
@@ -415,7 +415,7 @@ const ServiceManagementScreen: React.FC = () => {
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>Tipo:</Text>
               <Text style={[styles.detailValue, styles.packageText]}>
-                Pacote ({item.numSessions} sessÃƒÆ’Ã‚Âµes)
+                Pacote ({item.numSessions} sessões)
               </Text>
             </View>
           )}
@@ -430,13 +430,13 @@ const ServiceManagementScreen: React.FC = () => {
                 return (
                   <View key={profId} style={styles.professionalChip}>
                     <Text style={styles.professionalChipText}>
-                      {String(professional?.name || 'Profissional nÃƒÆ’Ã‚Â£o encontrado')}
+                      {String(professional?.name || 'Profissional não encontrado')}
                     </Text>
                   </View>
                 );
               })
             ) : (
-              <Text style={styles.noProfessionalsText}>Nenhum profissional atribuÃƒÆ’Ã‚Â­do</Text>
+              <Text style={styles.noProfessionalsText}>Nenhum profissional atribuído</Text>
             )}
           </View>
         </View>
@@ -471,24 +471,24 @@ const ServiceManagementScreen: React.FC = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Carregando serviÃƒÆ’Ã‚Â§os...</Text>
+        <Text style={styles.loadingText}>Carregando serviços...</Text>
       </View>
     );
   }
 
-  // Garantir que filteredServices seja sempre um array vÃƒÆ’Ã‚Â¡lido
+  // Garantir que filteredServices seja sempre um array válido
   const safeFilteredServices = Array.isArray(filteredServices) ? filteredServices : [];
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Gerenciar ServiÃƒÆ’Ã‚Â§os</Text>
+        <Text style={styles.headerTitle}>Gerenciar Serviços</Text>
       </View>
 
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Buscar por nome, descriÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o ou categoria"
+          placeholder="Buscar por nome, descrição ou categoria"
           value={searchText}
           onChangeText={setSearchText}
         />
@@ -533,7 +533,7 @@ const ServiceManagementScreen: React.FC = () => {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Nenhum serviÃƒÆ’Ã‚Â§o encontrado</Text>
+            <Text style={styles.emptyText}>Nenhum serviço encontrado</Text>
           </View>
         }
       />
@@ -545,7 +545,7 @@ const ServiceManagementScreen: React.FC = () => {
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
 
-      {/* Modal para adicionar/editar serviÃƒÆ’Ã‚Â§o */}
+      {/* Modal para adicionar/editar serviço */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -556,42 +556,42 @@ const ServiceManagementScreen: React.FC = () => {
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                {editingService ? 'Editar ServiÃƒÆ’Ã‚Â§o' : 'Adicionar Novo ServiÃƒÆ’Ã‚Â§o'}
+                {editingService ? 'Editar Serviço' : 'Adicionar Novo Serviço'}
               </Text>
 
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.closeButtonText}>ÃƒÂ¢Ã‚Å“Ã‚â€¢</Text>
+                <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             </View>
 
             <ScrollView>
-              {/* Campo de NÃƒÆ’Ã‚Âºmero de SessÃƒÆ’Ã‚Âµes movido para o topo */}
-              <Text style={styles.modalLabel}>Tipo de ServiÃƒÆ’Ã‚Â§o</Text>
+              {/* Campo de Número de Sessões movido para o topo */}
+              <Text style={styles.modalLabel}>Tipo de Serviço</Text>
               <TextInput
                 style={styles.modalInput}
-                placeholder="1 para serviÃƒÆ’Ã‚Â§o simples, >1 para pacote"
+                placeholder="1 para serviço simples, >1 para pacote"
                 value={numSessions}
                 onChangeText={handleNumSessionsChange}
                 keyboardType="numeric"
-                editable={!editingService} // NÃƒÆ’Ã‚Â£o pode editar se for serviÃƒÆ’Ã‚Â§o existente
+                editable={!editingService} // Não pode editar se for serviço existente
               />
 
               {parseInt(numSessions, 10) > 1 && (
                 <View style={styles.packageInfoContainer}>
                   <Text style={styles.packageInfoText}>
-                    ÃƒÂ°Ã‚Å¸Ã‚â€™Ã‚Â¡ Modo Pacote Ativado: Selecione um serviÃƒÆ’Ã‚Â§o base abaixo para criar um pacote de {numSessions} sessÃƒÆ’Ã‚Âµes
+                    💡 Modo Pacote Ativado: Selecione um serviço base abaixo para criar um pacote de {numSessions} sessões
                   </Text>
                 </View>
               )}
 
               {isCreatingPackage ? (
                 <View style={styles.packageCreationContainer}>
-                  <Text style={styles.modalLabel}>Selecione o ServiÃƒÆ’Ã‚Â§o Base para o Pacote</Text>
+                  <Text style={styles.modalLabel}>Selecione o Serviço Base para o Pacote</Text>
                   {baseServiceId === '' && (
-                    <Text style={styles.warningText}>ÃƒÂ¢Ã‚Å¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â Selecione um serviÃƒÆ’Ã‚Â§o base para continuar</Text>
+                    <Text style={styles.warningText}>⚠️ Selecione um serviço base para continuar</Text>
                   )}
                   {services
                     .filter(s => !s.numSessions || s.numSessions <= 1)
@@ -615,7 +615,7 @@ const ServiceManagementScreen: React.FC = () => {
                 </View>
               ) : null}
 
-              <Text style={styles.modalLabel}>Nome do ServiÃƒÆ’Ã‚Â§o</Text>
+              <Text style={styles.modalLabel}>Nome do Serviço</Text>
               <TextInput
                 style={styles.modalInput}
                 placeholder="Ex: Corte de Cabelo"
@@ -623,16 +623,16 @@ const ServiceManagementScreen: React.FC = () => {
                 onChangeText={handleServiceNameChange}
               />
 
-              <Text style={styles.modalLabel}>DescriÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o</Text>
+              <Text style={styles.modalLabel}>Descrição</Text>
               <TextInput
                 style={[styles.modalInput, styles.multilineInput]}
-                placeholder="Descreva o serviÃƒÆ’Ã‚Â§o..."
+                placeholder="Descreva o serviço..."
                 value={serviceDescription}
                 onChangeText={setServiceDescription}
                 multiline
               />
 
-              <Text style={styles.modalLabel}>PreÃƒÆ’Ã‚Â§o (R$)</Text>
+              <Text style={styles.modalLabel}>Preço (R$)</Text>
               <TextInput
                 style={styles.modalInput}
                 placeholder="Ex: 50.00"
@@ -641,7 +641,7 @@ const ServiceManagementScreen: React.FC = () => {
                 keyboardType="numeric"
               />
 
-              <Text style={styles.modalLabel}>DuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o</Text>
+              <Text style={styles.modalLabel}>Duração</Text>
               <TextInput
                 style={styles.modalInput}
                 placeholder="Ex: 30 min, 1h, 1h 30m"
@@ -652,7 +652,7 @@ const ServiceManagementScreen: React.FC = () => {
               <Text style={styles.modalLabel}>Categoria</Text>
               <TextInput
                 style={styles.modalInput}
-                placeholder="Ex: Cabelo, Manicure, EstÃƒÆ’Ã‚Â©tica"
+                placeholder="Ex: Cabelo, Manicure, Estética"
                 value={serviceCategory}
                 onChangeText={setServiceCategory}
               />
@@ -766,7 +766,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 15,
-    paddingBottom: 80, // EspaÃƒÆ’Ã‚Â§o para o botÃƒÆ’Ã‚Â£o de adicionar
+    paddingBottom: 80, // Espaço para o botão de adicionar
   },
   serviceCard: {
     backgroundColor: colors.white,

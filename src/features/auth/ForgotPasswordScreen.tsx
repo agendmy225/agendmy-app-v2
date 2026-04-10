@@ -42,21 +42,21 @@ const ForgotPasswordScreen: React.FC = () => {
 
       Alert.alert(
         'E-mail Enviado',
-        'Um e-mail da AGENDMY com instruÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes para redefinir sua senha foi enviado. Verifique sua caixa de entrada e spam. O link ÃƒÆ’Ã‚Â© vÃƒÆ’Ã‚Â¡lido por 1 hora.',
+        'Um e-mail da AGENDMY com instruções para redefinir sua senha foi enviado. Verifique sua caixa de entrada e spam. O link é válido por 1 hora.',
         [{ text: 'OK', onPress: () => navigation.goBack() }],
       );
     } catch (error: unknown) {
-      let errorMessage = 'Ocorreu um erro ao enviar o e-mail de recuperaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o.';
+      let errorMessage = 'Ocorreu um erro ao enviar o e-mail de recuperação.';
       if (error && typeof error === 'object' && 'code' in error) {
         const firebaseError = error as { code: string };
         if (firebaseError.code === 'auth/user-not-found') {
-          errorMessage = 'UsuÃƒÆ’Ã‚Â¡rio nÃƒÆ’Ã‚Â£o encontrado. Verifique seu e-mail.';
+          errorMessage = 'Usuário não encontrado. Verifique seu e-mail.';
         } else if (firebaseError.code === 'auth/invalid-email') {
-          errorMessage = 'E-mail invÃƒÆ’Ã‚Â¡lido. Verifique o formato.';
+          errorMessage = 'E-mail inválido. Verifique o formato.';
         } else if (firebaseError.code === 'auth/too-many-requests') {
           errorMessage = 'Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.';
         } else if (firebaseError.code === 'auth/operation-not-allowed') {
-          errorMessage = 'OperaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o nÃƒÆ’Ã‚Â£o permitida. Entre em contato com o suporte.';
+          errorMessage = 'Operação não permitida. Entre em contato com o suporte.';
         }
       }
       Alert.alert('Erro', errorMessage);
@@ -81,7 +81,7 @@ const ForgotPasswordScreen: React.FC = () => {
             </Text>
             <Text style={styles.titleText}>RECUPERAR SENHA</Text>
             <Text style={styles.subtitleText}>
-              Digite seu e-mail para receber as instruÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de recuperaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de senha.
+              Digite seu e-mail para receber as instruções de recuperação de senha.
             </Text>
           </View>
 

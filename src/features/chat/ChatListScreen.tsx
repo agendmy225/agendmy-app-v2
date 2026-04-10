@@ -56,7 +56,7 @@ const ChatListScreen: React.FC = () => {
   };
 
   const handleChatPress = (chat: Chat) => {
-    // Encontrar o ID do outro usuÃƒÆ’Ã‚Â¡rio (geralmente o owner)
+    // Encontrar o ID do outro usuário (geralmente o owner)
     const otherUserId = chat.participants.find(p => p !== user?.uid);
     if (!otherUserId) return;
 
@@ -126,7 +126,7 @@ const ChatListScreen: React.FC = () => {
             <Icon name="chat-bubble-outline" size={64} color={colors.lightText} />
             <Text style={styles.emptyStateTitle}>Nenhuma conversa ainda</Text>
             <Text style={styles.emptyStateText}>
-              Suas conversas com profissionais e estabelecimentos aparecerÃƒÆ’Ã‚Â£o aqui.
+              Suas conversas com profissionais e estabelecimentos aparecerão aqui.
             </Text>
           </View>
         ) : (

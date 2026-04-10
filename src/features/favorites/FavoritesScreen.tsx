@@ -66,7 +66,7 @@ const FavoritesScreen: React.FC = () => {
         keyExtractor={(item) => item.id}
         ListEmptyComponent={
           <View style={styles.centerContent}>
-            <Text style={styles.emptyText}>VocÃƒÆ’Ã‚Âª ainda nÃƒÆ’Ã‚Â£o adicionou nenhum favorito.</Text>
+            <Text style={styles.emptyText}>Você ainda não adicionou nenhum favorito.</Text>
           </View>
         }
         contentContainerStyle={favorites.length === 0 ? styles.centerContent : styles.listContentContainer}

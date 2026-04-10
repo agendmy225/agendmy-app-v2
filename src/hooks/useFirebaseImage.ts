@@ -14,7 +14,7 @@ export const useFirebaseImage = (storagePath: string | null | undefined) => {
         if (isMounted) {
           setImageSource(null);
           setLoading(false);
-          setError('Caminho de storage invÃƒÆ’Ã‚Â¡lido');
+          setError('Caminho de storage inválido');
         }
         return;
       }
@@ -23,24 +23,24 @@ export const useFirebaseImage = (storagePath: string | null | undefined) => {
         setLoading(true);
         setError(null);
         
-        console.log('ÃƒÂ°Ã‚Å¸Ã‚â€Ã‚Â¥ Obtendo imagem base64 do Firebase para:', storagePath);
+        console.log('🔥 Obtendo imagem base64 do Firebase para:', storagePath);
         
-        // Usar o serviÃƒÆ’Ã‚Â§o de cache para obter a imagem em base64
+        // Usar o serviço de cache para obter a imagem em base64
         const base64Image = await imageCacheService.getImage(storagePath);
         
         if (isMounted) {
           if (base64Image) {
-            console.log('ÃƒÂ¢Ã‚Å“Ã‚â€¦ Imagem base64 obtida com sucesso:', storagePath);
+            console.log('✅ Imagem base64 obtida com sucesso:', storagePath);
             setImageSource(base64Image);
           } else {
-            console.error('ÃƒÂ¢Ã‚ÂÃ‚Å’ Falha ao obter imagem base64:', storagePath);
+            console.error('❌ Falha ao obter imagem base64:', storagePath);
             setImageSource(null);
             setError('Erro ao obter imagem do Firebase');
           }
         }
       } catch (err) {
         if (isMounted) {
-          console.error('ÃƒÂ¢Ã‚ÂÃ‚Å’ Erro ao obter imagem base64 do Firebase:', err);
+          console.error('❌ Erro ao obter imagem base64 do Firebase:', err);
           setError('Erro ao obter imagem do Firebase');
           setImageSource(null);
         }
@@ -65,7 +65,7 @@ export const useFirebaseImage = (storagePath: string | null | undefined) => {
   }, [storagePath]);
 
   return {
-    imageUrl: imageSource, // Agora retorna base64 ao invÃƒÆ’Ã‚Â©s de URL
+    imageUrl: imageSource, // Agora retorna base64 ao invés de URL
     imageSource, // Para compatibilidade
     loading,
     error,

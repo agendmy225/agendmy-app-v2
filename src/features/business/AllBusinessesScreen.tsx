@@ -50,7 +50,7 @@ const AllBusinessesScreen: React.FC = () => {
   const [userCoordinates, setUserCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
-    // Obter localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o do usuÃƒÆ’Ã‚Â¡rio
+    // Obter localização do usuário
     const getUserLocation = async () => {
       try {
         // Request permission for Android
@@ -58,15 +58,15 @@ const AllBusinessesScreen: React.FC = () => {
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
             {
-              title: 'PermissÃƒÆ’Ã‚Â£o de LocalizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o',
-              message: 'O app precisa acessar sua localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o para encontrar estabelecimentos prÃƒÆ’Ã‚Â³ximos.',
+              title: 'Permissão de Localização',
+              message: 'O app precisa acessar sua localização para encontrar estabelecimentos próximos.',
               buttonNeutral: 'Perguntar depois',
               buttonNegative: 'Cancelar',
               buttonPositive: 'OK',
             }
           );
           if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-            console.log('PermissÃƒÆ’Ã‚Â£o de localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o negada');
+            console.log('Permissão de localização negada');
             return;
           }
         }
@@ -80,7 +80,7 @@ const AllBusinessesScreen: React.FC = () => {
             });
           },
           (error) => {
-            console.log('Erro ao obter localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o:', error);
+            console.log('Erro ao obter localização:', error);
           },
           {
             enableHighAccuracy: true,
@@ -89,7 +89,7 @@ const AllBusinessesScreen: React.FC = () => {
           }
         );
       } catch (error) {
-        console.log('Erro ao obter localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o:', error);
+        console.log('Erro ao obter localização:', error);
       }
     };
     
@@ -100,7 +100,7 @@ const AllBusinessesScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Filtrar negÃƒÆ’Ã‚Â³cios sempre que a lista mudar ou a localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o for obtida
+    // Filtrar negócios sempre que a lista mudar ou a localização for obtida
     filterBusinessesByCity();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businesses, userCoordinates, userCity]);
@@ -112,7 +112,7 @@ const AllBusinessesScreen: React.FC = () => {
 
       switch (listType) {
         case 'recent':
-          data = await getMostRecentBusinesses(100); // Carrega mais negÃƒÆ’Ã‚Â³cios
+          data = await getMostRecentBusinesses(100); // Carrega mais negócios
           break;
         case 'topRated':
           data = await getTopRatedBusinesses(100);
@@ -126,8 +126,8 @@ const AllBusinessesScreen: React.FC = () => {
 
       setBusinesses(data);
     } catch (error: any) {
-      // Exibe alerta amigÃƒÆ’Ã‚Â¡vel ao usuÃƒÆ’Ã‚Â¡rio em caso de erro
-      // (convenÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o: mensagem em portuguÃƒÆ’Ã‚Âªs)
+      // Exibe alerta amigável ao usuário em caso de erro
+      // (convenção: mensagem em português)
       Alert.alert('Erro', 'Erro ao carregar estabelecimentos. Tente novamente mais tarde.');
       console.log('Erro ao carregar estabelecimentos:', error?.message || error);
     } finally {
@@ -142,10 +142,10 @@ const AllBusinessesScreen: React.FC = () => {
       return;
     }
 
-    // Se tem cidade do usuÃƒÆ’Ã‚Â¡rio, filtra por ela
+    // Se tem cidade do usuário, filtra por ela
     if (userCity) {
       const filtered = businesses.filter(business => {
-        // Verifica se o endereÃƒÆ’Ã‚Â§o contÃƒÆ’Ã‚Â©m a cidade
+        // Verifica se o endereço contém a cidade
         return business.address?.toLowerCase().includes(userCity.toLowerCase());
       });
       setFilteredBusinesses(filtered);
@@ -166,7 +166,7 @@ const AllBusinessesScreen: React.FC = () => {
       });
       setFilteredBusinesses(filtered);
     } else {
-      // Se nÃƒÆ’Ã‚Â£o tem nem cidade nem coordenadas, mostra todos
+      // Se não tem nem cidade nem coordenadas, mostra todos
       setFilteredBusinesses(businesses);
     }
   };
@@ -195,7 +195,7 @@ const AllBusinessesScreen: React.FC = () => {
       case 'topRated':
         return 'Mais Bem Avaliados';
       case 'promotions':
-        return 'PromoÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes';
+        return 'Promoções';
       default:
         return 'Todos os Estabelecimentos';
     }
@@ -214,7 +214,7 @@ const AllBusinessesScreen: React.FC = () => {
       <View style={styles.businessInfo}>
         <Text style={styles.businessName} numberOfLines={1}>{item.name}</Text>
         <Text style={styles.businessCategory} numberOfLines={1}>
-          {getCategoryById(item.category)?.name || 'ServiÃƒÆ’Ã‚Â§os'}
+          {getCategoryById(item.category)?.name || 'Serviços'}
         </Text>
         {item.address && (
           <View style={styles.addressContainer}>
@@ -228,14 +228,14 @@ const AllBusinessesScreen: React.FC = () => {
           <View style={styles.ratingContainer}>
             <Icon name="star" size={16} color="#FFD700" />
             <Text style={styles.ratingText}>
-              {item.rating?.toFixed(1) || '0.0'} ({item.reviewCount} avaliaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes)
+              {item.rating?.toFixed(1) || '0.0'} ({item.reviewCount} avaliações)
             </Text>
           </View>
         )}
         {listType === 'promotions' && item.hasActivePromotions && (
           <View style={styles.promotionBadge}>
             <Text style={styles.promotionText}>
-              PROMOÃƒÆ’Ã‚â€¡ÃƒÆ’Ã‚Æ’O
+              PROMOÇÃO
             </Text>
           </View>
         )}
@@ -292,11 +292,11 @@ const AllBusinessesScreen: React.FC = () => {
             <Text style={styles.emptyTitle}>
               {userCity
                 ? `Nenhum estabelecimento encontrado em ${userCity}`
-                : 'Nenhum estabelecimento encontrado na sua regiÃƒÆ’Ã‚Â£o'
+                : 'Nenhum estabelecimento encontrado na sua região'
               }
             </Text>
             <Text style={styles.emptyText}>
-              Tente ajustar sua localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o ou buscar em outras cidades prÃƒÆ’Ã‚Â³ximas.
+              Tente ajustar sua localização ou buscar em outras cidades próximas.
             </Text>
           </View>
         }

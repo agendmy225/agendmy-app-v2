@@ -1,10 +1,10 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useRealTimeLocation, UseRealTimeLocationResult } from '../features/business/hooks/useRealTimeLocation';
 
-// Criar o contexto para localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
+// Criar o contexto para localização
 const LocationContext = createContext<UseRealTimeLocationResult | undefined>(undefined);
 
-// Provider para o contexto de localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
+// Provider para o contexto de localização
 interface LocationProviderProps {
   children: ReactNode;
 }
@@ -19,7 +19,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({ children }) 
   );
 };
 
-// Hook para usar o contexto de localizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
+// Hook para usar o contexto de localização
 export const useLocation = (): UseRealTimeLocationResult => {
   const context = useContext(LocationContext);
   if (context === undefined) {

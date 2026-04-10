@@ -97,7 +97,7 @@ const LoginScreen: React.FC = () => {
       await saveCredentials();
     } catch (error) {
       const err = error as Error;
-      Alert.alert('Erro no Login', err.message || 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel fazer login. Verifique suas credenciais.');
+      Alert.alert('Erro no Login', err.message || 'Não foi possível fazer login. Verifique suas credenciais.');
     } finally {
       setIsLoading(false);
     }
@@ -126,13 +126,13 @@ const LoginScreen: React.FC = () => {
               Agend<Text style={styles.logoAccent}>My</Text>
             </Text>
             <Text style={styles.clientTypeText}>
-              {userType === 'client' ? 'CLIENTE' : 'PROPRIETÃƒÆ’Ã‚ÂRIO'}
+              {userType === 'client' ? 'CLIENTE' : 'PROPRIETÁRIO'}
             </Text>
             <Text style={styles.welcomeText}>BEM-VINDO!</Text>
             {rememberMe && email && password ? (
               <Text style={styles.savedCredentialsText}>Credenciais salvas! Clique em ENTRAR para acessar.</Text>
             ) : (
-              <Text style={styles.loginText}>JÃƒÆ’Ã‚Â¡ estÃƒÆ’Ã‚Â¡ cadastrado? FaÃƒÆ’Ã‚Â§a o login aqui.</Text>
+              <Text style={styles.loginText}>Já está cadastrado? Faça o login aqui.</Text>
             )}
           </View>
 
@@ -173,7 +173,7 @@ const LoginScreen: React.FC = () => {
                 onPress={() => setRememberMe(!rememberMe)}
               >
                 <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
-                  {rememberMe && <Text style={styles.checkmark}>ÃƒÂ¢Ã‚Å“Ã‚â€œ</Text>}
+                  {rememberMe && <Text style={styles.checkmark}>✓</Text>}
                 </View>
                 <Text style={styles.rememberMeText}>Lembrar-me</Text>
               </TouchableOpacity>

@@ -42,13 +42,13 @@ export const useMarkerImage = (
     try {
       const cacheFilePath = getCacheFilePath(id);
 
-      // Verifica se jÃƒÆ’Ã‚Â¡ existe no cache
+      // Verifica se já existe no cache
       if (enableCache && await RNFS.exists(cacheFilePath)) {
-        console.log(`ÃƒÂ°Ã‚Å¸Ã‚â€œÃ‚Â¦ Imagem do marker ${id} encontrada no cache local`);
+        console.log(`📦 Imagem do marker ${id} encontrada no cache local`);
         return cacheFilePath;
       }
 
-      console.log(`ÃƒÂ¢Ã‚Â¬Ã‚â€¡ÃƒÂ¯Ã‚Â¸Ã‚Â Baixando imagem do marker ${id}...`);
+      console.log(`⬇️ Baixando imagem do marker ${id}...`);
 
       // Faz download da imagem
       const downloadResult = await RNFS.downloadFile({
@@ -57,55 +57,55 @@ export const useMarkerImage = (
       }).promise;
 
       if (downloadResult.statusCode === 200) {
-        console.log(`ÃƒÂ¢Ã‚Å“Ã‚â€¦ Imagem do marker ${id} baixada com sucesso`);
+        console.log(`✅ Imagem do marker ${id} baixada com sucesso`);
         return cacheFilePath;
       } else {
         throw new Error(`Download falhou com status ${downloadResult.statusCode}`);
       }
     } catch (error) {
-      console.error(`ÃƒÂ¢Ã‚ÂÃ‚Å’ Erro ao baixar imagem do marker ${id}:`, error);
+      console.error(`❌ Erro ao baixar imagem do marker ${id}:`, error);
       throw error;
     }
   }, [enableCache]);
 
   const loadMarkerImage = useCallback(async () => {
     if (!businessId) {
-      setState(prev => ({ ...prev, error: 'BusinessId nÃƒÆ’Ã‚Â£o fornecido', isReady: false }));
+      setState(prev => ({ ...prev, error: 'BusinessId não fornecido', isReady: false }));
       return;
     }
 
     setState(prev => ({ ...prev, isLoading: true, error: undefined }));
 
     try {
-      console.log(`ÃƒÂ°Ã‚Å¸Ã‚Å½Ã‚Â¯ Carregando imagem do marker para business ${businessId}`);
+      console.log(`🎯 Carregando imagem do marker para business ${businessId}`);
 
       // Busca o logo na pasta do business no Firebase Storage
       const businessFolderRef = ref(storage, `businesses/${businessId}`);
       const files = await listAll(businessFolderRef);
 
-      // Procura por arquivos que comeÃƒÆ’Ã‚Â§am com 'logo_'
+      // Procura por arquivos que começam com 'logo_'
       const logoFile = files.items.find(item => item.name.startsWith('logo_'));
 
       if (!logoFile) {
-        throw new Error('Logo nÃƒÆ’Ã‚Â£o encontrado');
+        throw new Error('Logo não encontrado');
       }
 
-      // ObtÃƒÆ’Ã‚Â©m a URL de download do logo encontrado
+      // Obtém a URL de download do logo encontrado
       const downloadUrl = await getDownloadURL(logoFile);
 
       // Faz download e cache da imagem
       const localPath = await downloadAndCacheImage(downloadUrl, businessId);
 
-      // PrÃƒÆ’Ã‚Â©-carrega a imagem para garantir que estÃƒÆ’Ã‚Â¡ vÃƒÆ’Ã‚Â¡lida
+      // Pré-carrega a imagem para garantir que está válida
       await new Promise<void>((resolve, reject) => {
         Image.getSize(
           Platform.OS === 'android' ? `file://${localPath}` : localPath,
           (width, height) => {
-            console.log(`ÃƒÂ¢Ã‚Å“Ã‚â€¦ Imagem do marker ${businessId} validada: ${width}x${height}`);
+            console.log(`✅ Imagem do marker ${businessId} validada: ${width}x${height}`);
             resolve();
           },
           (error) => {
-            console.error(`ÃƒÂ¢Ã‚ÂÃ‚Å’ Erro ao validar imagem do marker ${businessId}:`, error);
+            console.error(`❌ Erro ao validar imagem do marker ${businessId}:`, error);
             reject(error);
           }
         );
@@ -121,11 +121,11 @@ export const useMarkerImage = (
         isReady: true,
       });
 
-      console.log(`ÃƒÂ°Ã‚Å¸Ã‚Å½Ã‚Â¯ Marker image ready para business ${businessId}: ${finalUri}`);
+      console.log(`🎯 Marker image ready para business ${businessId}: ${finalUri}`);
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      console.error(`ÃƒÂ¢Ã‚ÂÃ‚Å’ Erro ao carregar imagem do marker ${businessId}:`, errorMessage);
+      console.error(`❌ Erro ao carregar imagem do marker ${businessId}:`, errorMessage);
 
       setState({
         isLoading: false,
@@ -140,10 +140,10 @@ export const useMarkerImage = (
       const cacheFilePath = getCacheFilePath(businessId);
       if (await RNFS.exists(cacheFilePath)) {
         await RNFS.unlink(cacheFilePath);
-        console.log(`ÃƒÂ°Ã‚Å¸Ã‚â€”Ã‚â€˜ÃƒÂ¯Ã‚Â¸Ã‚Â Cache da imagem do marker ${businessId} removido`);
+        console.log(`🗑️ Cache da imagem do marker ${businessId} removido`);
       }
     } catch (error) {
-      console.error(`ÃƒÂ¢Ã‚ÂÃ‚Å’ Erro ao limpar cache do marker ${businessId}:`, error);
+      console.error(`❌ Erro ao limpar cache do marker ${businessId}:`, error);
     }
   };
 
@@ -161,7 +161,7 @@ export const useMarkerImage = (
 };
 
 /**
- * Hook para carregar mÃƒÆ’Ã‚Âºltiplas imagens de marcadores
+ * Hook para carregar múltiplas imagens de marcadores
  */
 export const useMultipleMarkerImages = (
   businessIds: string[]
@@ -175,7 +175,7 @@ export const useMultipleMarkerImages = (
     if (businessIds.length === 0) return;
 
     setIsLoading(true);
-    console.log(`ÃƒÂ°Ã‚Å¸Ã‚Å½Ã‚Â¯ Carregando ${businessIds.length} imagens de marcadores...`);
+    console.log(`🎯 Carregando ${businessIds.length} imagens de marcadores...`);
 
     const newStates = new Map<string, MarkerImageState>();
 
@@ -197,14 +197,14 @@ export const useMultipleMarkerImages = (
             const businessFolderRef = ref(storage, `businesses/${businessId}`);
             const files = await listAll(businessFolderRef);
 
-            // Procura por arquivos que comeÃƒÆ’Ã‚Â§am com 'logo_'
+            // Procura por arquivos que começam com 'logo_'
             const logoFile = files.items.find(item => item.name.startsWith('logo_'));
 
             if (!logoFile) {
-              throw new Error('Logo nÃƒÆ’Ã‚Â£o encontrado');
+              throw new Error('Logo não encontrado');
             }
 
-            // ObtÃƒÆ’Ã‚Â©m a URL de download do logo encontrado
+            // Obtém a URL de download do logo encontrado
             const downloadUrl = await getDownloadURL(logoFile);
 
             // Atualiza estado individual
@@ -235,7 +235,7 @@ export const useMultipleMarkerImages = (
     }
 
     setIsLoading(false);
-    console.log(`ÃƒÂ¢Ã‚Å“Ã‚â€¦ Carregamento de marcadores concluÃƒÆ’Ã‚Â­do`);
+    console.log(`✅ Carregamento de marcadores concluído`);
   }, [businessIds]);
 
   useEffect(() => {

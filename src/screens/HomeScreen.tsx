@@ -1,4 +1,4 @@
-ÃƒÂ¯Ã‚Â»Ã‚Â¿import { useFocusEffect, useNavigation, CompositeNavigationProp } from '@react-navigation/native';
+﻿import { useFocusEffect, useNavigation, CompositeNavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {

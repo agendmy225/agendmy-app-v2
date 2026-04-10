@@ -1,8 +1,8 @@
-// Lista de categorias predefinidas para negÃƒÆ’Ã‚Â³cios
+// Lista de categorias predefinidas para negócios
 export const BUSINESS_CATEGORIES = [
-  { id: 'saloes-beleza', name: 'SalÃƒÆ’Ã‚Âµes de Beleza', icon: 'content-cut' },
+  { id: 'saloes-beleza', name: 'Salões de Beleza', icon: 'content-cut' },
   { id: 'barbearias', name: 'Barbearias', icon: 'storefront' },
-  { id: 'estetica', name: 'EstÃƒÆ’Ã‚Â©tica', icon: 'spa' },
+  { id: 'estetica', name: 'Estética', icon: 'spa' },
   { id: 'pet-shops', name: 'Pet Shops', icon: 'pets' },
   { id: 'tatuagem', name: 'Tatuagem', icon: 'brush' },
   { id: 'academia', name: 'Academias', icon: 'fitness-center' },

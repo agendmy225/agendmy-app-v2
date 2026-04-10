@@ -58,26 +58,26 @@ const PromotionManagementScreen: React.FC = () => {
     try {
       setLoading(true);
 
-      // Buscar negÃƒÆ’Ã‚Â³cio do proprietÃƒÆ’Ã‚Â¡rio
+      // Buscar negócio do proprietário
       const businessData = await getBusinessByOwnerId(user.uid);
       if (!businessData) {
-        Alert.alert('Erro', 'NegÃƒÆ’Ã‚Â³cio nÃƒÆ’Ã‚Â£o encontrado');
+        Alert.alert('Erro', 'Negócio não encontrado');
         navigation.goBack();
         return;
       }
       setBusiness(businessData);
 
-      // Buscar serviÃƒÆ’Ã‚Â§os do negÃƒÆ’Ã‚Â³cio
+      // Buscar serviços do negócio
       const servicesData = await getServicesByBusiness(businessData.id);
       setServices(servicesData);
 
-      // Mapear serviÃƒÆ’Ã‚Â§os para promoÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes, carregando dados existentes
+      // Mapear serviços para promoções, carregando dados existentes
       const promotionsList: Promotion[] = servicesData.map(service => {
         const discountPercentage = service.discountPercentage ?? 0;
         const isActive = service.isPromotionActive ?? false;
         const originalPrice = service.price;
 
-        // Recalcula o preÃƒÆ’Ã‚Â§o promocional com base nos dados do serviÃƒÆ’Ã‚Â§o
+        // Recalcula o preço promocional com base nos dados do serviço
         const promotionalPrice = isActive
           ? calculatePromotionalPrice(originalPrice, discountPercentage)
           : originalPrice;
@@ -95,7 +95,7 @@ const PromotionManagementScreen: React.FC = () => {
       setPromotions(promotionsList);
     } catch (error: any) {
       console.error('Error loading promotion data:', error);
-      Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel carregar os dados');
+      Alert.alert('Erro', 'Não foi possível carregar os dados');
     } finally {
       setLoading(false);
     }
@@ -123,7 +123,7 @@ const PromotionManagementScreen: React.FC = () => {
 
     const discount = parseInt(discountInput, 10);
     if (isNaN(discount) || discount < 0 || discount > 100) {
-      Alert.alert('Erro', 'Por favor, insira um desconto vÃƒÆ’Ã‚Â¡lido entre 0 e 100');
+      Alert.alert('Erro', 'Por favor, insira um desconto válido entre 0 e 100');
       return;
     }
 
@@ -147,7 +147,7 @@ const PromotionManagementScreen: React.FC = () => {
     const updatedPromotions = promotions.map(promo => {
       if (promo.serviceId === serviceId) {
         const isActive = !promo.isActive;
-        // Se a promoÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o for desativada, o preÃƒÆ’Ã‚Â§o promocional volta a ser o original
+        // Se a promoção for desativada, o preço promocional volta a ser o original
         const promotionalPrice = isActive
           ? calculatePromotionalPrice(promo.originalPrice, promo.discountPercentage)
           : promo.originalPrice;
@@ -186,11 +186,11 @@ const PromotionManagementScreen: React.FC = () => {
         hasActivePromotions,
       });
 
-      Alert.alert('Sucesso', 'PromoÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes salvas com sucesso!');
+      Alert.alert('Sucesso', 'Promoções salvas com sucesso!');
       navigation.goBack();
     } catch (error: any) {
       console.error('Error saving promotions:', error);
-      Alert.alert('Erro', 'NÃƒÆ’Ã‚Â£o foi possÃƒÆ’Ã‚Â­vel salvar as promoÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes');
+      Alert.alert('Erro', 'Não foi possível salvar as promoções');
     } finally {
       setSaving(false);
     }
@@ -200,7 +200,7 @@ const PromotionManagementScreen: React.FC = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Carregando serviÃƒÆ’Ã‚Â§os...</Text>
+        <Text style={styles.loadingText}>Carregando serviços...</Text>
       </View>
     );
   }
@@ -214,7 +214,7 @@ const PromotionManagementScreen: React.FC = () => {
         >
           <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Gerenciar PromoÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes</Text>
+        <Text style={styles.headerTitle}>Gerenciar Promoções</Text>
         <TouchableOpacity
           style={styles.saveButton}
           onPress={savePromotions}
@@ -232,8 +232,8 @@ const PromotionManagementScreen: React.FC = () => {
         <View style={styles.infoCard}>
           <Icon name="info" size={24} color={colors.primary} />
           <Text style={styles.infoText}>
-            Ative promoÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes para seus serviÃƒÆ’Ã‚Â§os e atraia mais clientes!
-            Os serviÃƒÆ’Ã‚Â§os em promoÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o aparecerÃƒÆ’Ã‚Â£o em destaque no app.
+            Ative promoções para seus serviços e atraia mais clientes!
+            Os serviços em promoção aparecerão em destaque no app.
           </Text>
         </View>
 
@@ -241,13 +241,13 @@ const PromotionManagementScreen: React.FC = () => {
           <View style={styles.emptyContainer}>
             <Icon name="inventory-2" size={64} color={colors.lightText} />
             <Text style={styles.emptyText}>
-              Nenhum serviÃƒÆ’Ã‚Â§o cadastrado ainda.
+              Nenhum serviço cadastrado ainda.
             </Text>
             <TouchableOpacity
               style={styles.addServiceButton}
               onPress={() => navigation.goBack()}
             >
-              <Text style={styles.addServiceButtonText}>Adicionar ServiÃƒÆ’Ã‚Â§os</Text>
+              <Text style={styles.addServiceButtonText}>Adicionar Serviços</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -266,7 +266,7 @@ const PromotionManagementScreen: React.FC = () => {
 
                 <View style={styles.priceContainer}>
                   <View style={styles.priceInfo}>
-                    <Text style={styles.priceLabel}>PreÃƒÆ’Ã‚Â§o Original:</Text>
+                    <Text style={styles.priceLabel}>Preço Original:</Text>
                     <Text style={styles.originalPrice}>
                       R$ {promotion.originalPrice.toFixed(2)}
                     </Text>
@@ -274,7 +274,7 @@ const PromotionManagementScreen: React.FC = () => {
 
                   {promotion.isActive && promotion.discountPercentage > 0 && (
                     <View style={styles.priceInfo}>
-                      <Text style={styles.priceLabel}>PreÃƒÆ’Ã‚Â§o Promocional:</Text>
+                      <Text style={styles.priceLabel}>Preço Promocional:</Text>
                       <Text style={styles.promotionalPrice}>
                         R$ {promotion.promotionalPrice.toFixed(2)}
                       </Text>
@@ -332,7 +332,7 @@ const PromotionManagementScreen: React.FC = () => {
 
             {discountInput && !isNaN(parseInt(discountInput, 10)) && (
               <View style={styles.previewContainer}>
-                <Text style={styles.previewLabel}>PreÃƒÆ’Ã‚Â§o com desconto:</Text>
+                <Text style={styles.previewLabel}>Preço com desconto:</Text>
                 <Text style={styles.previewPrice}>
                   R$ {calculatePromotionalPrice(
                     selectedPromotion?.originalPrice || 0,
