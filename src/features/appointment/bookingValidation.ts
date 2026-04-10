@@ -4,7 +4,7 @@ import { getBusinessById } from '../../services/businesses';
 import { firebaseDb, collection, query, where, getDocs } from '../../config/firebase';
 
 /**
- * Valida se é possível agendar para o business/profissional/data/hora
+ * Valida se Ã© possÃ­vel agendar para o business/profissional/data/hora
  * Retorna { valid: boolean, reason?: string }
  */
 export async function canBookAppointment({
@@ -20,28 +20,28 @@ export async function canBookAppointment({
   date: string;
   time: string;
 }): Promise<{ valid: boolean; reason?: string }> {
-  // 1. Verifica se existe serviço ativo
+  // 1. Verifica se existe serviÃ§o ativo
   const services = await getServicesByBusiness(businessId);
   if (!services.length) {
-    return { valid: false, reason: 'Nenhum serviço ativo disponível.' };
+    return { valid: false, reason: 'Nenhum serviÃ§o ativo disponÃ­vel.' };
   }
   if (!services.find((s: Service) => s.id === serviceId)) {
-    return { valid: false, reason: 'Serviço selecionado não encontrado.' };
+    return { valid: false, reason: 'ServiÃ§o selecionado nÃ£o encontrado.' };
   }
 
   // 2. Verifica se existe profissional ativo
   const professionals = await getProfessionalsByBusiness(businessId);
   if (!professionals.length) {
-    return { valid: false, reason: 'Nenhum profissional ativo disponível.' };
+    return { valid: false, reason: 'Nenhum profissional ativo disponÃ­vel.' };
   }
   if (!professionals.find((p: Professional) => p.id === professionalId)) {
-    return { valid: false, reason: 'Profissional selecionado não encontrado.' };
+    return { valid: false, reason: 'Profissional selecionado nÃ£o encontrado.' };
   }
 
-  // 3. Verifica horário de funcionamento do business
+  // 3. Verifica horÃ¡rio de funcionamento do business
   const business = await getBusinessById(businessId);
   if (!business) {
-    return { valid: false, reason: 'Estabelecimento não encontrado.' };
+    return { valid: false, reason: 'Estabelecimento nÃ£o encontrado.' };
   }
   const dayOfWeek = [
     'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',
@@ -51,10 +51,10 @@ export async function canBookAppointment({
     return { valid: false, reason: 'Estabelecimento fechado neste dia.' };
   }
   if (time < wh.start || time >= wh.end) {
-    return { valid: false, reason: 'Horário fora do expediente do estabelecimento.' };
+    return { valid: false, reason: 'HorÃ¡rio fora do expediente do estabelecimento.' };
   }
 
-  // 4. Verifica se já existe agendamento para o profissional neste horário
+  // 4. Verifica se jÃ¡ existe agendamento para o profissional neste horÃ¡rio
   const snapshot = await getDocs(
     query(
       collection(firebaseDb, 'appointments'),
@@ -66,7 +66,7 @@ export async function canBookAppointment({
     )
   );
   if (!snapshot.empty) {
-    return { valid: false, reason: 'Já existe agendamento para este profissional neste horário.' };
+    return { valid: false, reason: 'JÃ¡ existe agendamento para este profissional neste horÃ¡rio.' };
   }
 
   // Se chegou aqui, pode agendar

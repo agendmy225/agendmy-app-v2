@@ -12,7 +12,7 @@ interface CategoryIconMarkerProps {
 
 const MARKER_SIZE = 40;
 
-// Mapeamento de categorias para ícones do Material Icons
+// Mapeamento de categorias para Ã­cones do Material Icons
 const getCategoryIcon = (category: string): string => {
   switch (category) {
     case 'saloes-beleza':
@@ -28,7 +28,7 @@ const getCategoryIcon = (category: string): string => {
     case 'academia':
       return 'fitness-center'; // Academia
     case 'odontologia':
-      return 'local-hospital'; // Hospital/saúde
+      return 'local-hospital'; // Hospital/saÃºde
     case 'fisioterapia':
       return 'accessibility'; // Acessibilidade
     case 'massagem':
@@ -36,11 +36,11 @@ const getCategoryIcon = (category: string): string => {
     case 'manicure':
       return 'colorize'; // Colorir/manicure
     default:
-      return 'store'; // Ícone padrão para loja
+      return 'store'; // Ãcone padrÃ£o para loja
   }
 };
 
-// Cores específicas para cada categoria
+// Cores especÃ­ficas para cada categoria
 const getCategoryColor = (category: string): string => {
   switch (category) {
     case 'saloes-beleza':
@@ -64,7 +64,7 @@ const getCategoryColor = (category: string): string => {
     case 'manicure':
       return '#FF5722'; // Laranja avermelhado
     default:
-      return colors.primary; // Cor padrão
+      return colors.primary; // Cor padrÃ£o
   }
 };
 
@@ -79,7 +79,7 @@ export const CategoryIconMarker: React.FC<CategoryIconMarkerProps> = memo(({ bus
     return () => clearTimeout(timer);
   }, [business.id]);
 
-  // Não renderiza se não tiver localização
+  // NÃ£o renderiza se nÃ£o tiver localizaÃ§Ã£o
   if (!business.location?.latitude || !business.location?.longitude) {
     return null;
   }
@@ -97,7 +97,7 @@ export const CategoryIconMarker: React.FC<CategoryIconMarkerProps> = memo(({ bus
       onPress={onPress}
       title={business.name}
       description={business.description}
-      // Para de rastrear mudanças quando renderização estiver completa
+      // Para de rastrear mudanÃ§as quando renderizaÃ§Ã£o estiver completa
       tracksViewChanges={!isRenderComplete}
     >
       <View style={styles.markerContainer}>
@@ -108,7 +108,7 @@ export const CategoryIconMarker: React.FC<CategoryIconMarkerProps> = memo(({ bus
             color={colors.white} 
           />
         </View>
-        {/* Pequeno triângulo apontando para baixo */}
+        {/* Pequeno triÃ¢ngulo apontando para baixo */}
         <View style={[styles.markerTriangle, { borderTopColor: backgroundColor }]} />
       </View>
     </Marker>

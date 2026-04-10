@@ -1,21 +1,21 @@
 // Paleta de cores do aplicativo AgendMy
 const colors = {  // Paleta Principal do App AGENDMY
-  primary: '#3D312A',      // Cor primária do app
+  primary: '#3D312A',      // Cor primÃ¡ria do app
   background: '#FFEFEF',   // Cor de fundo principal (MUDOU PARA PRETO)
   accent: '#000000',       // Cor de destaque (preto)
 
-  // Gradiente de fundo (bem leve: off-white quase puro até um toque sutil de vermelho claro)
-  backgroundGradientStart: '#FCFCFC',   // “off-white” quase puro
-  backgroundGradientEnd: '#D3102720',   // “gelo avermelhado” muito transparente (~12% de opacidade)
-  // Cores básicas e utilitárias
-  text: '#333333',          // Texto escuro padrão
+  // Gradiente de fundo (bem leve: off-white quase puro atÃ© um toque sutil de vermelho claro)
+  backgroundGradientStart: '#FCFCFC',   // â€œoff-whiteâ€ quase puro
+  backgroundGradientEnd: '#D3102720',   // â€œgelo avermelhadoâ€ muito transparente (~12% de opacidade)
+  // Cores bÃ¡sicas e utilitÃ¡rias
+  text: '#333333',          // Texto escuro padrÃ£o
   lightText: '#777777',     // Texto claro para legendas, placeholders
   offWhite: '#FAFAFA',      // Off-white para textos em fundos escuros
   white: '#FFFFFF',
   black: '#000000',
-  gray: '#cccccc',          // Cinza médio para elementos neutros
+  gray: '#cccccc',          // Cinza mÃ©dio para elementos neutros
   lightGray: '#eeeeee',     // Para bordas, divisores, fundos de input sutis
-  card: '#f5f5f5',         // Cor para cards e superfícies elevadas
+  card: '#f5f5f5',         // Cor para cards e superfÃ­cies elevadas
 
   // Cores de feedback
   error: '#D32F2F',         // Vermelho para erros
@@ -27,15 +27,15 @@ const colors = {  // Paleta Principal do App AGENDMY
   logoGradientEnd: '#d31027',
 
   transparent: 'transparent',
-  // Cores Adicionais com base nas Referências Visuais
-  brandRed: '#d31027', // Cor dos botões e fundos nas telas de login de referência
+  // Cores Adicionais com base nas ReferÃªncias Visuais
+  brandRed: '#d31027', // Cor dos botÃµes e fundos nas telas de login de referÃªncia
   placeholderText: '#999999', // Texto placeholder em inputs
   welcomeText: '#FFFFFF',
   authButtonInactiveBackground: 'rgba(255, 255, 255, 0.3)',
   authButtonInactiveText: '#FFFFFF',
 };
 
-// Estrutura compatível com sistema de temas
+// Estrutura compatÃ­vel com sistema de temas
 const Colors = {
   light: {
     text: colors.text,

@@ -8,32 +8,32 @@ export const validatePassword = (password: string): PasswordValidation => {
     const errors: string[] = [];
     let strength: 'weak' | 'medium' | 'strong' = 'weak';
 
-    // Verificar comprimento mínimo
+    // Verificar comprimento mÃ­nimo
     if (password.length < 8) {
         errors.push('A senha deve ter pelo menos 8 caracteres');
     }
 
-    // Verificar se contém pelo menos uma letra minúscula
+    // Verificar se contÃ©m pelo menos uma letra minÃºscula
     if (!/[a-z]/.test(password)) {
-        errors.push('A senha deve conter pelo menos uma letra minúscula');
+        errors.push('A senha deve conter pelo menos uma letra minÃºscula');
     }
 
-    // Verificar se contém pelo menos uma letra maiúscula
+    // Verificar se contÃ©m pelo menos uma letra maiÃºscula
     if (!/[A-Z]/.test(password)) {
-        errors.push('A senha deve conter pelo menos uma letra maiúscula');
+        errors.push('A senha deve conter pelo menos uma letra maiÃºscula');
     }
 
-    // Verificar se contém pelo menos um número
+    // Verificar se contÃ©m pelo menos um nÃºmero
     if (!/\d/.test(password)) {
-        errors.push('A senha deve conter pelo menos um número');
+        errors.push('A senha deve conter pelo menos um nÃºmero');
     }
 
-    // Verificar se contém pelo menos um caractere especial
+    // Verificar se contÃ©m pelo menos um caractere especial
     if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
         errors.push('A senha deve conter pelo menos um caractere especial');
     }
 
-    // Determinar força da senha
+    // Determinar forÃ§a da senha
     const hasLower = /[a-z]/.test(password);
     const hasUpper = /[A-Z]/.test(password);
     const hasNumber = /\d/.test(password);
@@ -75,7 +75,7 @@ export const getPasswordStrengthText = (strength: 'weak' | 'medium' | 'strong'):
         case 'weak':
             return 'Fraca';
         case 'medium':
-            return 'Média';
+            return 'MÃ©dia';
         case 'strong':
             return 'Forte';
         default:

@@ -21,7 +21,7 @@ export type AvailabilityDay = {
 };
 export type TimeSlot = { time: string; available: boolean };
 
-const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'SÃ¡b'];
 const MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
@@ -121,7 +121,7 @@ export const getAvailableDays = async (
       };
     });
   } catch {
-    Alert.alert('Erro', 'Não foi possível carregar os dias disponíveis.');
+    Alert.alert('Erro', 'NÃ£o foi possÃ­vel carregar os dias disponÃ­veis.');
     return [];
   }
 };
@@ -142,7 +142,7 @@ export const getAvailableTimeSlots = async (
     if (!daySchedule) return [];
 
     const service = await getServiceById(businessId, serviceId);
-    if (!service) { Alert.alert('Erro', 'Serviço não encontrado.'); return []; }
+    if (!service) { Alert.alert('Erro', 'ServiÃ§o nÃ£o encontrado.'); return []; }
 
     const serviceDuration =
       typeof service.duration === 'string' ? parseInt(service.duration, 10) : service.duration as number;
@@ -181,7 +181,7 @@ export const getAvailableTimeSlots = async (
 
     return slots;
   } catch {
-    Alert.alert('Erro', 'Não foi possível carregar os horários disponíveis.');
+    Alert.alert('Erro', 'NÃ£o foi possÃ­vel carregar os horÃ¡rios disponÃ­veis.');
     return [];
   }
 };

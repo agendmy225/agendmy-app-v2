@@ -38,12 +38,12 @@ export interface Review {
   };
 }
 
-// Adicionar uma nova avaliação
+// Adicionar uma nova avaliaÃ§Ã£o
 export const addReview = async (
   review: Omit<Review, 'id' | 'date' | 'status'>,
 ): Promise<string> => {
   try {
-    console.log('Adicionando nova avaliação:', { businessId: review.businessId, userId: review.userId, rating: review.rating });
+    console.log('Adicionando nova avaliaÃ§Ã£o:', { businessId: review.businessId, userId: review.userId, rating: review.rating });
 
     const reviewData = {
       ...review,
@@ -59,31 +59,31 @@ export const addReview = async (
     );
     const docRef = await addDoc(reviewsCollectionRef, reviewData);
 
-    console.log('Avaliação adicionada com sucesso, ID:', docRef.id);
+    console.log('AvaliaÃ§Ã£o adicionada com sucesso, ID:', docRef.id);
 
-    // Atualizar média de avaliações do estabelecimento
+    // Atualizar mÃ©dia de avaliaÃ§Ãµes do estabelecimento
     await updateBusinessRating(review.businessId);
 
-    // Atualizar média de avaliações do profissional, se aplicável
+    // Atualizar mÃ©dia de avaliaÃ§Ãµes do profissional, se aplicÃ¡vel
     if (review.professionalId) {
       await updateProfessionalRating(review.professionalId);
     }
 
     return docRef.id;
   } catch (error) {
-    console.error('Erro ao adicionar avaliação:', error);
+    console.error('Erro ao adicionar avaliaÃ§Ã£o:', error);
     throw error;
   }
 };
 
-// Buscar avaliações de um estabelecimento
+// Buscar avaliaÃ§Ãµes de um estabelecimento
 export const getBusinessReviews = async (
   businessId: string,
   status: 'all' | 'pending' | 'approved' | 'rejected' = 'approved',
   limitNum = 10, // Renomeado para evitar conflito
 ): Promise<Review[]> => {
   try {
-    console.log('Buscando avaliações do estabelecimento:', businessId, 'Status:', status);
+    console.log('Buscando avaliaÃ§Ãµes do estabelecimento:', businessId, 'Status:', status);
 
     const reviewsCollectionRef = collection(
       firebaseDb,
@@ -97,7 +97,7 @@ export const getBusinessReviews = async (
       q = query(q, where('status', '==', status));
     }
 
-    q = query(q, firestoreLimit(limitNum)); // Usando a função renomeada
+    q = query(q, firestoreLimit(limitNum)); // Usando a funÃ§Ã£o renomeada
 
     const reviewsSnapshot = await getDocs(q);
 
@@ -110,22 +110,22 @@ export const getBusinessReviews = async (
       });
     });
 
-    console.log(`Encontradas ${reviews.length} avaliações para o estabelecimento ${businessId}`);
+    console.log(`Encontradas ${reviews.length} avaliaÃ§Ãµes para o estabelecimento ${businessId}`);
     return reviews;
   } catch (error) {
-    console.error('Erro ao buscar avaliações do estabelecimento:', error);
+    console.error('Erro ao buscar avaliaÃ§Ãµes do estabelecimento:', error);
     throw error;
   }
 };
 
-// Buscar avaliações de um profissional
+// Buscar avaliaÃ§Ãµes de um profissional
 export const getProfessionalReviews = async (
   professionalId: string,
   status: 'all' | 'pending' | 'approved' | 'rejected' = 'approved',
   limitNum = 10, // Renomeado para evitar conflito
 ): Promise<Review[]> => {
   try {
-    console.log('Buscando avaliações do profissional:', professionalId, 'Status:', status);
+    console.log('Buscando avaliaÃ§Ãµes do profissional:', professionalId, 'Status:', status);
 
     // This query is complex across all businesses.
     // For performance, it's better to query reviews per business
@@ -141,7 +141,7 @@ export const getProfessionalReviews = async (
       q = query(q, where('status', '==', status));
     }
 
-    const reviewsSnapshot = await getDocs(query(q, firestoreLimit(limitNum))); // Usando a função renomeada
+    const reviewsSnapshot = await getDocs(query(q, firestoreLimit(limitNum))); // Usando a funÃ§Ã£o renomeada
 
     const reviews: Review[] = [];
 
@@ -152,26 +152,26 @@ export const getProfessionalReviews = async (
       });
     });
 
-    console.log(`Encontradas ${reviews.length} avaliações para o profissional ${professionalId}`);
+    console.log(`Encontradas ${reviews.length} avaliaÃ§Ãµes para o profissional ${professionalId}`);
     return reviews;
   } catch (error) {
-    console.error('Erro ao buscar avaliações do profissional:', error);
+    console.error('Erro ao buscar avaliaÃ§Ãµes do profissional:', error);
     throw error;
   }
 };
 
-// Buscar avaliações de um usuário
+// Buscar avaliaÃ§Ãµes de um usuÃ¡rio
 export const getUserReviews = async (
   userId: string,
   limitNum = 10, // Renomeado para evitar conflito
 ): Promise<Review[]> => {
   try {
-    // Buscar reviews em todas as subcoleções de reviews usando collectionGroup
+    // Buscar reviews em todas as subcoleÃ§Ãµes de reviews usando collectionGroup
     const q = query(
       collectionGroup(firebaseDb, 'reviews'),
       where('userId', '==', userId),
       orderBy('date', 'desc'),
-      firestoreLimit(limitNum), // Usando a função renomeada
+      firestoreLimit(limitNum), // Usando a funÃ§Ã£o renomeada
     );
     const reviewsSnapshot = await getDocs(q);
 
@@ -186,12 +186,12 @@ export const getUserReviews = async (
 
     return reviews;
   } catch (error) {
-    console.error('Erro ao buscar avaliações do usuário:', error);
+    console.error('Erro ao buscar avaliaÃ§Ãµes do usuÃ¡rio:', error);
     throw error;
   }
 };
 
-// Aprovar uma avaliação
+// Aprovar uma avaliaÃ§Ã£o
 export const approveReview = async (
   businessId: string,
   reviewId: string,
@@ -208,16 +208,16 @@ export const approveReview = async (
       status: 'approved',
     });
 
-    // Buscar dados da avaliação para atualizar médias
+    // Buscar dados da avaliaÃ§Ã£o para atualizar mÃ©dias
     const reviewDoc = await getDoc(reviewRef);
 
     if (reviewDoc.exists()) {
       const reviewData = reviewDoc.data() as Review;
 
-      // Atualizar média de avaliações do estabelecimento
+      // Atualizar mÃ©dia de avaliaÃ§Ãµes do estabelecimento
       await updateBusinessRating(reviewData.businessId);
 
-      // Atualizar média de avaliações do profissional, se aplicável
+      // Atualizar mÃ©dia de avaliaÃ§Ãµes do profissional, se aplicÃ¡vel
       if (reviewData.professionalId) {
         await updateProfessionalRating(reviewData.professionalId);
       }
@@ -227,7 +227,7 @@ export const approveReview = async (
   }
 };
 
-// Rejeitar uma avaliação
+// Rejeitar uma avaliaÃ§Ã£o
 export const rejectReview = async (
   businessId: string,
   reviewId: string,
@@ -248,7 +248,7 @@ export const rejectReview = async (
   }
 };
 
-// Responder a uma avaliação
+// Responder a uma avaliaÃ§Ã£o
 export const respondToReview = async (
   businessId: string,
   reviewId: string,
@@ -273,14 +273,14 @@ export const respondToReview = async (
   }
 };
 
-// Atualizar média de avaliações do estabelecimento
+// Atualizar mÃ©dia de avaliaÃ§Ãµes do estabelecimento
 export const updateBusinessRating = async (
   businessId: string,
 ): Promise<number> => {
   try {
     console.log('Atualizando rating do estabelecimento:', businessId);
 
-    // Buscar todas as avaliações aprovadas deste estabelecimento
+    // Buscar todas as avaliaÃ§Ãµes aprovadas deste estabelecimento
     const reviewsCollectionRef = collection(
       firebaseDb,
       'businesses',
@@ -301,9 +301,9 @@ export const updateBusinessRating = async (
 
     const averageRating = count > 0 ? totalRating / count : 0;
 
-    console.log(`Estabelecimento ${businessId}: ${count} avaliações, média ${averageRating.toFixed(1)}`);
+    console.log(`Estabelecimento ${businessId}: ${count} avaliaÃ§Ãµes, mÃ©dia ${averageRating.toFixed(1)}`);
 
-    // Atualizar a média no documento do estabelecimento
+    // Atualizar a mÃ©dia no documento do estabelecimento
     const businessRef = doc(firebaseDb, 'businesses', businessId);
     await updateDoc(businessRef, {
       rating: averageRating,
@@ -317,14 +317,14 @@ export const updateBusinessRating = async (
   }
 };
 
-// Atualizar média de avaliações do profissional
+// Atualizar mÃ©dia de avaliaÃ§Ãµes do profissional
 export const updateProfessionalRating = async (
   professionalId: string,
 ): Promise<number> => {
   try {
     console.log('Atualizando rating do profissional:', professionalId);
 
-    // Buscar todas as avaliações aprovadas deste profissional em todos os negócios
+    // Buscar todas as avaliaÃ§Ãµes aprovadas deste profissional em todos os negÃ³cios
     const q = query(
       collectionGroup(firebaseDb, 'reviews'), // Use collectionGroup
       where('professionalId', '==', professionalId),
@@ -343,9 +343,9 @@ export const updateProfessionalRating = async (
 
     const averageRating = count > 0 ? totalRating / count : 0;
 
-    console.log(`Profissional ${professionalId}: ${count} avaliações, média ${averageRating.toFixed(1)}`);
+    console.log(`Profissional ${professionalId}: ${count} avaliaÃ§Ãµes, mÃ©dia ${averageRating.toFixed(1)}`);
 
-    // Atualizar a média no documento do profissional
+    // Atualizar a mÃ©dia no documento do profissional
     const professionalRef = doc(firebaseDb, 'professionals', professionalId);
     await updateDoc(professionalRef, {
       rating: averageRating,
@@ -359,10 +359,10 @@ export const updateProfessionalRating = async (
   }
 };
 
-// Função para recalcular todas as contagens de avaliações
+// FunÃ§Ã£o para recalcular todas as contagens de avaliaÃ§Ãµes
 export const recalculateAllBusinessRatings = async (): Promise<void> => {
   try {
-    // Buscar todos os negócios
+    // Buscar todos os negÃ³cios
     const businessesSnapshot = await getDocs(collection(firebaseDb, 'businesses'));
 
     const promises: Promise<number>[] = [];

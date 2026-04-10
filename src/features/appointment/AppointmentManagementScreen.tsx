@@ -131,7 +131,7 @@ const AppointmentManagementScreen: React.FC = () => {
     }
     try {
       await updateAppointmentStatusService(id, newStatus);
-      // Atualizar localmente após sucesso
+      // Atualizar localmente apÃ³s sucesso
       setAppointments(prevAppointments =>
         prevAppointments.map(appointment =>
           appointment.id === id ? { ...appointment, status: newStatus } : appointment,
@@ -160,15 +160,15 @@ const AppointmentManagementScreen: React.FC = () => {
   const getStatusText = (status: Appointment['status']) => {
     switch (status) {
       case 'scheduled':
-        return 'Aguardando Confirmação';
+        return 'Aguardando ConfirmaÃ§Ã£o';
       case 'confirmed':
         return 'Confirmado';
       case 'completed':
-        return 'Concluído';
+        return 'ConcluÃ­do';
       case 'cancelled':
         return 'Cancelado';
       case 'no_show':
-        return 'Não Compareceu';
+        return 'NÃ£o Compareceu';
       default:
         return status;
     }
@@ -210,16 +210,16 @@ const AppointmentManagementScreen: React.FC = () => {
 
       <View style={styles.appointmentDetails}>
         <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Serviço:</Text>
-          <Text style={styles.detailValue}>{item.serviceName || 'Serviço Desconhecido'}</Text>
+          <Text style={styles.detailLabel}>ServiÃ§o:</Text>
+          <Text style={styles.detailValue}>{item.serviceName || 'ServiÃ§o Desconhecido'}</Text>
         </View>
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Profissional:</Text>
-          <Text style={styles.detailValue}>{item.professionalName || 'Profissional Não Atribuído'}</Text>
+          <Text style={styles.detailValue}>{item.professionalName || 'Profissional NÃ£o AtribuÃ­do'}</Text>
         </View>
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Data/Hora:</Text>
-          <Text style={styles.detailValue}>{item.date} às {item.time}</Text>
+          <Text style={styles.detailValue}>{item.date} Ã s {item.time}</Text>
         </View>
         {item.price !== undefined && (
           <View style={styles.detailRow}>
@@ -252,7 +252,7 @@ const AppointmentManagementScreen: React.FC = () => {
             style={[styles.actionButton, styles.completeButton]}
             onPress={() => handleUpdateStatus(item.id, 'completed')}
           >
-            <Text style={styles.actionButtonText}>Marcar como Concluído</Text>
+            <Text style={styles.actionButtonText}>Marcar como ConcluÃ­do</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -268,7 +268,7 @@ const AppointmentManagementScreen: React.FC = () => {
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Buscar por cliente, serviço ou profissional"
+          placeholder="Buscar por cliente, serviÃ§o ou profissional"
           value={searchText}
           onChangeText={setSearchText}
         />
@@ -305,7 +305,7 @@ const AppointmentManagementScreen: React.FC = () => {
             onPress={() => setActiveFilter('completed')}
           >
             <Text style={[styles.filterText, activeFilter === 'completed' && styles.activeFilterText]}>
-              Concluídos
+              ConcluÃ­dos
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -321,7 +321,7 @@ const AppointmentManagementScreen: React.FC = () => {
             onPress={() => setActiveFilter('no_show')}
           >
             <Text style={[styles.filterText, activeFilter === 'no_show' && styles.activeFilterText]}>
-              Não Compareceu
+              NÃ£o Compareceu
             </Text>
           </TouchableOpacity>
         </ScrollView>

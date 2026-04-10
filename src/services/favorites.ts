@@ -31,9 +31,9 @@ export interface FavoriteItem {
 // Adicionar estabelecimento aos favoritos
 export const addToFavorites = async (business: Business): Promise<void> => {
   try {
-    const currentUser = firebaseAuth.currentUser; // Usar instância firebaseAuth
+    const currentUser = firebaseAuth.currentUser; // Usar instÃ¢ncia firebaseAuth
     if (!currentUser) {
-      throw new Error('Usuário não autenticado');
+      throw new Error('UsuÃ¡rio nÃ£o autenticado');
     }
 
     const favoriteData = {
@@ -57,9 +57,9 @@ export const addToFavorites = async (business: Business): Promise<void> => {
 // Remover estabelecimento dos favoritos
 export const removeFromFavorites = async (businessId: string): Promise<void> => {
   try {
-    const currentUser = firebaseAuth.currentUser; // Usar instância firebaseAuth
+    const currentUser = firebaseAuth.currentUser; // Usar instÃ¢ncia firebaseAuth
     if (!currentUser) {
-      throw new Error('Usuário não autenticado');
+      throw new Error('UsuÃ¡rio nÃ£o autenticado');
     }
 
     const favoriteDocRef = doc(firebaseDb, 'favorites', `${currentUser.uid}_${businessId}`);
@@ -70,10 +70,10 @@ export const removeFromFavorites = async (businessId: string): Promise<void> => 
   }
 };
 
-// Verificar se estabelecimento está nos favoritos
+// Verificar se estabelecimento estÃ¡ nos favoritos
 export const isFavorite = async (businessId: string): Promise<boolean> => {
   try {
-    const currentUser = firebaseAuth.currentUser; // Usar instância firebaseAuth
+    const currentUser = firebaseAuth.currentUser; // Usar instÃ¢ncia firebaseAuth
     if (!currentUser) {
       return false;
     }
@@ -88,10 +88,10 @@ export const isFavorite = async (businessId: string): Promise<boolean> => {
   }
 };
 
-// Obter lista de favoritos do usuário
+// Obter lista de favoritos do usuÃ¡rio
 export const getUserFavorites = async (): Promise<FavoriteItem[]> => {
   try {
-    const currentUser = firebaseAuth.currentUser; // Usar instância firebaseAuth
+    const currentUser = firebaseAuth.currentUser; // Usar instÃ¢ncia firebaseAuth
     if (!currentUser) {
       return [];
     }
@@ -127,13 +127,13 @@ export const getUserFavorites = async (): Promise<FavoriteItem[]> => {
   }
 };
 
-// Listener para mudanças nos favoritos
+// Listener para mudanÃ§as nos favoritos
 export const subscribeFavorites = (
   onFavoritesUpdate: (favorites: FavoriteItem[]) => void,
 ): (() => void) => {
-  const currentUser = firebaseAuth.currentUser; // Usar instância firebaseAuth
+  const currentUser = firebaseAuth.currentUser; // Usar instÃ¢ncia firebaseAuth
   if (!currentUser) {
-    return () => { }; // Retorna uma função vazia para o unsubscribe
+    return () => { }; // Retorna uma funÃ§Ã£o vazia para o unsubscribe
   }
 
   const favoritesCollectionRef = collection(firebaseDb, 'favorites');
@@ -182,7 +182,7 @@ export const useFavorites = () => {
 
     loadFavorites();
 
-    // Listener para mudanças em tempo real
+    // Listener para mudanÃ§as em tempo real
     const unsubscribe = subscribeFavorites((updatedFavorites) => {
       setFavorites(updatedFavorites);
       setLoading(false);

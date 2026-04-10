@@ -2,8 +2,8 @@
 import { doc, getDoc, updateDoc, firebaseDb } from '../config/firebase';
 
 /**
- * Atualiza a taxa de comissão padrão do estabelecimento
- * Esta função deve ser chamada quando o proprietário configurar a taxa nas configurações
+ * Atualiza a taxa de comissÃ£o padrÃ£o do estabelecimento
+ * Esta funÃ§Ã£o deve ser chamada quando o proprietÃ¡rio configurar a taxa nas configuraÃ§Ãµes
  */
 export const updateDefaultCommissionRate = async (
   businessId: string,
@@ -11,11 +11,11 @@ export const updateDefaultCommissionRate = async (
 ): Promise<void> => {
   try {
     if (!businessId) {
-      throw new Error('ID do estabelecimento é obrigatório');
+      throw new Error('ID do estabelecimento Ã© obrigatÃ³rio');
     }
 
     if (!commissionRate || commissionRate <= 0 || commissionRate > 1) {
-      throw new Error('Taxa de comissão deve estar entre 0.01 (1%) e 1.0 (100%)');
+      throw new Error('Taxa de comissÃ£o deve estar entre 0.01 (1%) e 1.0 (100%)');
     }
 
     const businessDocRef = doc(firebaseDb, 'businesses', businessId);
@@ -25,15 +25,15 @@ export const updateDefaultCommissionRate = async (
       updatedAt: new Date(),
     });
 
-    console.log('✅ Taxa de comissão padrão atualizada:', commissionRate);
+    console.log('âœ… Taxa de comissÃ£o padrÃ£o atualizada:', commissionRate);
   } catch (error) {
-    console.error('❌ Erro ao atualizar taxa de comissão:', error);
+    console.error('âŒ Erro ao atualizar taxa de comissÃ£o:', error);
     throw error;
   }
 };
 
 /**
- * Atualiza a taxa de comissão específica de um profissional
+ * Atualiza a taxa de comissÃ£o especÃ­fica de um profissional
  */
 export const updateProfessionalCommissionRate = async (
   businessId: string,
@@ -42,14 +42,14 @@ export const updateProfessionalCommissionRate = async (
 ): Promise<void> => {
   try {
     if (!businessId || !professionalId) {
-      throw new Error('IDs do estabelecimento e profissional são obrigatórios');
+      throw new Error('IDs do estabelecimento e profissional sÃ£o obrigatÃ³rios');
     }
 
     if (!commissionRate || commissionRate <= 0 || commissionRate > 1) {
-      throw new Error('Taxa de comissão deve estar entre 0.01 (1%) e 1.0 (100%)');
+      throw new Error('Taxa de comissÃ£o deve estar entre 0.01 (1%) e 1.0 (100%)');
     }
 
-    // Atualizar na subcoleção de profissionais do business
+    // Atualizar na subcoleÃ§Ã£o de profissionais do business
     const professionalDocRef = doc(firebaseDb, 'businesses', businessId, 'professionals', professionalId);
 
     await updateDoc(professionalDocRef, {
@@ -57,15 +57,15 @@ export const updateProfessionalCommissionRate = async (
       updatedAt: new Date(),
     });
 
-    console.log('✅ Taxa de comissão do profissional atualizada:', professionalId, commissionRate);
+    console.log('âœ… Taxa de comissÃ£o do profissional atualizada:', professionalId, commissionRate);
   } catch (error) {
-    console.error('❌ Erro ao atualizar taxa de comissão do profissional:', error);
+    console.error('âŒ Erro ao atualizar taxa de comissÃ£o do profissional:', error);
     throw error;
   }
 };
 
 /**
- * Verifica se o estabelecimento tem configuração de comissão válida
+ * Verifica se o estabelecimento tem configuraÃ§Ã£o de comissÃ£o vÃ¡lida
  */
 export const validateCommissionConfig = async (businessId: string): Promise<{
   hasValidConfig: boolean;
@@ -79,7 +79,7 @@ export const validateCommissionConfig = async (businessId: string): Promise<{
     if (!businessDoc.exists()) {
       return {
         hasValidConfig: false,
-        message: 'Estabelecimento não encontrado',
+        message: 'Estabelecimento nÃ£o encontrado',
       };
     }
 
@@ -89,20 +89,20 @@ export const validateCommissionConfig = async (businessId: string): Promise<{
     if (!defaultRate || defaultRate <= 0) {
       return {
         hasValidConfig: false,
-        message: 'Taxa de comissão não configurada. Configure nas configurações do negócio.',
+        message: 'Taxa de comissÃ£o nÃ£o configurada. Configure nas configuraÃ§Ãµes do negÃ³cio.',
       };
     }
 
     return {
       hasValidConfig: true,
       defaultRate,
-      message: `Taxa de comissão configurada: ${(defaultRate * 100).toFixed(1)}%`,
+      message: `Taxa de comissÃ£o configurada: ${(defaultRate * 100).toFixed(1)}%`,
     };
   } catch (error) {
-    console.error('❌ Erro ao validar configuração de comissão:', error);
+    console.error('âŒ Erro ao validar configuraÃ§Ã£o de comissÃ£o:', error);
     return {
       hasValidConfig: false,
-      message: 'Erro ao verificar configuração de comissão',
+      message: 'Erro ao verificar configuraÃ§Ã£o de comissÃ£o',
     };
   }
 };

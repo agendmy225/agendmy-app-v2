@@ -8,7 +8,7 @@ import { useAuth } from '../features/auth/context/AuthContext';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import { colors } from '../constants/colors';
 
-// Telas de autenticação
+// Telas de autenticaÃ§Ã£o
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../features/auth/LoginScreen';
 import RegisterScreen from '../features/auth/RegisterScreen';
@@ -37,7 +37,7 @@ import EditPaymentMethodScreen from '../features/user/profile/EditPaymentMethodS
 import OwnerTabNavigator from './OwnerTabNavigator';
 import ReviewScreen from '../features/reviews/ReviewScreen';
 
-// Telas do proprietário
+// Telas do proprietÃ¡rio
 import DashboardScreen from '../features/dashboard/DashboardScreen';
 import FinancialReportsScreen from '../features/reports/FinancialReportsScreen';
 import ChatManagementScreen from '../features/chat/ChatManagementScreen';
@@ -48,7 +48,7 @@ import ServiceManagementScreen from '../features/service/ServiceManagementScreen
 import ReviewsManagementScreen from '../features/reviews/ReviewsManagementScreen';
 import BusinessSettingsScreen from '../features/business/BusinessSettingsScreen';
 
-// Loading Screen — exibida enquanto o estado de auth é verificado
+// Loading Screen â€” exibida enquanto o estado de auth Ã© verificado
 const LoadingScreen: React.FC = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
     <ActivityIndicator size="large" color={colors.primary} />
@@ -117,7 +117,7 @@ const ClientTabNavigator: React.FC = () => {
           name="HomeStack"
           component={HomeStackNavigator}
           options={{
-            tabBarLabel: 'Início',
+            tabBarLabel: 'InÃ­cio',
             tabBarIcon: HomeIcon,
           }}
         />
@@ -137,7 +137,7 @@ const ClientTabNavigator: React.FC = () => {
             tabBarIcon: PersonIcon,
           }}
         />
-        {/* Adicione mais abas do cliente aqui quando necessário */}
+        {/* Adicione mais abas do cliente aqui quando necessÃ¡rio */}
       </ClientTab.Navigator>
     </SafeAreaView>
   );
@@ -160,12 +160,12 @@ const AppNavigator: React.FC = () => {
       }}
     >
       {user ? (
-        // Usuário logado
+        // UsuÃ¡rio logado
         <>
           {user.userType === 'owner' ? (
             <>
               <Stack.Screen name="OwnerTabs" component={OwnerTabNavigator} />
-              {/* Telas específicas do proprietário */}
+              {/* Telas especÃ­ficas do proprietÃ¡rio */}
               <Stack.Screen name="BusinessDetails" component={BusinessDetailsScreen} />
               <Stack.Screen name="AppointmentDateTime" component={AppointmentDateTimeScreen} />
               <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
@@ -208,7 +208,7 @@ const AppNavigator: React.FC = () => {
           )}
         </>
       ) : (
-        // Usuário não logado
+        // UsuÃ¡rio nÃ£o logado
         <>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />

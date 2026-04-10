@@ -1,10 +1,10 @@
-// Serviço de integração com Mercado Pago
-// Usa Firebase Functions como backend seguro para não expor credenciais no app
+// ServiÃ§o de integraÃ§Ã£o com Mercado Pago
+// Usa Firebase Functions como backend seguro para nÃ£o expor credenciais no app
 
 import { httpsCallable } from '@react-native-firebase/functions';
 import { firebaseFunctions, firebaseAuth } from '../config/firebase';
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Tipos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export type PaymentMethod = 'pix' | 'credit_card' | 'debit_card';
 
@@ -50,7 +50,7 @@ export interface SavedCard {
   customerId: string;
 }
 
-// ─── Funções principais ───────────────────────────────────────────────────────
+// â”€â”€â”€ FunÃ§Ãµes principais â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Cria um pagamento via Mercado Pago.
@@ -58,7 +58,7 @@ export interface SavedCard {
  */
 export const createPayment = async (params: CreatePaymentParams): Promise<PaymentResult> => {
   const currentUser = firebaseAuth.currentUser;
-  if (!currentUser) throw new Error('Usuário não autenticado.');
+  if (!currentUser) throw new Error('UsuÃ¡rio nÃ£o autenticado.');
 
   const createPaymentFn = httpsCallable<CreatePaymentParams, PaymentResult>(
     firebaseFunctions,
@@ -88,7 +88,7 @@ export const createPixPayment = async (
 };
 
 /**
- * Processa pagamento com cartão de crédito/débito.
+ * Processa pagamento com cartÃ£o de crÃ©dito/dÃ©bito.
  */
 export const createCardPayment = async (
   appointmentId: string,
@@ -119,7 +119,7 @@ export const getPaymentStatus = async (paymentId: string): Promise<PaymentResult
 };
 
 /**
- * Busca os cartões salvos do usuário no Mercado Pago.
+ * Busca os cartÃµes salvos do usuÃ¡rio no Mercado Pago.
  */
 export const getSavedCards = async (): Promise<SavedCard[]> => {
   const currentUser = firebaseAuth.currentUser;
@@ -145,7 +145,7 @@ export const cancelPayment = async (paymentId: string): Promise<void> => {
   await cancelFn({ paymentId });
 };
 
-// ─── Helpers de formatação ────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers de formataÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export const formatAmount = (amountInCents: number): string => {
   return (amountInCents / 100).toLocaleString('pt-BR', {
@@ -199,5 +199,5 @@ export const detectCardBrand = (number: string): string => {
   if (/^3[47]/.test(n)) return 'Amex';
   if (/^6(?:011|5)/.test(n)) return 'Elo';
   if (/^(?:636368|438935|504175|451416|636297)/.test(n)) return 'Elo';
-  return 'Cartão';
+  return 'CartÃ£o';
 };

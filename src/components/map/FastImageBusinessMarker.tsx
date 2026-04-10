@@ -34,19 +34,19 @@ export const FastImageBusinessMarker: React.FC<BusinessMarkerProps> = memo(({ bu
     }
   }, [imageLoaded, imageError]);
 
-  // Não renderiza se não tiver localização
+  // NÃ£o renderiza se nÃ£o tiver localizaÃ§Ã£o
   if (!business.location?.latitude || !business.location?.longitude) {
     return null;
   }
 
   const handleImageLoad = () => {
-    console.log(`✅ FastImage carregada para ${business.name}`);
+    console.log(`âœ… FastImage carregada para ${business.name}`);
     setImageLoaded(true);
     setImageError(false);
   };
 
   const handleImageError = () => {
-    console.error(`❌ Erro FastImage para ${business.name}`);
+    console.error(`âŒ Erro FastImage para ${business.name}`);
     setImageError(true);
     setImageLoaded(false);
   };
@@ -61,7 +61,7 @@ export const FastImageBusinessMarker: React.FC<BusinessMarkerProps> = memo(({ bu
       onPress={onPress}
       title={business.name}
       description={business.description}
-      // CRÍTICO: Para quando renderização estiver completa
+      // CRÃTICO: Para quando renderizaÃ§Ã£o estiver completa
       tracksViewChanges={!isRenderComplete}
     >
       <View style={styles.markerContainer}>

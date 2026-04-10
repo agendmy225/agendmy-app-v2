@@ -96,7 +96,7 @@ const ChatScreen: React.FC = () => {
       console.error('Erro ao enviar mensagem:', error);
       Alert.alert(
         'Erro ao enviar',
-        'Não foi possível enviar sua mensagem. Tente novamente.',
+        'NÃ£o foi possÃ­vel enviar sua mensagem. Tente novamente.',
         [{ text: 'OK' }],
       );
     }
@@ -120,7 +120,7 @@ const ChatScreen: React.FC = () => {
               await deleteMessage(chatId, messageId);
             } catch (error) {
               console.error('Erro ao excluir mensagem:', error);
-              Alert.alert('Erro', 'Não foi possível excluir a mensagem.');
+              Alert.alert('Erro', 'NÃ£o foi possÃ­vel excluir a mensagem.');
             }
           },
           style: 'destructive',
@@ -188,7 +188,7 @@ const ChatScreen: React.FC = () => {
               {otherUserName}
             </Text>
             <Text style={styles.headerSubtitle}>
-              {user?.uid === otherUserId ? 'Você' : 'Outro usuário'}
+              {user?.uid === otherUserId ? 'VocÃª' : 'Outro usuÃ¡rio'}
             </Text>
           </View>
           <TouchableOpacity style={styles.headerAction}>

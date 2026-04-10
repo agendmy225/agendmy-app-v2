@@ -60,7 +60,7 @@ const DashboardScreen: React.FC = () => {
     }
 
     try {
-      // Buscar o ID do estabelecimento do proprietário atual
+      // Buscar o ID do estabelecimento do proprietÃ¡rio atual
       const businessQuery = query(
         collection(firestore, 'businesses'),
         where('ownerId', '==', user.uid),
@@ -72,7 +72,7 @@ const DashboardScreen: React.FC = () => {
         const businessDoc = businessSnapshot.docs[0];
         setBusinessId(businessDoc.id);
       } else {
-        // Se não encontrar um estabelecimento, não tem negócio
+        // Se nÃ£o encontrar um estabelecimento, nÃ£o tem negÃ³cio
 
         setBusinessId(null);
         setLoading(false);
@@ -96,20 +96,20 @@ const DashboardScreen: React.FC = () => {
       setLoading(true);
       setError(null); // Reset error state
 
-      // Buscar estatísticas usando nosso serviço real
+      // Buscar estatÃ­sticas usando nosso serviÃ§o real
       const [todayStats, monthStats] = await Promise.all([
         getAppointmentStats(businessId, 'today'),
         getAppointmentStats(businessId, 'month'),
       ]);
 
-      // Buscar profissionais ativos - usar subcoleção
+      // Buscar profissionais ativos - usar subcoleÃ§Ã£o
       const professionalsQuery = query(
         collection(firestore, 'businesses', businessId, 'professionals'),
         where('active', '==', true)
       );
       const professionalsSnapshot = await getDocs(professionalsQuery);
 
-      // Buscar serviços ativos - usar subcoleção
+      // Buscar serviÃ§os ativos - usar subcoleÃ§Ã£o
       const servicesQuery = query(
         collection(firestore, 'businesses', businessId, 'services'),
         where('active', '==', true)
@@ -169,7 +169,7 @@ const DashboardScreen: React.FC = () => {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Dashboard</Text>
           <Text style={styles.headerSubtitle}>
-            Bem-vindo, {user?.displayName || 'Proprietário'}
+            Bem-vindo, {user?.displayName || 'ProprietÃ¡rio'}
           </Text>
         </View>
         <View style={styles.errorContainer}>
@@ -189,7 +189,7 @@ const DashboardScreen: React.FC = () => {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Dashboard</Text>
           <Text style={styles.headerSubtitle}>
-            Bem-vindo, {user?.displayName || 'Proprietário'}
+            Bem-vindo, {user?.displayName || 'ProprietÃ¡rio'}
           </Text>
         </View>
         <CreateBusinessCard onBusinessCreated={() => {
@@ -209,24 +209,24 @@ const DashboardScreen: React.FC = () => {
 
   const handleShareBusinessLink = async () => {
     if (!businessId) {
-      Alert.alert('Erro', 'ID do estabelecimento não encontrado.');
+      Alert.alert('Erro', 'ID do estabelecimento nÃ£o encontrado.');
       return;
     }
     try {
       const url = `https://agendmy.app/business/${businessId}`; // Replace with your actual domain
       await Share.share({
-        message: `Confira nossa página: ${url}`,
+        message: `Confira nossa pÃ¡gina: ${url}`,
         url: url,
         title: 'Compartilhar Estabelecimento',
       });
     } catch {
-      Alert.alert('Erro', 'Não foi possível compartilhar o link.');
+      Alert.alert('Erro', 'NÃ£o foi possÃ­vel compartilhar o link.');
     }
   };
 
   const handleShareProfessionalProfile = async () => {
     if (!businessId) {
-      Alert.alert('Erro', 'ID do estabelecimento não encontrado.');
+      Alert.alert('Erro', 'ID do estabelecimento nÃ£o encontrado.');
       return;
     }
 
@@ -237,24 +237,24 @@ const DashboardScreen: React.FC = () => {
       if (professionalsData.length === 0) {
         Alert.alert(
           'Nenhum Profissional',
-          'Não há profissionais cadastrados para compartilhar. Cadastre um profissional primeiro.'
+          'NÃ£o hÃ¡ profissionais cadastrados para compartilhar. Cadastre um profissional primeiro.'
         );
         return;
       }
 
-      // Se há apenas um profissional, compartilha diretamente
+      // Se hÃ¡ apenas um profissional, compartilha diretamente
       if (professionalsData.length === 1) {
         await shareProfessionalProfile(professionalsData[0]);
         return;
       }
 
-      // Se há vários profissionais, mostra modal de seleção
+      // Se hÃ¡ vÃ¡rios profissionais, mostra modal de seleÃ§Ã£o
       setProfessionals(professionalsData);
       setShowProfessionalModal(true);
 
     } catch (fetchError) {
       console.error('Erro ao buscar profissionais:', fetchError);
-      Alert.alert('Erro', 'Não foi possível buscar os profissionais.');
+      Alert.alert('Erro', 'NÃ£o foi possÃ­vel buscar os profissionais.');
     }
   };
 
@@ -263,15 +263,15 @@ const DashboardScreen: React.FC = () => {
       const profileUrl = `https://agendmy.app/professional/${professional.id}`;
       const appDownloadUrl = 'https://agendmy.app/download'; // Link para download do app
 
-      const message = `🎯 Conheça ${professional.name} - ${professional.specialty}
+      const message = `ðŸŽ¯ ConheÃ§a ${professional.name} - ${professional.specialty}
 
-📋 Especialista em ${professional.specialty}
-⭐ Avaliação: ${professional.rating ? professional.rating.toFixed(1) : 'N/A'}/5
+ðŸ“‹ Especialista em ${professional.specialty}
+â­ AvaliaÃ§Ã£o: ${professional.rating ? professional.rating.toFixed(1) : 'N/A'}/5
 
-👇 Veja o perfil completo e agende seu horário:
+ðŸ‘‡ Veja o perfil completo e agende seu horÃ¡rio:
 ${profileUrl}
 
-📱 Baixe nosso app para uma experiência completa:
+ðŸ“± Baixe nosso app para uma experiÃªncia completa:
 ${appDownloadUrl}
 
 #Agendmy #${professional.specialty.replace(/\s+/g, '')}`;
@@ -286,7 +286,7 @@ ${appDownloadUrl}
       setShowProfessionalModal(false);
     } catch (shareError) {
       console.error('Erro ao compartilhar perfil:', shareError);
-      Alert.alert('Erro', 'Não foi possível compartilhar o perfil do profissional.');
+      Alert.alert('Erro', 'NÃ£o foi possÃ­vel compartilhar o perfil do profissional.');
     }
   };
 
@@ -300,7 +300,7 @@ ${appDownloadUrl}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Dashboard</Text>
         <Text style={styles.headerSubtitle}>
-          Bem-vindo, {user?.displayName || 'Proprietário'}
+          Bem-vindo, {user?.displayName || 'ProprietÃ¡rio'}
         </Text>
       </View>
 
@@ -321,9 +321,9 @@ ${appDownloadUrl}
         </View>
       </View>
 
-      {/* Estatísticas Gerais */}
+      {/* EstatÃ­sticas Gerais */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Estatísticas Gerais</Text>
+        <Text style={styles.sectionTitle}>EstatÃ­sticas Gerais</Text>
         <View style={styles.statsGrid}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{stats.totalAppointments}</Text>
@@ -335,7 +335,7 @@ ${appDownloadUrl}
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{stats.completedAppointments}</Text>
-            <Text style={styles.statLabel}>Concluídos</Text>
+            <Text style={styles.statLabel}>ConcluÃ­dos</Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{stats.canceledAppointments}</Text>
@@ -355,25 +355,25 @@ ${appDownloadUrl}
         </View>
       </View>
 
-      {/* Avaliações */}
+      {/* AvaliaÃ§Ãµes */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Avaliações</Text>
+        <Text style={styles.sectionTitle}>AvaliaÃ§Ãµes</Text>
         <View style={styles.ratingCard}>
           <Text style={styles.ratingValue}>{stats.averageRating.toFixed(1)}</Text>
           <View style={styles.starsContainer}>
             {[1, 2, 3, 4, 5].map((star) => (
               <Text key={star} style={styles.starIcon}>
-                {star <= Math.round(stats.averageRating) ? '★' : '☆'}
+                {star <= Math.round(stats.averageRating) ? 'â˜…' : 'â˜†'}
               </Text>
             ))}
           </View>
-          <Text style={styles.ratingLabel}>Avaliação Média</Text>
+          <Text style={styles.ratingLabel}>AvaliaÃ§Ã£o MÃ©dia</Text>
         </View>
       </View>
 
-      {/* Ações Rápidas */}
+      {/* AÃ§Ãµes RÃ¡pidas */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Ações Rápidas</Text>
+        <Text style={styles.sectionTitle}>AÃ§Ãµes RÃ¡pidas</Text>
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={styles.actionButton}
@@ -396,7 +396,7 @@ ${appDownloadUrl}
             onPress={() => navigation.navigate('ServiceManagement')}
           >
             <Icon name="content-cut" size={24} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Gerenciar Serviços</Text>
+            <Text style={styles.actionText}>Gerenciar ServiÃ§os</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -412,7 +412,7 @@ ${appDownloadUrl}
             onPress={() => navigation.navigate('FinancialReportsScreen')}
           >
             <Icon name="assessment" size={24} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Relatórios Financeiros</Text>
+            <Text style={styles.actionText}>RelatÃ³rios Financeiros</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -433,7 +433,7 @@ ${appDownloadUrl}
         </View>
       </View>
 
-      {/* Modal de Seleção de Profissional */}
+      {/* Modal de SeleÃ§Ã£o de Profissional */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -660,7 +660,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   actionIcon: {
-    // fontSize: 24, // Size é controlado pelo componente Icon
+    // fontSize: 24, // Size Ã© controlado pelo componente Icon
     marginBottom: 8,
   },
   actionText: {

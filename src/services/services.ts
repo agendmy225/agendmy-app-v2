@@ -18,7 +18,7 @@ import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 
 // Tipos
 export interface Service {
-  id: string; // Tornar id obrigatório
+  id: string; // Tornar id obrigatÃ³rio
   businessId: string;
   name: string;
   description: string;
@@ -26,16 +26,16 @@ export interface Service {
   duration: string;
   category: string;
   active: boolean;
-  isPromotionActive?: boolean; // Adicionado para promoções
-  discountPercentage?: number; // Adicionado para promoções
-  promotionalPrice?: number; // Adicionado para promoções
-  numSessions?: number; // Número de sessões para pacotes
-  professionalIds?: string[]; // IDs dos profissionais que realizam o serviço
+  isPromotionActive?: boolean; // Adicionado para promoÃ§Ãµes
+  discountPercentage?: number; // Adicionado para promoÃ§Ãµes
+  promotionalPrice?: number; // Adicionado para promoÃ§Ãµes
+  numSessions?: number; // NÃºmero de sessÃµes para pacotes
+  professionalIds?: string[]; // IDs dos profissionais que realizam o serviÃ§o
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 }
 
-// Buscar todos os serviços de um estabelecimento
+// Buscar todos os serviÃ§os de um estabelecimento
 export const getServicesByBusiness = async (businessId: string): Promise<Service[]> => {
   try {
     const servicesRef = collection(firebaseDb, 'businesses', businessId, 'services');
@@ -63,7 +63,7 @@ export const getServicesByBusiness = async (businessId: string): Promise<Service
   }
 };
 
-// Buscar um serviço específico
+// Buscar um serviÃ§o especÃ­fico
 export const getServiceById = async (businessId: string, serviceId: string): Promise<Service | null> => {
   try {
     const serviceDocRef = doc(firebaseDb, 'businesses', businessId, 'services', serviceId);
@@ -84,33 +84,33 @@ export const getServiceById = async (businessId: string, serviceId: string): Pro
   }
 };
 
-// Criar um novo serviço
+// Criar um novo serviÃ§o
 export const createService = async (businessId: string, serviceData: any): Promise<Service> => {
   try {
-    console.log('🔄 [createService] Iniciando criação de serviço');
-    console.log('📍 [createService] BusinessID:', businessId);
-    console.log('📋 [createService] ServiceData:', JSON.stringify(serviceData, null, 2));
+    console.log('ðŸ”„ [createService] Iniciando criaÃ§Ã£o de serviÃ§o');
+    console.log('ðŸ“ [createService] BusinessID:', businessId);
+    console.log('ðŸ“‹ [createService] ServiceData:', JSON.stringify(serviceData, null, 2));
 
     if (!businessId) {
-      console.log('❌ [createService] BusinessId vazio');
-      throw new Error('BusinessId é obrigatório para criar um serviço');
+      console.log('âŒ [createService] BusinessId vazio');
+      throw new Error('BusinessId Ã© obrigatÃ³rio para criar um serviÃ§o');
     }
 
-    // Validar campos obrigatórios
+    // Validar campos obrigatÃ³rios
     if (!serviceData.name || !serviceData.price || !serviceData.duration || !serviceData.category) {
-      console.log('❌ [createService] Campos obrigatórios ausentes:', {
+      console.log('âŒ [createService] Campos obrigatÃ³rios ausentes:', {
         name: !!serviceData.name,
         price: !!serviceData.price,
         duration: !!serviceData.duration,
         category: !!serviceData.category
       });
-      throw new Error('Campos obrigatórios não preenchidos: name, price, duration, category');
+      throw new Error('Campos obrigatÃ³rios nÃ£o preenchidos: name, price, duration, category');
     }
 
-    console.log('✅ [createService] Validações básicas passaram');
+    console.log('âœ… [createService] ValidaÃ§Ãµes bÃ¡sicas passaram');
 
     const servicesRef = collection(firebaseDb, 'businesses', businessId, 'services');
-    console.log('📂 [createService] Referência da coleção criada para:', `businesses/${businessId}/services`);
+    console.log('ðŸ“‚ [createService] ReferÃªncia da coleÃ§Ã£o criada para:', `businesses/${businessId}/services`);
 
     const dataToSave: any = {
       name: serviceData.name,
@@ -132,41 +132,41 @@ export const createService = async (businessId: string, serviceData: any): Promi
       dataToSave.numSessions = serviceData.numSessions;
     }
 
-    console.log('💾 [createService] Dados a serem salvos:', JSON.stringify(dataToSave, null, 2));
+    console.log('ðŸ’¾ [createService] Dados a serem salvos:', JSON.stringify(dataToSave, null, 2));
 
-    console.log('📝 [createService] Tentando adicionar documento...');
+    console.log('ðŸ“ [createService] Tentando adicionar documento...');
     const docRef = await addDoc(servicesRef, dataToSave);
-    console.log('✅ [createService] Documento criado com ID:', docRef.id);
+    console.log('âœ… [createService] Documento criado com ID:', docRef.id);
 
-    console.log('🔍 [createService] Recuperando serviço criado...');
+    console.log('ðŸ” [createService] Recuperando serviÃ§o criado...');
     const newService = await getServiceById(businessId, docRef.id);
     if (!newService) {
-      console.log('❌ [createService] Falha ao recuperar serviço criado');
-      throw new Error('Erro ao recuperar serviço criado');
+      console.log('âŒ [createService] Falha ao recuperar serviÃ§o criado');
+      throw new Error('Erro ao recuperar serviÃ§o criado');
     }
 
-    console.log('🎉 [createService] Serviço criado com sucesso:', newService);
+    console.log('ðŸŽ‰ [createService] ServiÃ§o criado com sucesso:', newService);
     return newService;
   } catch (error) {
-    console.error('❌ [createService] Erro ao criar serviço:', error);
-    console.error('🔍 [createService] Tipo do erro:', typeof error);
-    console.error('📊 [createService] Stack trace:', (error as Error)?.stack);
+    console.error('âŒ [createService] Erro ao criar serviÃ§o:', error);
+    console.error('ðŸ” [createService] Tipo do erro:', typeof error);
+    console.error('ðŸ“Š [createService] Stack trace:', (error as Error)?.stack);
 
     if (error instanceof Error) {
-      console.error('💬 [createService] Mensagem:', error.message);
+      console.error('ðŸ’¬ [createService] Mensagem:', error.message);
     }
 
     throw error;
   }
 };
 
-// Atualizar um serviço existente
+// Atualizar um serviÃ§o existente
 export const updateService = async (businessId: string, serviceId: string, serviceData: Partial<Service>): Promise<Service> => {
   try {
-    console.log('🔄 [updateService] Iniciando atualização de serviço');
-    console.log('📍 [updateService] BusinessID:', businessId);
-    console.log('📍 [updateService] ServiceID:', serviceId);
-    console.log('📋 [updateService] ServiceData recebido:', serviceData);
+    console.log('ðŸ”„ [updateService] Iniciando atualizaÃ§Ã£o de serviÃ§o');
+    console.log('ðŸ“ [updateService] BusinessID:', businessId);
+    console.log('ðŸ“ [updateService] ServiceID:', serviceId);
+    console.log('ðŸ“‹ [updateService] ServiceData recebido:', serviceData);
 
     // Remover campos undefined para evitar erro no firebaseDb
     const cleanedData: Record<string, unknown> = {};
@@ -177,7 +177,7 @@ export const updateService = async (businessId: string, serviceId: string, servi
       }
     });
 
-    console.log('🧹 [updateService] Dados limpos (sem undefined):', cleanedData);
+    console.log('ðŸ§¹ [updateService] Dados limpos (sem undefined):', cleanedData);
 
     const serviceDocRef = doc(firebaseDb, 'businesses', businessId, 'services', serviceId);
     await updateDoc(serviceDocRef, {
@@ -185,22 +185,22 @@ export const updateService = async (businessId: string, serviceId: string, servi
       updatedAt: serverTimestamp(),
     });
 
-    console.log('✅ [updateService] Documento atualizado com sucesso');
+    console.log('âœ… [updateService] Documento atualizado com sucesso');
 
     const updatedService = await getServiceById(businessId, serviceId);
     if (!updatedService) {
-      throw new Error('Serviço não encontrado após atualização');
+      throw new Error('ServiÃ§o nÃ£o encontrado apÃ³s atualizaÃ§Ã£o');
     }
 
-    console.log('🎉 [updateService] Serviço atualizado:', updatedService);
+    console.log('ðŸŽ‰ [updateService] ServiÃ§o atualizado:', updatedService);
     return updatedService;
   } catch (error) {
-    console.error('❌ [updateService] Erro ao atualizar serviço:', error);
+    console.error('âŒ [updateService] Erro ao atualizar serviÃ§o:', error);
     throw error;
   }
 };
 
-// Deletar um serviço (soft delete)
+// Deletar um serviÃ§o (soft delete)
 export const deleteService = async (businessId: string, serviceId: string): Promise<void> => {
   try {
     const serviceDocRef = doc(firebaseDb, 'businesses', businessId, 'services', serviceId);
@@ -213,7 +213,7 @@ export const deleteService = async (businessId: string, serviceId: string): Prom
   }
 };
 
-// Ativar/desativar um serviço
+// Ativar/desativar um serviÃ§o
 export const toggleServiceStatus = async (businessId: string, serviceId: string, active: boolean): Promise<void> => {
   try {
     const serviceDocRef = doc(firebaseDb, 'businesses', businessId, 'services', serviceId);
@@ -226,7 +226,7 @@ export const toggleServiceStatus = async (businessId: string, serviceId: string,
   }
 };
 
-// Atribuir profissionais a um serviço
+// Atribuir profissionais a um serviÃ§o
 export const assignProfessionalsToService = async (
   businessId: string,
   serviceId: string,
@@ -243,7 +243,7 @@ export const assignProfessionalsToService = async (
   }
 };
 
-// Buscar serviços por categoria
+// Buscar serviÃ§os por categoria
 export const getServicesByCategory = async (businessId: string, category: string): Promise<Service[]> => {
   try {
     const servicesRef = collection(firebaseDb, 'businesses', businessId, 'services');

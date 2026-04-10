@@ -1,21 +1,21 @@
-// Polyfill para variáveis globais necessárias para evitar crashes
-// Este arquivo deve ser importado antes de qualquer outro código
+// Polyfill para variÃ¡veis globais necessÃ¡rias para evitar crashes
+// Este arquivo deve ser importado antes de qualquer outro cÃ³digo
 
-// Declarações de tipos para variáveis globais
+// DeclaraÃ§Ãµes de tipos para variÃ¡veis globais
 declare global {
   var $: any;
   var hermes: any;
   var window: any;
 }
 
-// Garantir que as variáveis globais existam
+// Garantir que as variÃ¡veis globais existam
 if (typeof global !== 'undefined') {
-  // Polyfill para $ se não existir
+  // Polyfill para $ se nÃ£o existir
   if (typeof (global as any).$ === 'undefined') {
     (global as any).$ = {};
   }
 
-  // Polyfill para hermes se não existir
+  // Polyfill para hermes se nÃ£o existir
   if (typeof (global as any).hermes === 'undefined') {
     (global as any).hermes = {};
   }
@@ -26,14 +26,14 @@ if (typeof global !== 'undefined') {
   }
 }
 
-// Polyfills para window se necessário (para casos de web)
+// Polyfills para window se necessÃ¡rio (para casos de web)
 if (typeof globalThis !== 'undefined' && typeof (globalThis as any).window !== 'undefined') {
   if (typeof (globalThis as any).window.$ === 'undefined') {
     (globalThis as any).window.$ = {};
   }
 }
 
-// Garantir que console existe e tem todos os métodos
+// Garantir que console existe e tem todos os mÃ©todos
 if (typeof console === 'undefined') {
   const noop = () => { };
   (global as any).console = {

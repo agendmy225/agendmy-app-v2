@@ -3,11 +3,11 @@ import { Business } from '../services/businesses';
 import { Professional } from '../services/professionals';
 
 /**
- * Verifica se um profissional tem horários disponíveis nos próximos dias
+ * Verifica se um profissional tem horÃ¡rios disponÃ­veis nos prÃ³ximos dias
  * @param professional - O profissional a verificar
  * @param business - O estabelecimento do profissional
- * @param daysToCheck - Número de dias para verificar (padrão: 7)
- * @returns true se há horários disponíveis, false caso contrário
+ * @param daysToCheck - NÃºmero de dias para verificar (padrÃ£o: 7)
+ * @returns true se hÃ¡ horÃ¡rios disponÃ­veis, false caso contrÃ¡rio
  */
 export const hasProfessionalAvailableSlots = async (
     professional: Professional,
@@ -17,7 +17,7 @@ export const hasProfessionalAvailableSlots = async (
     try {
         const today = new Date();
 
-        // Gerar próximos dias para verificação
+        // Gerar prÃ³ximos dias para verificaÃ§Ã£o
         for (let i = 0; i < daysToCheck; i++) {
             const date = new Date(today);
             date.setDate(today.getDate() + i);
@@ -26,13 +26,13 @@ export const hasProfessionalAvailableSlots = async (
             const dayName = date.toLocaleDateString('pt-BR', { weekday: 'long' });
             const dayKey = getDayKey(dayName);
 
-            // Verificar se o negócio está aberto neste dia
+            // Verificar se o negÃ³cio estÃ¡ aberto neste dia
             const workingHours = business.workingHours?.[dayKey];
             if (!workingHours?.open) {
-                continue; // Pular este dia se o negócio estiver fechado
+                continue; // Pular este dia se o negÃ³cio estiver fechado
             }
 
-            // Verificar se há horários disponíveis neste dia
+            // Verificar se hÃ¡ horÃ¡rios disponÃ­veis neste dia
             const hasAvailableSlots = await checkDayAvailability(
                 professional.id,
                 dateString,
@@ -41,23 +41,23 @@ export const hasProfessionalAvailableSlots = async (
             );
 
             if (hasAvailableSlots) {
-                return true; // Encontrou pelo menos um horário disponível
+                return true; // Encontrou pelo menos um horÃ¡rio disponÃ­vel
             }
         }
 
-        return false; // Não encontrou horários disponíveis em nenhum dos dias
+        return false; // NÃ£o encontrou horÃ¡rios disponÃ­veis em nenhum dos dias
     } catch (error) {
-        return false; // Em caso de erro, considerar como não disponível
+        return false; // Em caso de erro, considerar como nÃ£o disponÃ­vel
     }
 };
 
 /**
- * Verifica se há horários disponíveis para um profissional em um dia específico
+ * Verifica se hÃ¡ horÃ¡rios disponÃ­veis para um profissional em um dia especÃ­fico
  * @param professionalId - ID do profissional
  * @param date - Data no formato 'YYYY-MM-DD'
- * @param startTime - Horário de início do expediente (ex: '09:00')
- * @param endTime - Horário de fim do expediente (ex: '18:00')
- * @returns true se há pelo menos um horário disponível, false caso contrário
+ * @param startTime - HorÃ¡rio de inÃ­cio do expediente (ex: '09:00')
+ * @param endTime - HorÃ¡rio de fim do expediente (ex: '18:00')
+ * @returns true se hÃ¡ pelo menos um horÃ¡rio disponÃ­vel, false caso contrÃ¡rio
  */
 const checkDayAvailability = async (
     professionalId: string,
@@ -69,13 +69,13 @@ const checkDayAvailability = async (
         const startMinutes = timeToMinutes(startTime);
         const endMinutes = timeToMinutes(endTime);
         const slotDuration = 30; // Slots de 30 minutos
-        const serviceDuration = 60; // Duração típica de serviço (60 min)
+        const serviceDuration = 60; // DuraÃ§Ã£o tÃ­pica de serviÃ§o (60 min)
 
         // Verificar slots de 30 em 30 minutos
         for (let minutes = startMinutes; minutes + serviceDuration <= endMinutes; minutes += slotDuration) {
             const timeString = minutesToTime(minutes);
 
-            // Verificar se este horário está disponível
+            // Verificar se este horÃ¡rio estÃ¡ disponÃ­vel
             const isAvailable = await checkTimeSlotAvailability(
                 professionalId,
                 date,
@@ -84,20 +84,20 @@ const checkDayAvailability = async (
             );
 
             if (isAvailable) {
-                return true; // Encontrou pelo menos um horário disponível
+                return true; // Encontrou pelo menos um horÃ¡rio disponÃ­vel
             }
         }
 
-        return false; // Não encontrou horários disponíveis
+        return false; // NÃ£o encontrou horÃ¡rios disponÃ­veis
     } catch (error) {
         return false;
     }
 };
 
 /**
- * Converte string de horário para minutos desde meia-noite
- * @param time - Horário no formato 'HH:MM'
- * @returns Número de minutos desde meia-noite
+ * Converte string de horÃ¡rio para minutos desde meia-noite
+ * @param time - HorÃ¡rio no formato 'HH:MM'
+ * @returns NÃºmero de minutos desde meia-noite
  */
 const timeToMinutes = (time: string): number => {
     const [hours, minutes] = time.split(':').map(Number);
@@ -105,9 +105,9 @@ const timeToMinutes = (time: string): number => {
 };
 
 /**
- * Converte minutos desde meia-noite para string de horário
- * @param minutes - Número de minutos desde meia-noite
- * @returns Horário no formato 'HH:MM'
+ * Converte minutos desde meia-noite para string de horÃ¡rio
+ * @param minutes - NÃºmero de minutos desde meia-noite
+ * @returns HorÃ¡rio no formato 'HH:MM'
  */
 const minutesToTime = (minutes: number): string => {
     const hours = Math.floor(minutes / 60);
@@ -116,28 +116,28 @@ const minutesToTime = (minutes: number): string => {
 };
 
 /**
- * Converte nome do dia em português para chave em inglês
- * @param dayName - Nome do dia em português
- * @returns Chave em inglês do dia
+ * Converte nome do dia em portuguÃªs para chave em inglÃªs
+ * @param dayName - Nome do dia em portuguÃªs
+ * @returns Chave em inglÃªs do dia
  */
 const getDayKey = (dayName: string): string => {
     const dayMap: { [key: string]: string } = {
         'segunda-feira': 'monday',
-        'terça-feira': 'tuesday',
+        'terÃ§a-feira': 'tuesday',
         'quarta-feira': 'wednesday',
         'quinta-feira': 'thursday',
         'sexta-feira': 'friday',
-        'sábado': 'saturday',
+        'sÃ¡bado': 'saturday',
         'domingo': 'sunday',
     };
     return dayMap[dayName.toLowerCase()] || 'monday';
 };
 
 /**
- * Verifica disponibilidade de múltiplos profissionais em lote
+ * Verifica disponibilidade de mÃºltiplos profissionais em lote
  * @param professionals - Lista de profissionais
  * @param business - Estabelecimento
- * @param daysToCheck - Número de dias para verificar
+ * @param daysToCheck - NÃºmero de dias para verificar
  * @returns Map com ID do profissional e sua disponibilidade
  */
 export const checkMultipleProfessionalsAvailability = async (

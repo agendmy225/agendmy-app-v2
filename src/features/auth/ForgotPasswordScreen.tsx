@@ -42,21 +42,21 @@ const ForgotPasswordScreen: React.FC = () => {
 
       Alert.alert(
         'E-mail Enviado',
-        'Um e-mail da AGENDMY com instruções para redefinir sua senha foi enviado. Verifique sua caixa de entrada e spam. O link é válido por 1 hora.',
+        'Um e-mail da AGENDMY com instruÃ§Ãµes para redefinir sua senha foi enviado. Verifique sua caixa de entrada e spam. O link Ã© vÃ¡lido por 1 hora.',
         [{ text: 'OK', onPress: () => navigation.goBack() }],
       );
     } catch (error: unknown) {
-      let errorMessage = 'Ocorreu um erro ao enviar o e-mail de recuperação.';
+      let errorMessage = 'Ocorreu um erro ao enviar o e-mail de recuperaÃ§Ã£o.';
       if (error && typeof error === 'object' && 'code' in error) {
         const firebaseError = error as { code: string };
         if (firebaseError.code === 'auth/user-not-found') {
-          errorMessage = 'Usuário não encontrado. Verifique seu e-mail.';
+          errorMessage = 'UsuÃ¡rio nÃ£o encontrado. Verifique seu e-mail.';
         } else if (firebaseError.code === 'auth/invalid-email') {
-          errorMessage = 'E-mail inválido. Verifique o formato.';
+          errorMessage = 'E-mail invÃ¡lido. Verifique o formato.';
         } else if (firebaseError.code === 'auth/too-many-requests') {
           errorMessage = 'Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.';
         } else if (firebaseError.code === 'auth/operation-not-allowed') {
-          errorMessage = 'Operação não permitida. Entre em contato com o suporte.';
+          errorMessage = 'OperaÃ§Ã£o nÃ£o permitida. Entre em contato com o suporte.';
         }
       }
       Alert.alert('Erro', errorMessage);
@@ -81,7 +81,7 @@ const ForgotPasswordScreen: React.FC = () => {
             </Text>
             <Text style={styles.titleText}>RECUPERAR SENHA</Text>
             <Text style={styles.subtitleText}>
-              Digite seu e-mail para receber as instruções de recuperação de senha.
+              Digite seu e-mail para receber as instruÃ§Ãµes de recuperaÃ§Ã£o de senha.
             </Text>
           </View>
 

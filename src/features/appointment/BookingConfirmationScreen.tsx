@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { firebaseAuth } from '../../config/firebase'; // Adicionar auth na importação
+import { firebaseAuth } from '../../config/firebase'; // Adicionar auth na importaÃ§Ã£o
 import { colors } from '../../constants/colors';
 import { AppStackParamList } from '../../types/types';
 import { saveAppointment } from '../../services/appointments';
@@ -20,37 +20,37 @@ import { Business, getBusinessById, getBusinessByOwnerId } from '../../services/
 import { Professional, getProfessionalById } from '../../services/professionals';
 import { Service, getServiceById } from '../../services/services';
 
-// Função para detectar se o usuário é proprietário
+// FunÃ§Ã£o para detectar se o usuÃ¡rio Ã© proprietÃ¡rio
 const checkIfUserIsOwner = async (): Promise<boolean> => {
   try {
     const currentUser = firebaseAuth.currentUser;
     if (!currentUser) return false;
 
-    // Verificar se o usuário possui um negócio (é proprietário)
+    // Verificar se o usuÃ¡rio possui um negÃ³cio (Ã© proprietÃ¡rio)
     const business = await getBusinessByOwnerId(currentUser.uid);
     return business !== null;
   } catch (error) {
-    console.error('❌ [checkIfUserIsOwner] Erro ao verificar tipo de usuário:', error);
+    console.error('âŒ [checkIfUserIsOwner] Erro ao verificar tipo de usuÃ¡rio:', error);
     return false;
   }
 };
 
-// Função para testar conectividade com Firestore
+// FunÃ§Ã£o para testar conectividade com Firestore
 const testFirestoreConnection = async (): Promise<boolean> => {
   try {
-    console.log('🧪 [testFirestore] Testando conectividade...');
+    console.log('ðŸ§ª [testFirestore] Testando conectividade...');
 
-    // Verificar autenticação
+    // Verificar autenticaÃ§Ã£o
     const currentUser = firebaseAuth.currentUser;
     if (!currentUser) {
-      console.error('❌ [testFirestore] Usuário não autenticado');
+      console.error('âŒ [testFirestore] UsuÃ¡rio nÃ£o autenticado');
       return false;
     }
 
-    console.log('✅ [testFirestore] Usuário autenticado, conectividade OK');
+    console.log('âœ… [testFirestore] UsuÃ¡rio autenticado, conectividade OK');
     return true;
   } catch (error) {
-    console.error('❌ [testFirestore] Erro de conectividade:', error);
+    console.error('âŒ [testFirestore] Erro de conectividade:', error);
     return false;
   }
 };
@@ -68,7 +68,7 @@ const BookingConfirmationScreen: React.FC = () => {
   const [professionalData, setProfessionalData] = useState<Professional | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Verificar se é um pacote com múltiplas sessões
+  // Verificar se Ã© um pacote com mÃºltiplas sessÃµes
   const isPackage = Boolean(sessions && sessions.length > 0);
   const appointmentSessions = isPackage ? sessions : [{ date: date!, time: time! }];
 
@@ -77,12 +77,12 @@ const BookingConfirmationScreen: React.FC = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        console.log('🔵 [BookingConfirmation] Iniciando carregamento de dados...');
-        console.log('📊 [BookingConfirmation] IDs recebidos:', { businessId, serviceId, professionalId });
+        console.log('ðŸ”µ [BookingConfirmation] Iniciando carregamento de dados...');
+        console.log('ðŸ“Š [BookingConfirmation] IDs recebidos:', { businessId, serviceId, professionalId });
 
         // Set a timeout to prevent infinite loading
         const timeoutId = setTimeout(() => {
-          console.error('⏰ [BookingConfirmation] Timeout ao carregar dados');
+          console.error('â° [BookingConfirmation] Timeout ao carregar dados');
           setLoading(false);
           Alert.alert('Erro', 'Tempo limite excedido ao carregar dados. Tente novamente.');
         }, 15000); // 15 seconds timeout
@@ -90,72 +90,72 @@ const BookingConfirmationScreen: React.FC = () => {
         // Testar conectividade com Firestore
         const isConnected = await testFirestoreConnection();
         if (!isConnected) {
-          console.error('❌ [BookingConfirmation] Sem conectividade com Firestore');
+          console.error('âŒ [BookingConfirmation] Sem conectividade com Firestore');
           clearTimeout(timeoutId);
-          Alert.alert('Erro', 'Sem conexão com o Firestore. Verifique sua conexão e tente novamente.');
+          Alert.alert('Erro', 'Sem conexÃ£o com o Firestore. Verifique sua conexÃ£o e tente novamente.');
           // Set default empty data to prevent infinite loading
-          setBusinessData({ id: businessId, name: 'Estabelecimento', address: 'Endereço indisponível', imageUrl: '' } as Business);
-          setServiceData({ id: serviceId, name: 'Serviço', price: 0, duration: '60min' } as Service);
+          setBusinessData({ id: businessId, name: 'Estabelecimento', address: 'EndereÃ§o indisponÃ­vel', imageUrl: '' } as Business);
+          setServiceData({ id: serviceId, name: 'ServiÃ§o', price: 0, duration: '60min' } as Service);
           setProfessionalData({ id: professionalId, name: 'Profissional' } as Professional);
           return;
         }
 
-        console.log('✅ [BookingConfirmation] Conectividade OK, carregando documentos...');
+        console.log('âœ… [BookingConfirmation] Conectividade OK, carregando documentos...');
 
         // Load business data
-        console.log('🏢 [BookingConfirmation] Carregando dados do estabelecimento...');
+        console.log('ðŸ¢ [BookingConfirmation] Carregando dados do estabelecimento...');
         const businessData = await getBusinessById(businessId);
 
         // Load service data  
-        console.log('🛠️ [BookingConfirmation] Carregando dados do serviço...');
+        console.log('ðŸ› ï¸ [BookingConfirmation] Carregando dados do serviÃ§o...');
         const serviceData = await getServiceById(businessId, serviceId);
 
         // Load professional data
-        console.log('👤 [BookingConfirmation] Carregando dados do profissional...');
+        console.log('ðŸ‘¤ [BookingConfirmation] Carregando dados do profissional...');
         const professionalData = await getProfessionalById(professionalId);
 
         // Clear the timeout since we got a response
         clearTimeout(timeoutId);
 
         if (businessData) {
-          console.log('✅ [BookingConfirmation] Dados do estabelecimento carregados');
+          console.log('âœ… [BookingConfirmation] Dados do estabelecimento carregados');
           setBusinessData(businessData);
         } else {
-          console.error('❌ [BookingConfirmation] Documento do estabelecimento não encontrado');
-          setBusinessData({ id: businessId, name: 'Estabelecimento', address: 'Endereço indisponível', imageUrl: '' } as Business);
+          console.error('âŒ [BookingConfirmation] Documento do estabelecimento nÃ£o encontrado');
+          setBusinessData({ id: businessId, name: 'Estabelecimento', address: 'EndereÃ§o indisponÃ­vel', imageUrl: '' } as Business);
         }
 
         if (serviceData) {
-          console.log('✅ [BookingConfirmation] Dados do serviço carregados');
+          console.log('âœ… [BookingConfirmation] Dados do serviÃ§o carregados');
           setServiceData(serviceData);
         } else {
-          console.error('❌ [BookingConfirmation] Documento do serviço não encontrado');
-          setServiceData({ id: serviceId, name: 'Serviço', price: 0, duration: '60min' } as Service);
+          console.error('âŒ [BookingConfirmation] Documento do serviÃ§o nÃ£o encontrado');
+          setServiceData({ id: serviceId, name: 'ServiÃ§o', price: 0, duration: '60min' } as Service);
         }
 
         if (professionalData) {
-          console.log('✅ [BookingConfirmation] Dados do profissional carregados');
+          console.log('âœ… [BookingConfirmation] Dados do profissional carregados');
           setProfessionalData(professionalData);
         } else {
-          console.error('❌ [BookingConfirmation] Documento do profissional não encontrado');
+          console.error('âŒ [BookingConfirmation] Documento do profissional nÃ£o encontrado');
           setProfessionalData({ id: professionalId, name: 'Profissional' } as Professional);
         }
 
-        console.log('✅ [BookingConfirmation] Carregamento de dados concluído');
+        console.log('âœ… [BookingConfirmation] Carregamento de dados concluÃ­do');
       } catch (error) {
-        console.error('❌ [BookingConfirmation] Erro ao carregar dados:', error);
+        console.error('âŒ [BookingConfirmation] Erro ao carregar dados:', error);
 
         // Set default data to prevent infinite loading
-        setBusinessData({ id: businessId, name: 'Estabelecimento', address: 'Endereço indisponível', imageUrl: '' } as Business);
-        setServiceData({ id: serviceId, name: 'Serviço', price: 0, duration: '60min' } as Service);
+        setBusinessData({ id: businessId, name: 'Estabelecimento', address: 'EndereÃ§o indisponÃ­vel', imageUrl: '' } as Business);
+        setServiceData({ id: serviceId, name: 'ServiÃ§o', price: 0, duration: '60min' } as Service);
         setProfessionalData({ id: professionalId, name: 'Profissional' } as Professional);
 
         Alert.alert(
           'Erro',
-          'Não foi possível carregar alguns dados do agendamento. Por favor, verifique se os dados estão corretos.',
+          'NÃ£o foi possÃ­vel carregar alguns dados do agendamento. Por favor, verifique se os dados estÃ£o corretos.',
         );
       } finally {
-        console.log('🔄 [BookingConfirmation] Finalizando carregamento...');
+        console.log('ðŸ”„ [BookingConfirmation] Finalizando carregamento...');
         setLoading(false);
       }
     };
@@ -163,7 +163,7 @@ const BookingConfirmationScreen: React.FC = () => {
     loadData();
   }, [businessId, serviceId, professionalId]);
 
-  // Formatar a data para exibição
+  // Formatar a data para exibiÃ§Ã£o
   const formatDate = (dateString: string) => {
     const d = new Date(dateString);
     return d.toLocaleDateString('pt-BR', {
@@ -178,15 +178,15 @@ const BookingConfirmationScreen: React.FC = () => {
     setIsLoading(true);
 
     try {
-      console.log('🔵 Iniciando confirmação do agendamento...');
+      console.log('ðŸ”µ Iniciando confirmaÃ§Ã£o do agendamento...');
 
       // Testar conectividade primeiro
       const isConnected = await testFirestoreConnection();
       if (!isConnected) {
-        throw new Error('Não foi possível conectar ao banco de dados. Verifique sua conexão com a internet.');
+        throw new Error('NÃ£o foi possÃ­vel conectar ao banco de dados. Verifique sua conexÃ£o com a internet.');
       }
 
-      console.log('📊 Dados do agendamento:', {
+      console.log('ðŸ“Š Dados do agendamento:', {
         businessId,
         serviceId,
         professionalId,
@@ -197,41 +197,41 @@ const BookingConfirmationScreen: React.FC = () => {
       });
 
       if (isPackage && appointmentSessions) {
-        console.log('📦 Processando pacote com múltiplas sessões:', appointmentSessions.length);
-        // Para pacotes, criar múltiplos agendamentos
+        console.log('ðŸ“¦ Processando pacote com mÃºltiplas sessÃµes:', appointmentSessions.length);
+        // Para pacotes, criar mÃºltiplos agendamentos
         const appointmentPromises = appointmentSessions.map(async (session, index) => {
-          console.log(`📅 Criando sessão ${index + 1}:`, session);
+          console.log(`ðŸ“… Criando sessÃ£o ${index + 1}:`, session);
           const appointmentData = {
             businessId,
             serviceId,
             professionalId,
             date: session.date,
             time: session.time,
-            serviceName: serviceData?.name || 'Serviço',
+            serviceName: serviceData?.name || 'ServiÃ§o',
             professionalName: professionalData?.name || 'Profissional',
             businessName: businessData?.name || 'Estabelecimento',
-            price: (serviceData?.price || 0) / appointmentSessions.length, // Dividir o preço entre as sessões
+            price: (serviceData?.price || 0) / appointmentSessions.length, // Dividir o preÃ§o entre as sessÃµes
             duration: String(serviceData?.duration || 0),
             status: 'scheduled' as const,
           };
           const result = await saveAppointment(appointmentData);
-          console.log(`✅ Sessão ${index + 1} salva com ID:`, result);
+          console.log(`âœ… SessÃ£o ${index + 1} salva com ID:`, result);
           return result;
         });
 
         const results = await Promise.all(appointmentPromises);
-        console.log('✅ Todas as sessões do pacote foram salvas:', results);
+        console.log('âœ… Todas as sessÃµes do pacote foram salvas:', results);
 
       } else {
-        console.log('📅 Processando sessão única');
-        // Para sessão única, manter comportamento original
+        console.log('ðŸ“… Processando sessÃ£o Ãºnica');
+        // Para sessÃ£o Ãºnica, manter comportamento original
         const appointmentData = {
           businessId,
           serviceId,
           professionalId,
           date: date!,
           time: time!,
-          serviceName: serviceData?.name || 'Serviço',
+          serviceName: serviceData?.name || 'ServiÃ§o',
           professionalName: professionalData?.name || 'Profissional',
           businessName: businessData?.name || 'Estabelecimento',
           price: serviceData?.price || 0,
@@ -239,11 +239,11 @@ const BookingConfirmationScreen: React.FC = () => {
           status: 'scheduled' as const,
         };
 
-        console.log('💾 Salvando agendamento único:', appointmentData);
+        console.log('ðŸ’¾ Salvando agendamento Ãºnico:', appointmentData);
         const result = await saveAppointment(appointmentData);
-        console.log('✅ Agendamento único salvo com ID:', result);
+        console.log('âœ… Agendamento Ãºnico salvo com ID:', result);
       }
-      console.log('🎉 Agendamento confirmado com sucesso!');
+      console.log('ðŸŽ‰ Agendamento confirmado com sucesso!');
 
       const goToAppointments = async () => {
         const isOwner = await checkIfUserIsOwner();
@@ -253,14 +253,14 @@ const BookingConfirmationScreen: React.FC = () => {
       const inAppPaymentEnabled = businessData?.paymentMethods?.inApp ?? false;
       if (inAppPaymentEnabled && (serviceData?.price ?? 0) > 0) {
         Alert.alert(
-          'Agendamento Confirmado! 🎉',
-          'Deseja pagar agora pelo app com Pix ou cartão?',
+          'Agendamento Confirmado! ðŸŽ‰',
+          'Deseja pagar agora pelo app com Pix ou cartÃ£o?',
           [
             { text: 'Pagar agora', onPress: () => {
               navigation.navigate('Payment', {
                 appointmentId: `${businessId}_${Date.now()}`,
                 amount: serviceData?.price ?? 0,
-                description: `${serviceData?.name ?? 'Serviço'} — ${professionalData?.name ?? ''}`,
+                description: `${serviceData?.name ?? 'ServiÃ§o'} â€” ${professionalData?.name ?? ''}`,
                 businessName: businessData?.name ?? 'Estabelecimento',
                 currency: 'BRL',
               });
@@ -272,20 +272,20 @@ const BookingConfirmationScreen: React.FC = () => {
       Alert.alert(
         'Agendamento Confirmado',
         isPackage && appointmentSessions
-          ? `Seu pacote com ${appointmentSessions.length} sessões foi confirmado com sucesso!`
+          ? `Seu pacote com ${appointmentSessions.length} sessÃµes foi confirmado com sucesso!`
           : 'Seu agendamento foi confirmado com sucesso!',
         [
           {
             text: 'Ver Meus Agendamentos',
             onPress: async () => {
-              console.log('📱 Navegando para tela de agendamentos...');
+              console.log('ðŸ“± Navegando para tela de agendamentos...');
               
-              // Detectar se o usuário é proprietário para navegar para a tela correta
+              // Detectar se o usuÃ¡rio Ã© proprietÃ¡rio para navegar para a tela correta
               const isOwner = await checkIfUserIsOwner();
               
               if (isOwner) {
-                console.log('👑 [BookingConfirmation] Usuário é proprietário, navegando para OwnerTabs');
-                // Reset para garantir que volta para a tab de agendamentos do proprietário
+                console.log('ðŸ‘‘ [BookingConfirmation] UsuÃ¡rio Ã© proprietÃ¡rio, navegando para OwnerTabs');
+                // Reset para garantir que volta para a tab de agendamentos do proprietÃ¡rio
                 navigation.reset({
                   index: 0,
                   routes: [
@@ -293,7 +293,7 @@ const BookingConfirmationScreen: React.FC = () => {
                   ],
                 });
               } else {
-                console.log('👤 [BookingConfirmation] Usuário é cliente, navegando para ClientTabs');
+                console.log('ðŸ‘¤ [BookingConfirmation] UsuÃ¡rio Ã© cliente, navegando para ClientTabs');
                 // Reset para garantir que volta para a tab de agendamentos do cliente
                 navigation.reset({
                   index: 0,
@@ -308,8 +308,8 @@ const BookingConfirmationScreen: React.FC = () => {
       );
       }
     } catch (error) {
-      console.error('❌ Erro ao confirmar agendamento:', error);
-      console.error('📊 Detalhes do erro:', {
+      console.error('âŒ Erro ao confirmar agendamento:', error);
+      console.error('ðŸ“Š Detalhes do erro:', {
         message: error instanceof Error ? error.message : 'Erro desconhecido',
         stack: error instanceof Error ? error.stack : undefined,
         name: error instanceof Error ? error.name : undefined,
@@ -317,7 +317,7 @@ const BookingConfirmationScreen: React.FC = () => {
 
       Alert.alert(
         'Erro',
-        `Não foi possível confirmar seu agendamento.\n\nDetalhes: ${error instanceof Error ? error.message : 'Erro desconhecido'}\n\nTente novamente ou entre em contato conosco.`,
+        `NÃ£o foi possÃ­vel confirmar seu agendamento.\n\nDetalhes: ${error instanceof Error ? error.message : 'Erro desconhecido'}\n\nTente novamente ou entre em contato conosco.`,
         [
           { text: 'OK', style: 'default' },
         ],
@@ -336,7 +336,7 @@ const BookingConfirmationScreen: React.FC = () => {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backButtonText}>←</Text>
+            <Text style={styles.backButtonText}>â†</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Confirmar Agendamento</Text>
           <View style={styles.placeholder} />
@@ -358,7 +358,7 @@ const BookingConfirmationScreen: React.FC = () => {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backButtonText}>←</Text>
+            <Text style={styles.backButtonText}>â†</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Confirmar Agendamento</Text>
           <View style={styles.placeholder} />
@@ -390,7 +390,7 @@ const BookingConfirmationScreen: React.FC = () => {
           onPress={() => navigation.goBack()}
           disabled={isLoading}
         >
-          <Text style={styles.backButtonText}>←</Text>
+          <Text style={styles.backButtonText}>â†</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Confirmar Agendamento</Text>
         <View style={styles.placeholder} />
@@ -408,9 +408,9 @@ const BookingConfirmationScreen: React.FC = () => {
           </View>
         </View>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Detalhes do Serviço</Text>
+          <Text style={styles.sectionTitle}>Detalhes do ServiÃ§o</Text>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Serviço:</Text>
+            <Text style={styles.detailLabel}>ServiÃ§o:</Text>
             <Text style={styles.detailValue}>{serviceData.name}</Text>
           </View>
           <View style={styles.detailRow}>
@@ -422,13 +422,13 @@ const BookingConfirmationScreen: React.FC = () => {
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>Tipo:</Text>
                 <Text style={styles.detailValue}>
-                  Pacote com {appointmentSessions?.length || 0} sessões
+                  Pacote com {appointmentSessions?.length || 0} sessÃµes
                 </Text>
               </View>
-              <Text style={styles.sessionsTitle}>Sessões agendadas:</Text>
+              <Text style={styles.sessionsTitle}>SessÃµes agendadas:</Text>
               {appointmentSessions?.map((session, index) => (
                 <View key={index} style={styles.sessionRow}>
-                  <Text style={styles.sessionNumber}>Sessão {index + 1}:</Text>
+                  <Text style={styles.sessionNumber}>SessÃ£o {index + 1}:</Text>
                   <View style={styles.sessionDetails}>
                     <Text style={styles.sessionDate}>{formatDate(session.date)}</Text>
                     <Text style={styles.sessionTime}>{session.time}</Text>
@@ -443,13 +443,13 @@ const BookingConfirmationScreen: React.FC = () => {
                 <Text style={styles.detailValue}>{formatDate(date!)}</Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Horário:</Text>
+                <Text style={styles.detailLabel}>HorÃ¡rio:</Text>
                 <Text style={styles.detailValue}>{time}</Text>
               </View>
             </>
           )}
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Duração:</Text>
+            <Text style={styles.detailLabel}>DuraÃ§Ã£o:</Text>
             <Text style={styles.detailValue}>{serviceData.duration}</Text>
           </View>
         </View>
@@ -468,10 +468,10 @@ const BookingConfirmationScreen: React.FC = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Política de Cancelamento</Text>
+          <Text style={styles.sectionTitle}>PolÃ­tica de Cancelamento</Text>
           <Text style={styles.policyText}>
-            Cancelamentos devem ser realizados com pelo menos 24 horas de antecedência.
-            Cancelamentos com menos de 24 horas ou não comparecimento podem estar sujeitos a cobrança.
+            Cancelamentos devem ser realizados com pelo menos 24 horas de antecedÃªncia.
+            Cancelamentos com menos de 24 horas ou nÃ£o comparecimento podem estar sujeitos a cobranÃ§a.
           </Text>
         </View>
       </ScrollView>
@@ -486,7 +486,7 @@ const BookingConfirmationScreen: React.FC = () => {
             <ActivityIndicator color={colors.white} size="small" />
           ) : (
             <Text style={styles.confirmButtonText}>
-              {isPackage && appointmentSessions ? `Confirmar ${appointmentSessions.length} Sessões` : 'Confirmar Agendamento'}
+              {isPackage && appointmentSessions ? `Confirmar ${appointmentSessions.length} SessÃµes` : 'Confirmar Agendamento'}
             </Text>
           )}
         </TouchableOpacity>

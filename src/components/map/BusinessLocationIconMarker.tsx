@@ -10,7 +10,7 @@ interface BusinessLocation {
   latitude: number;
   longitude: number;
   description?: string;
-  category?: string; // Pode não ter categoria, então opcional
+  category?: string; // Pode nÃ£o ter categoria, entÃ£o opcional
 }
 
 interface BusinessLocationIconMarkerProps {
@@ -20,9 +20,9 @@ interface BusinessLocationIconMarkerProps {
 
 const MARKER_SIZE = 40;
 
-// Mapeamento de categorias para ícones do Material Icons
+// Mapeamento de categorias para Ã­cones do Material Icons
 const getCategoryIcon = (category?: string): string => {
-  if (!category) return 'store'; // Ícone padrão se não tiver categoria
+  if (!category) return 'store'; // Ãcone padrÃ£o se nÃ£o tiver categoria
   
   switch (category) {
     case 'saloes-beleza':
@@ -38,7 +38,7 @@ const getCategoryIcon = (category?: string): string => {
     case 'academia':
       return 'fitness-center'; // Academia
     case 'odontologia':
-      return 'local-hospital'; // Hospital/saúde
+      return 'local-hospital'; // Hospital/saÃºde
     case 'fisioterapia':
       return 'accessibility'; // Acessibilidade
     case 'massagem':
@@ -46,13 +46,13 @@ const getCategoryIcon = (category?: string): string => {
     case 'manicure':
       return 'colorize'; // Colorir/manicure
     default:
-      return 'store'; // Ícone padrão para loja
+      return 'store'; // Ãcone padrÃ£o para loja
   }
 };
 
-// Cores específicas para cada categoria
+// Cores especÃ­ficas para cada categoria
 const getCategoryColor = (category?: string): string => {
-  if (!category) return colors.primary; // Cor padrão se não tiver categoria
+  if (!category) return colors.primary; // Cor padrÃ£o se nÃ£o tiver categoria
   
   switch (category) {
     case 'saloes-beleza':
@@ -76,7 +76,7 @@ const getCategoryColor = (category?: string): string => {
     case 'manicure':
       return '#FF5722'; // Laranja avermelhado
     default:
-      return colors.primary; // Cor padrão
+      return colors.primary; // Cor padrÃ£o
   }
 };
 
@@ -104,7 +104,7 @@ export const BusinessLocationIconMarker: React.FC<BusinessLocationIconMarkerProp
       onPress={onPress}
       title={business.name}
       description={business.description}
-      // Para de rastrear mudanças quando renderização estiver completa
+      // Para de rastrear mudanÃ§as quando renderizaÃ§Ã£o estiver completa
       tracksViewChanges={!isRenderComplete}
     >
       <View style={styles.markerContainer}>
@@ -115,7 +115,7 @@ export const BusinessLocationIconMarker: React.FC<BusinessLocationIconMarkerProp
             color={colors.white} 
           />
         </View>
-        {/* Pequeno triângulo apontando para baixo */}
+        {/* Pequeno triÃ¢ngulo apontando para baixo */}
         <View style={[styles.markerTriangle, { borderTopColor: backgroundColor }]} />
       </View>
     </Marker>

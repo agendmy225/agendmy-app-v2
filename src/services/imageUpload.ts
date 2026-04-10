@@ -20,7 +20,7 @@ export interface ImageUploadResult {
 }
 
 /**
- * Abre o seletor de imagens e permite ao usuário escolher uma foto
+ * Abre o seletor de imagens e permite ao usuÃ¡rio escolher uma foto
  */
 export const selectImage = (): Promise<ImagePickerResponse> => {
   return new Promise((resolve, reject) => {
@@ -34,7 +34,7 @@ export const selectImage = (): Promise<ImagePickerResponse> => {
 
     launchImageLibrary(options, (response) => {
       if (response.didCancel) {
-        reject(new Error('Seleção cancelada'));
+        reject(new Error('SeleÃ§Ã£o cancelada'));
       } else if (response.errorMessage) {
         reject(new Error(response.errorMessage));
       } else {
@@ -55,13 +55,13 @@ export const uploadImageToFirebase = async (
   try {
     const { storageKey } = options;
 
-    // Verificar se usuário está autenticado
+    // Verificar se usuÃ¡rio estÃ¡ autenticado
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      throw new Error('Usuário não autenticado');
+      throw new Error('UsuÃ¡rio nÃ£o autenticado');
     }
 
-    // Criar referência no Firebase Storage
+    // Criar referÃªncia no Firebase Storage
     const storageRef = ref(storage, storageKey);
 
     // Converter URI para Blob
@@ -86,15 +86,15 @@ export const uploadImageToFirebase = async (
     return downloadURL;
   } catch (error: unknown) {
 
-    // Mensagens de erro mais específicas
+    // Mensagens de erro mais especÃ­ficas
     if (typeof error === 'object' && error !== null && 'code' in error) {
       const firebaseError = error as { code: string };
       if (firebaseError.code === 'storage/unauthorized') {
-        throw new Error('Usuário não autorizado a fazer upload. Verifique as regras do Firebase Storage.');
+        throw new Error('UsuÃ¡rio nÃ£o autorizado a fazer upload. Verifique as regras do Firebase Storage.');
       } else if (firebaseError.code === 'storage/canceled') {
         throw new Error('Upload cancelado.');
       } else if (firebaseError.code === 'storage/unknown') {
-        throw new Error('Erro desconhecido no upload. Verifique sua conexão.');
+        throw new Error('Erro desconhecido no upload. Verifique sua conexÃ£o.');
       }
     }
 
@@ -117,7 +117,7 @@ export const selectAndUploadImage = async (
     const asset = response.assets?.[0];
 
     if (!asset?.uri) {
-      throw new Error('Nenhuma imagem selecionada ou URI indisponível');
+      throw new Error('Nenhuma imagem selecionada ou URI indisponÃ­vel');
     }
 
     // Fazer upload
@@ -130,8 +130,8 @@ export const selectAndUploadImage = async (
     };
   } catch (error) {
     if (error instanceof Error && error.message.includes('cancelada')) {
-      // Não tratar como um erro fatal, apenas informar o usuário
-      Alert.alert('Info', 'A seleção de imagem foi cancelada.');
+      // NÃ£o tratar como um erro fatal, apenas informar o usuÃ¡rio
+      Alert.alert('Info', 'A seleÃ§Ã£o de imagem foi cancelada.');
     }
     throw error;
   }
@@ -148,11 +148,11 @@ export const deleteImageFromFirebase = async (
       return;
     }
 
-    // A referência pode ser criada diretamente do caminho do storage
+    // A referÃªncia pode ser criada diretamente do caminho do storage
     const reference = ref(storage, imageUrl);
     await deleteObject(reference);
   } catch (error: unknown) {
-    // Não propagar o erro pois a imagem pode já ter sido deletada
+    // NÃ£o propagar o erro pois a imagem pode jÃ¡ ter sido deletada
     // mas loggar para debug
     if (typeof error === 'object' && error !== null && 'code' in error) {
       const firebaseError = error as { code: string };
@@ -163,7 +163,7 @@ export const deleteImageFromFirebase = async (
 };
 
 /**
- * Mostra um dialog de confirmação para selecionar uma imagem
+ * Mostra um dialog de confirmaÃ§Ã£o para selecionar uma imagem
  */
 export const showImagePickerDialog = (
   title: string,
@@ -171,7 +171,7 @@ export const showImagePickerDialog = (
 ): void => {
   Alert.alert(
     title,
-    'Escolha uma opção:',
+    'Escolha uma opÃ§Ã£o:',
     [
       {
         text: 'Cancelar',

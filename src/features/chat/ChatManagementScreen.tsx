@@ -36,9 +36,9 @@ const ChatManagementScreen: React.FC = () => {
 
     try {
       setLoading(true);
-      // Buscar conversas onde o usuário atual é um dos participantes
+      // Buscar conversas onde o usuÃ¡rio atual Ã© um dos participantes
       const conversationsData = await getUserConversationsAsync(user.uid);
-      // Filtrar apenas conversas onde o usuário é owner (pode ter businessId)
+      // Filtrar apenas conversas onde o usuÃ¡rio Ã© owner (pode ter businessId)
       const ownerConversations = conversationsData.filter(chat =>
         chat.ownerId === user.uid || chat.businessId,
       );
@@ -63,7 +63,7 @@ const ChatManagementScreen: React.FC = () => {
   }, [loadConversations]);
 
   const handleConversationPress = (conversation: Chat) => {
-    // Encontrar o ID do outro usuário (cliente)
+    // Encontrar o ID do outro usuÃ¡rio (cliente)
     const otherUserId = conversation.participants.find(p => p !== user?.uid);
     if (!otherUserId) return;
 
@@ -161,7 +161,7 @@ const ChatManagementScreen: React.FC = () => {
           <Icon name="chat" size={64} color={colors.lightGray} />
           <Text style={styles.emptyTitle}>Nenhuma conversa ainda</Text>
           <Text style={styles.emptyText}>
-            As conversas com seus clientes aparecerão aqui quando eles enviarem mensagens.
+            As conversas com seus clientes aparecerÃ£o aqui quando eles enviarem mensagens.
           </Text>
         </View>
       ) : (

@@ -1,4 +1,4 @@
-﻿// Following React Native Firebase v22 modular API patterns
+// Following React Native Firebase v22 modular API patterns
 // https://rnfirebase.io/migrating-to-v22
 import {
   addDoc,

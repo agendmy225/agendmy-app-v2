@@ -16,7 +16,7 @@ type ProfessionalType = {
   specialty: string;
   rating: number;
   image: string;
-  services?: string[]; // IDs dos serviços que o profissional realiza
+  services?: string[]; // IDs dos serviÃ§os que o profissional realiza
 };
 
 type ServiceDetailsModalProps = {
@@ -46,18 +46,18 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
   const [filteredProfessionals, setFilteredProfessionals] = useState<ProfessionalType[]>([]);
 
   useEffect(() => {
-    // Filtrar profissionais que podem realizar este serviço
+    // Filtrar profissionais que podem realizar este serviÃ§o
     const filtered = professionals.filter(professional => {
-      // Se o profissional não tem serviços definidos, ele pode realizar todos os serviços
+      // Se o profissional nÃ£o tem serviÃ§os definidos, ele pode realizar todos os serviÃ§os
       if (!professional.services || professional.services.length === 0) {
         return true;
       }
-      // Caso contrário, verificar se o serviço está na lista de serviços do profissional
+      // Caso contrÃ¡rio, verificar se o serviÃ§o estÃ¡ na lista de serviÃ§os do profissional
       return professional.services.includes(service.id);
     });
     setFilteredProfessionals(filtered);
 
-    // Resetar seleção quando o modal abre ou o serviço muda
+    // Resetar seleÃ§Ã£o quando o modal abre ou o serviÃ§o muda
     setSelectedProfessional(null);
   }, [service.id, professionals]);
 
@@ -84,7 +84,7 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
           <Text style={styles.professionalName}>{professional.name}</Text>
           <Text style={styles.professionalSpecialty}>{professional.specialty}</Text>
           <View style={styles.ratingContainer}>
-            <Text style={styles.ratingIcon}>{'⭐'}</Text>
+            <Text style={styles.ratingIcon}>{'â­'}</Text>
             <Text style={styles.ratingText}>{professional.rating.toFixed(1)}</Text>
           </View>
         </View>
@@ -105,9 +105,9 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Detalhes do Serviço</Text>
+            <Text style={styles.modalTitle}>Detalhes do ServiÃ§o</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>✕</Text>
+              <Text style={styles.closeButtonText}>âœ•</Text>
             </TouchableOpacity>
           </View>
 
@@ -126,15 +126,15 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
 
               <View style={styles.serviceInfo}>
                 <View style={styles.infoItem}>
-                  <Text style={styles.infoIcon}>{'⏱️'}</Text>
+                  <Text style={styles.infoIcon}>{'â±ï¸'}</Text>
                   <Text style={styles.infoText}>{service.duration}</Text>
                 </View>
                 <View style={styles.infoItem}>
-                  <Text style={styles.infoIcon}>{'💰'}</Text>
+                  <Text style={styles.infoIcon}>{'ðŸ’°'}</Text>
                   <Text style={styles.infoText}>{'R$ '}{service.price.toFixed(2)}</Text>
                 </View>
                 <View style={styles.infoItem}>
-                  <Text style={styles.infoIcon}>{'🏷️'}</Text>
+                  <Text style={styles.infoIcon}>{'ðŸ·ï¸'}</Text>
                   <Text style={styles.infoText}>{service.category}</Text>
                 </View>
               </View>
@@ -146,7 +146,7 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
                 filteredProfessionals.map(renderProfessionalItem)
               ) : (
                 <Text style={styles.noProfessionalsText}>
-                  Nenhum profissional disponível para este serviço
+                  Nenhum profissional disponÃ­vel para este serviÃ§o
                 </Text>
               )}
             </View>

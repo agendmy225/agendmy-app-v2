@@ -22,15 +22,15 @@ const CreateBusinessCard: React.FC<CreateBusinessCardProps> = ({ onBusinessCreat
 
   const handleCreateBusiness = async () => {
     if (!user) {
-      Alert.alert('Erro', 'Usuário não encontrado');
+      Alert.alert('Erro', 'UsuÃ¡rio nÃ£o encontrado');
       return;
     }
 
     try {
       setCreating(true);
-      const businessName = `Negócio de ${user.displayName || 'Usuário'}`;
-      const defaultAddress = 'Avenida Paulista, 1578, São Paulo, SP'; // Endereço padrão para geocodificação
-      await createQuickBusiness(user.uid, businessName, defaultAddress); // Passa o endereço
+      const businessName = `NegÃ³cio de ${user.displayName || 'UsuÃ¡rio'}`;
+      const defaultAddress = 'Avenida Paulista, 1578, SÃ£o Paulo, SP'; // EndereÃ§o padrÃ£o para geocodificaÃ§Ã£o
+      await createQuickBusiness(user.uid, businessName, defaultAddress); // Passa o endereÃ§o
 
       if (refreshUser) {
         await refreshUser();
@@ -38,7 +38,7 @@ const CreateBusinessCard: React.FC<CreateBusinessCardProps> = ({ onBusinessCreat
 
       Alert.alert(
         'Sucesso!',
-        `Seu negócio "${businessName}" foi criado com sucesso. Você pode editá-lo nas configurações.`,
+        `Seu negÃ³cio "${businessName}" foi criado com sucesso. VocÃª pode editÃ¡-lo nas configuraÃ§Ãµes.`,
         [
           {
             text: 'OK',
@@ -49,7 +49,7 @@ const CreateBusinessCard: React.FC<CreateBusinessCardProps> = ({ onBusinessCreat
     } catch (error) {
       Alert.alert(
         'Erro',
-        'Não foi possível criar o negócio. Tente novamente.',
+        'NÃ£o foi possÃ­vel criar o negÃ³cio. Tente novamente.',
       );
     } finally {
       setCreating(false);
@@ -62,9 +62,9 @@ const CreateBusinessCard: React.FC<CreateBusinessCardProps> = ({ onBusinessCreat
         <View style={styles.iconContainer}>
           <Icon name="add-business" size={48} color={colors.primary} />
         </View>
-        <Text style={styles.title}>Criar Novo Negócio</Text>
+        <Text style={styles.title}>Criar Novo NegÃ³cio</Text>
         <Text style={styles.description}>
-          Você ainda não possui um negócio associado à sua conta. Crie um agora para começar a gerenciar seus serviços e agendamentos.
+          VocÃª ainda nÃ£o possui um negÃ³cio associado Ã  sua conta. Crie um agora para comeÃ§ar a gerenciar seus serviÃ§os e agendamentos.
         </Text>
         <TouchableOpacity
           style={[styles.button, creating && styles.buttonDisabled]}
@@ -76,7 +76,7 @@ const CreateBusinessCard: React.FC<CreateBusinessCardProps> = ({ onBusinessCreat
           ) : (
             <View style={styles.buttonContent}>
               <Icon name="add" size={20} color={colors.white} style={styles.buttonIcon} />
-              <Text style={styles.buttonText}>Criar Negócio</Text>
+              <Text style={styles.buttonText}>Criar NegÃ³cio</Text>
             </View>
           )}
         </TouchableOpacity>

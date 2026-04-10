@@ -1,4 +1,4 @@
-﻿import { RouteProp, useFocusEffect, useNavigation, useRoute, CompositeNavigationProp } from '@react-navigation/native'; // Import useFocusEffect
+import { RouteProp, useFocusEffect, useNavigation, useRoute, CompositeNavigationProp } from '@react-navigation/native'; // Import useFocusEffect
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BusinessMarker } from './components/BusinessMarker';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';

@@ -1,4 +1,4 @@
-﻿// OwnerHomeScreen.tsx - Corrigido
+// OwnerHomeScreen.tsx - Corrigido
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useCallback, useEffect, useRef, useState } from 'react';

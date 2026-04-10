@@ -20,7 +20,7 @@ class ImageCacheManager {
 
     preloadImage(uri: string): Promise<boolean> {
         return new Promise((resolve) => {
-            // Verificar se já está no cache
+            // Verificar se jÃ¡ estÃ¡ no cache
             const cached = this.cache.get(uri);
             if (cached) {
                 resolve(cached.loaded && !cached.error);
@@ -30,15 +30,15 @@ class ImageCacheManager {
             // Adicionar ao cache como loading
             this.cache.set(uri, { uri, loaded: false, error: false });
 
-            // Pré-carregar a imagem
+            // PrÃ©-carregar a imagem
             Image.prefetch(uri)
                 .then(() => {
-                    console.log(`✅ Imagem pré-carregada com sucesso: ${uri}`);
+                    console.log(`âœ… Imagem prÃ©-carregada com sucesso: ${uri}`);
                     this.cache.set(uri, { uri, loaded: true, error: false });
                     resolve(true);
                 })
                 .catch((error) => {
-                    console.error(`❌ Erro ao pré-carregar imagem: ${uri}`, error);
+                    console.error(`âŒ Erro ao prÃ©-carregar imagem: ${uri}`, error);
                     this.cache.set(uri, { uri, loaded: false, error: true });
                     resolve(false);
                 });
