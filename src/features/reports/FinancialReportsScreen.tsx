@@ -288,7 +288,7 @@ const FinancialReportsScreen: React.FC = () => {
           style={styles.deleteIcon}
           onPress={() => report.id && handleDeleteReport(report.id)}
         >
-          <Text style={styles.deleteIconText}>ðŸ—‘ï¸</Text>
+          <Text style={styles.deleteIconText}>ðŸ—‘௸</Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.reportDate}>

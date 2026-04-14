@@ -84,7 +84,7 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
           <Text style={styles.professionalName}>{professional.name}</Text>
           <Text style={styles.professionalSpecialty}>{professional.specialty}</Text>
           <View style={styles.ratingContainer}>
-            <Text style={styles.ratingIcon}>{'â­'}</Text>
+            <Text style={styles.ratingIcon}>{'ࢭ'}</Text>
             <Text style={styles.ratingText}>{professional.rating.toFixed(1)}</Text>
           </View>
         </View>
@@ -126,7 +126,7 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
 
               <View style={styles.serviceInfo}>
                 <View style={styles.infoItem}>
-                  <Text style={styles.infoIcon}>{'â±ï¸'}</Text>
+                  <Text style={styles.infoIcon}>{'࢏±௸'}</Text>
                   <Text style={styles.infoText}>{service.duration}</Text>
                 </View>
                 <View style={styles.infoItem}>
@@ -134,7 +134,7 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
                   <Text style={styles.infoText}>{'R$ '}{service.price.toFixed(2)}</Text>
                 </View>
                 <View style={styles.infoItem}>
-                  <Text style={styles.infoIcon}>{'ðŸ·ï¸'}</Text>
+                  <Text style={styles.infoIcon}>{'ðŸ·௸'}</Text>
                   <Text style={styles.infoText}>{service.category}</Text>
                 </View>
               </View>

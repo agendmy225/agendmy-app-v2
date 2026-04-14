@@ -45,7 +45,7 @@ export const OptimizedBusinessMarker: React.FC<BusinessMarkerProps> = memo(({ bu
   };
 
   const handleImageError = () => {
-    console.error(`âŒ Erro ao carregar imagem para ${business.name}`);
+    console.error(`࢝Œ Erro ao carregar imagem para ${business.name}`);
     setImageError(true);
     setImageLoaded(false);
   };

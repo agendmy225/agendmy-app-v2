@@ -122,7 +122,7 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
         );
       }
     } catch (error) {
-      console.error('âŒ Erro no teste de conectividade:', error);
+      console.error('࢝Œ Erro no teste de conectividade:', error);
       setStorageConnected(false);
 
       if (showTestButton) {
@@ -160,7 +160,7 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
           ) : storageConnected ? (
             <Text style={styles.statusConnected}>Conectado âœ…</Text>
           ) : (
-            <Text style={styles.statusDisconnected}>Desconectado âŒ</Text>
+            <Text style={styles.statusDisconnected}>Desconectado ࢝Œ</Text>
           )}
         </Text>
 
@@ -199,7 +199,7 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
       {__DEV__ && (
         <View style={styles.debugContainer}>
           <Text style={styles.debugText}>
-            Businesses: {businesses.length} | Storage: {storageConnected ? 'âœ…' : 'âŒ'}
+            Businesses: {businesses.length} | Storage: {storageConnected ? 'âœ…' : '࢝Œ'}
           </Text>
         </View>
       )}

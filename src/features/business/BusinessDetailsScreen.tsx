@@ -354,7 +354,7 @@ const BusinessDetailsScreen: React.FC = () => {
             styles.ratingIcon,
             !isAvailable && styles.professionalTextDisabled,
           ]}>
-            Ô¡É
+            ԡÉ
           </Text>
           <Text style={[
             styles.ratingText,

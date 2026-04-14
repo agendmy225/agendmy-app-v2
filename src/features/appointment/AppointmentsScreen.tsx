@@ -50,7 +50,7 @@ const AppointmentsScreen: React.FC = () => {
         return false;
       }
     } catch (error) {
-      console.error('âŒ [AppointmentsScreen] Erro ao verificar tipo de usuário:', error);
+      console.error('࢝Œ [AppointmentsScreen] Erro ao verificar tipo de usuário:', error);
       setIsOwner(false);
       setBusinessId(null);
       return false;
@@ -62,7 +62,7 @@ const AppointmentsScreen: React.FC = () => {
     try {
       const currentUser = firebaseAuth.currentUser;
       if (!currentUser) {
-        console.log('âŒ [AppointmentsScreen] Usuário não autenticado');
+        console.log('࢝Œ [AppointmentsScreen] Usuário não autenticado');
         return;
       }
 
@@ -84,11 +84,11 @@ const AppointmentsScreen: React.FC = () => {
           // Para proprietários: carregar TANTO agendamentos como cliente QUANTO agendamentos do negócio
           const [clientAppointments, businessAppointments] = await Promise.all([
             getClientAppointments().catch(err => {
-              console.warn('âš ï¸ [AppointmentsScreen] Erro ao carregar agendamentos como cliente:', err);
+              console.warn('âš ௸ [AppointmentsScreen] Erro ao carregar agendamentos como cliente:', err);
               return [];
             }),
             getBusinessAppointments(currentBusinessId).catch(err => {
-              console.warn('âš ï¸ [AppointmentsScreen] Erro ao carregar agendamentos do negócio:', err);
+              console.warn('âš ௸ [AppointmentsScreen] Erro ao carregar agendamentos do negócio:', err);
               return [];
             })
           ]);
@@ -106,7 +106,7 @@ const AppointmentsScreen: React.FC = () => {
             total: userAppointments.length
           });
         } else {
-          console.log('âš ï¸ [AppointmentsScreen] Proprietário sem negócio, carregando como cliente');
+          console.log('âš ௸ [AppointmentsScreen] Proprietário sem negócio, carregando como cliente');
           userAppointments = await getClientAppointments();
         }
       } else {
@@ -119,7 +119,7 @@ const AppointmentsScreen: React.FC = () => {
 
       setAppointments(userAppointments);
     } catch (error) {
-      console.error('âŒ [AppointmentsScreen] Erro ao carregar agendamentos:', error);
+      console.error('࢝Œ [AppointmentsScreen] Erro ao carregar agendamentos:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);

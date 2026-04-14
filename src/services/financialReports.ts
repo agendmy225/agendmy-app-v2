@@ -157,7 +157,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
                     serviceName = rootServiceData?.name || 'Serviço Desconhecido';
                   }
                 } catch {
-                  console.log('âš ï¸ Serviço não encontrado em nenhuma coleção:', appointment.serviceId);
+                  console.log('âš ௸ Serviço não encontrado em nenhuma coleção:', appointment.serviceId);
                 }
               }
 
@@ -167,7 +167,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
                 appointmentsCount: 0,
               };
             } catch (serviceError) {
-              console.error('âŒ Erro ao buscar dados do serviço:', serviceError);
+              console.error('࢝Œ Erro ao buscar dados do serviço:', serviceError);
               serviceRevenue[appointment.serviceId] = {
                 name: 'Serviço Desconhecido',
                 totalRevenue: 0,
@@ -211,7 +211,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
               rateForCalculation = professionalData?.commissionRate || defaultCommissionRate;
 
               if (!rateForCalculation || rateForCalculation <= 0) {
-                console.warn('âš ï¸ Taxa de comissão não configurada para profissional:', profId);
+                console.warn('âš ௸ Taxa de comissão não configurada para profissional:', profId);
                 // Pular este profissional se não tiver configuração válida
                 continue;
               }
@@ -229,10 +229,10 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
                 console.log('ðŸ‘¤ Profissional adicionado:', professionalName, 'Taxa:', rateForCalculation);
               }
             } catch (profError) {
-              console.error('âŒ Erro ao buscar dados do profissional:', profError);
+              console.error('࢝Œ Erro ao buscar dados do profissional:', profError);
               // IMPORTANTE: Se não conseguir buscar dados do profissional, pular
               // NÃƒO usar taxa mockada/padrão
-              console.warn('âš ï¸ Pulando profissional sem dados válidos:', profId);
+              console.warn('âš ௸ Pulando profissional sem dados válidos:', profId);
               continue;
             }
           }
@@ -245,7 +245,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
         }
       } else if (isCanceledStatus(appointment.status)) {
         canceledAppointments++;
-        console.log('âŒ Agendamento cancelado contabilizado');
+        console.log('࢝Œ Agendamento cancelado contabilizado');
       }
     }
 
@@ -283,7 +283,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
       id: reportRef.id,
     };
   } catch (error) {
-    console.error('âŒ Erro ao gerar relatório financeiro:', error);
+    console.error('࢝Œ Erro ao gerar relatório financeiro:', error);
     if (error instanceof Error) {
       throw error; // Re-throw se já é um Error com mensagem específica
     }
@@ -421,7 +421,7 @@ export const calculateCommissions = async (
             rateForCalculation = professionalData?.commissionRate || defaultCommissionRate;
 
             if (!rateForCalculation || rateForCalculation <= 0) {
-              console.warn('âš ï¸ Taxa de comissão não configurada para profissional:', profId);
+              console.warn('âš ௸ Taxa de comissão não configurada para profissional:', profId);
               // Pular este profissional se não tiver configuração válida
               continue;
             }
@@ -436,10 +436,10 @@ export const calculateCommissions = async (
               };
             }
           } catch (profError) {
-            console.error('âŒ Erro ao buscar profissional:', profError);
+            console.error('࢝Œ Erro ao buscar profissional:', profError);
             // IMPORTANTE: Se não conseguir buscar dados do profissional, pular
             // NÃƒO usar taxa mockada/padrão
-            console.warn('âš ï¸ Pulando profissional sem dados válidos:', profId);
+            console.warn('âš ௸ Pulando profissional sem dados válidos:', profId);
             continue;
           }
         }
@@ -453,7 +453,7 @@ export const calculateCommissions = async (
     console.log('âœ… Cálculo de comissões concluído:', Object.keys(commissions).length, 'profissionais');
     return commissions;
   } catch (error) {
-    console.error('âŒ Erro ao calcular comissões:', error);
+    console.error('࢝Œ Erro ao calcular comissões:', error);
     throw error;
   }
 };

@@ -46,7 +46,7 @@ export const FastImageBusinessMarker: React.FC<BusinessMarkerProps> = memo(({ bu
   };
 
   const handleImageError = () => {
-    console.error(`âŒ Erro FastImage para ${business.name}`);
+    console.error(`࢝Œ Erro FastImage para ${business.name}`);
     setImageError(true);
     setImageLoaded(false);
   };

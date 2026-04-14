@@ -100,7 +100,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             };
             setUser(userDataFromDb);
           } else {
-            console.log('âš ï¸ AuthContext: Usuário não encontrado no Firestore, usando dados básicos do Auth');
+            console.log('âš ௸ AuthContext: Usuário não encontrado no Firestore, usando dados básicos do Auth');
             userDataFromDb = {
               uid: firebaseAuthUser.uid,
               email: firebaseAuthUser.email,
@@ -115,7 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             await refreshFavoritesInternal();
           }
         } catch (error) {
-          console.error('âŒ AuthContext: Erro ao buscar dados do usuário no Firestore:', error);
+          console.error('࢝Œ AuthContext: Erro ao buscar dados do usuário no Firestore:', error);
           setUser(null);
           setFavorites([]);
         }
@@ -137,7 +137,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('âœ… AuthContext: Favoritos carregados com sucesso:', userFavorites.length, 'items');
       setFavorites(userFavorites);
     } catch (error) {
-      console.error('âŒ AuthContext: Erro ao carregar favoritos:', error);
+      console.error('࢝Œ AuthContext: Erro ao carregar favoritos:', error);
       setFavorites([]);
     }
   };

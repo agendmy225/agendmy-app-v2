@@ -28,7 +28,7 @@ class BusinessLogosService {
 
       return true;
     } catch (error) {
-      console.error('âŒ Erro ao conectar com Firebase Storage:', error);
+      console.error('࢝Œ Erro ao conectar com Firebase Storage:', error);
       return false;
     }
   }
@@ -47,7 +47,7 @@ class BusinessLogosService {
 
       // Evita múltiplas requisições simultâneas para o mesmo business
       if (this.downloadingLogos.has(businessId)) {
-        console.log(`â³ Aguardando download do logo do business ${businessId}...`);
+        console.log(`࢏³ Aguardando download do logo do business ${businessId}...`);
         return null;
       }
 
@@ -65,7 +65,7 @@ class BusinessLogosService {
       );
 
       if (logoFiles.length === 0) {
-        console.warn(`âš ï¸ Nenhum logo encontrado para o business ${businessId}`);
+        console.warn(`âš ௸ Nenhum logo encontrado para o business ${businessId}`);
         this.downloadingLogos.delete(businessId);
         return null;
       }
@@ -88,7 +88,7 @@ class BusinessLogosService {
       return businessLogo;
 
     } catch (error) {
-      console.error(`âŒ Erro ao buscar logo do business ${businessId}:`, error);
+      console.error(`࢝Œ Erro ao buscar logo do business ${businessId}:`, error);
       this.downloadingLogos.delete(businessId);
 
       const errorLogo: BusinessLogo = {
@@ -134,7 +134,7 @@ class BusinessLogosService {
    */
   clearCache(): void {
     this.logoCache.clear();
-    console.log('ðŸ—‘ï¸ Cache de logos limpo');
+    console.log('ðŸ—‘௸ Cache de logos limpo');
   }
 
   /**

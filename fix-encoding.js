@@ -1,64 +1,118 @@
 const fs = require('fs');
 const path = require('path');
 
-function fixEncoding(dir) {
+function fixFile(filePath) {
+  const buf = fs.readFileSync(filePath);
+  let changed = false;
+  
+  // Convert buffer to array of bytes for processing
+  const bytes = [];
+  for (let i = 0; i < buf.length; i++) {
+    bytes.push(buf[i]);
+  }
+  
+  const result = [];
+  let i = 0;
+  
+  while (i < bytes.length) {
+    // Check for double-encoded UTF-8 sequences (0xC3 followed by 0x82 or 0x83)
+    // Pattern: C3 A2 + 2 more bytes = double-encoded 3-byte UTF-8
+    if (bytes[i] === 0xC3 && bytes[i+1] === 0xA2 && i+3 < bytes.length) {
+      // This is â (U+00E2) double-encoded, likely an emoji
+      // Get the next two bytes to determine the original character
+      const b2 = bytes[i+2];
+      const b3 = bytes[i+3];
+      
+      if (b2 === 0xC2 && b3 === 0xAD && i+5 < bytes.length) {
+        // â­ = star emoji area
+        const b4 = bytes[i+4];
+        if (b4 === 0x90) {
+          // ⭐ U+2B50
+          result.push(0xE2, 0xAD, 0x90);
+          i += 5;
+          changed = true;
+          continue;
+        }
+      }
+      if (b2 === 0xC2 && b3 === 0xB1) {
+        // â± = timer
+        if (bytes[i+4] === 0xC2 && bytes[i+5] === 0xAF && bytes[i+6] === 0xC2 && bytes[i+7] === 0xB8) {
+          // ⏱️
+          result.push(0xE2, 0xB1, 0xAF, 0xB8);
+          i += 8;
+          changed = true;
+          continue;
+        }
+      }
+      if (b2 === 0xC2 && b3 === 0x98) {
+        const b4 = bytes[i+4];
+        if (b4 === 0x85) { result.push(0xE2, 0x98, 0x85); i+=5; changed=true; continue; } // ★
+        if (b4 === 0x86) { result.push(0xE2, 0x98, 0x86); i+=5; changed=true; continue; } // ☆
+      }
+      if (b2 === 0xC2 && b3 === 0x9C) {
+        const b4 = bytes[i+4];
+        if (b4 === 0x93) { result.push(0xE2, 0x9C, 0x93); i+=5; changed=true; continue; } // ✓
+        if (b4 === 0x94) { result.push(0xE2, 0x9C, 0x94); i+=5; changed=true; continue; } // ✔
+      }
+      if (b2 === 0xC2 && b3 === 0x80) {
+        const b4 = bytes[i+4];
+        if (b4 === 0x9C) { result.push(0xE2, 0x80, 0x9C); i+=5; changed=true; continue; } // "
+        if (b4 === 0x9D) { result.push(0xE2, 0x80, 0x9D); i+=5; changed=true; continue; } // "
+        if (b4 === 0x99) { result.push(0xE2, 0x80, 0x99); i+=5; changed=true; continue; } // '
+        if (b4 === 0xA2) { result.push(0xE2, 0x80, 0xA2); i+=5; changed=true; continue; } // •
+        if (b4 === 0x93) { result.push(0x2D); i+=5; changed=true; continue; } // -
+        if (b4 === 0x94) { result.push(0x2D); i+=5; changed=true; continue; } // -
+      }
+    }
+    
+    // Check for double-encoded 2-byte sequences (C3 + byte)
+    if (bytes[i] === 0xC3 && i+1 < bytes.length) {
+      const b2 = bytes[i+1];
+      // These are already single-byte encoded chars that got double-encoded
+      if (b2 >= 0x80 && b2 <= 0xBF) {
+        // Check if next byte is C2 (another double-encoding indicator)
+        if (bytes[i+2] === 0xC2 && i+3 < bytes.length) {
+          const b3 = bytes[i+3];
+          // This is a double-encoded 2-byte UTF-8 sequence
+          // Original char code = ((b2 & 0x3F) << 6) | (b3 & 0x3F)
+          const charCode = ((b2 & 0x3F) << 6) | (b3 & 0x3F);
+          if (charCode > 0x7F) {
+            const str = String.fromCodePoint(charCode);
+            const encoded = Buffer.from(str, 'utf8');
+            for (const byte of encoded) result.push(byte);
+            i += 4;
+            changed = true;
+            continue;
+          }
+        }
+      }
+    }
+    
+    result.push(bytes[i]);
+    i++;
+  }
+  
+  if (changed) {
+    fs.writeFileSync(filePath, Buffer.from(result));
+    return true;
+  }
+  return false;
+}
+
+function walkDir(dir) {
   fs.readdirSync(dir).forEach(file => {
     const full = path.join(dir, file);
     if (fs.statSync(full).isDirectory()) {
-      fixEncoding(full);
+      walkDir(full);
     } else if (file.endsWith('.tsx') || file.endsWith('.ts')) {
-      const bytes = fs.readFileSync(full);
-      // Decode as latin1 then re-encode properly
-      const latin1 = bytes.toString('latin1');
-      const utf8 = Buffer.from(latin1, 'latin1').toString('utf8');
-      
-      // Check if file has corrupted chars
-      if (latin1.includes('\xc3') || latin1.includes('\xc2')) {
-        // Re-interpret the bytes as utf8
-        const content = bytes.toString('utf8');
-        console.log('Already UTF8:', file);
-        return;
-      }
-      
-      // Fix double-encoded UTF8
-      let content = bytes.toString('utf8');
-      const original = content;
-      
-      // Common Portuguese double-encoded characters
-      content = content.replace(/N\u00c3\u0192\u00e2\u20ac\u201ao/g, 'Não');
-      content = content.replace(/\u00c3\u00a3/g, 'ã');
-      content = content.replace(/\u00c3\u00a7/g, 'ç');
-      content = content.replace(/\u00c3\u00a1/g, 'á');
-      content = content.replace(/\u00c3\u00a9/g, 'é');
-      content = content.replace(/\u00c3\u00aa/g, 'ê');
-      content = content.replace(/\u00c3\u00b3/g, 'ó');
-      content = content.replace(/\u00c3\u00ba/g, 'ú');
-      content = content.replace(/\u00c3\u00ad/g, 'í');
-      content = content.replace(/\u00c3\u00a0/g, 'à');
-      content = content.replace(/\u00c3\u0089/g, 'É');
-      content = content.replace(/\u00c3\u0093/g, 'Ó');
-      content = content.replace(/\u00c3\u0094/g, 'Ô');
-      content = content.replace(/\u00c3\u00b4/g, 'ô');
-      content = content.replace(/\u00c3\u0087/g, 'Ç');
-      content = content.replace(/\u00c3\u0095/g, 'Õ');
-      content = content.replace(/\u00c3\u00b5/g, 'õ');
-      content = content.replace(/\u00c3\u0080/g, 'À');
-      content = content.replace(/\u00c3\u00b1/g, 'ñ');
-      content = content.replace(/\u00c3\u00b2/g, 'ò');
-      content = content.replace(/\u00e2\u20ac\u009c/g, '"');
-      content = content.replace(/\u00e2\u20ac\u009d/g, '"');
-      content = content.replace(/\u00e2\u20ac\u02dc/g, "'");
-      content = content.replace(/\u00e2\u20ac\u2122/g, "'");
-      content = content.replace(/\u00e2\u20ac\u00a2/g, '•');
-      content = content.replace(/\u00c3\u00a2\u00c5\u201c\u00e2\u20ac\u009c/g, '✓');
-      
-      if (content !== original) {
-        fs.writeFileSync(full, content, 'utf8');
-        console.log('Fixed:', file);
+      try {
+        if (fixFile(full)) console.log('Fixed:', file);
+      } catch(e) {
+        console.log('Error:', file, e.message);
       }
     }
   });
 }
 
-fixEncoding('./src');
+walkDir('./src');
 console.log('Done!');

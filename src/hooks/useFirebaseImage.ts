@@ -33,14 +33,14 @@ export const useFirebaseImage = (storagePath: string | null | undefined) => {
             console.log('âœ… Imagem base64 obtida com sucesso:', storagePath);
             setImageSource(base64Image);
           } else {
-            console.error('âŒ Falha ao obter imagem base64:', storagePath);
+            console.error('࢝Œ Falha ao obter imagem base64:', storagePath);
             setImageSource(null);
             setError('Erro ao obter imagem do Firebase');
           }
         }
       } catch (err) {
         if (isMounted) {
-          console.error('âŒ Erro ao obter imagem base64 do Firebase:', err);
+          console.error('࢝Œ Erro ao obter imagem base64 do Firebase:', err);
           setError('Erro ao obter imagem do Firebase');
           setImageSource(null);
         }

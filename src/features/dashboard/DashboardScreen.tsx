@@ -266,7 +266,7 @@ const DashboardScreen: React.FC = () => {
       const message = `ðŸŽ¯ Conheça ${professional.name} - ${professional.specialty}
 
 ðŸ“‹ Especialista em ${professional.specialty}
-â­ Avaliação: ${professional.rating ? professional.rating.toFixed(1) : 'N/A'}/5
+ࢭ Avaliação: ${professional.rating ? professional.rating.toFixed(1) : 'N/A'}/5
 
 ðŸ‘‡ Veja o perfil completo e agende seu horário:
 ${profileUrl}

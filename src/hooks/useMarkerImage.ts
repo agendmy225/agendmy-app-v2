@@ -48,7 +48,7 @@ export const useMarkerImage = (
         return cacheFilePath;
       }
 
-      console.log(`â¬‡ï¸ Baixando imagem do marker ${id}...`);
+      console.log(`ࢬ‡௸ Baixando imagem do marker ${id}...`);
 
       // Faz download da imagem
       const downloadResult = await RNFS.downloadFile({
@@ -63,7 +63,7 @@ export const useMarkerImage = (
         throw new Error(`Download falhou com status ${downloadResult.statusCode}`);
       }
     } catch (error) {
-      console.error(`âŒ Erro ao baixar imagem do marker ${id}:`, error);
+      console.error(`࢝Œ Erro ao baixar imagem do marker ${id}:`, error);
       throw error;
     }
   }, [enableCache]);
@@ -105,7 +105,7 @@ export const useMarkerImage = (
             resolve();
           },
           (error) => {
-            console.error(`âŒ Erro ao validar imagem do marker ${businessId}:`, error);
+            console.error(`࢝Œ Erro ao validar imagem do marker ${businessId}:`, error);
             reject(error);
           }
         );
@@ -125,7 +125,7 @@ export const useMarkerImage = (
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      console.error(`âŒ Erro ao carregar imagem do marker ${businessId}:`, errorMessage);
+      console.error(`࢝Œ Erro ao carregar imagem do marker ${businessId}:`, errorMessage);
 
       setState({
         isLoading: false,
@@ -140,10 +140,10 @@ export const useMarkerImage = (
       const cacheFilePath = getCacheFilePath(businessId);
       if (await RNFS.exists(cacheFilePath)) {
         await RNFS.unlink(cacheFilePath);
-        console.log(`ðŸ—‘ï¸ Cache da imagem do marker ${businessId} removido`);
+        console.log(`ðŸ—‘௸ Cache da imagem do marker ${businessId} removido`);
       }
     } catch (error) {
-      console.error(`âŒ Erro ao limpar cache do marker ${businessId}:`, error);
+      console.error(`࢝Œ Erro ao limpar cache do marker ${businessId}:`, error);
     }
   };
 

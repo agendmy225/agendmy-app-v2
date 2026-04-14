@@ -27,7 +27,7 @@ export const updateDefaultCommissionRate = async (
 
     console.log('âœ… Taxa de comissão padrão atualizada:', commissionRate);
   } catch (error) {
-    console.error('âŒ Erro ao atualizar taxa de comissão:', error);
+    console.error('࢝Œ Erro ao atualizar taxa de comissão:', error);
     throw error;
   }
 };
@@ -59,7 +59,7 @@ export const updateProfessionalCommissionRate = async (
 
     console.log('âœ… Taxa de comissão do profissional atualizada:', professionalId, commissionRate);
   } catch (error) {
-    console.error('âŒ Erro ao atualizar taxa de comissão do profissional:', error);
+    console.error('࢝Œ Erro ao atualizar taxa de comissão do profissional:', error);
     throw error;
   }
 };
@@ -99,7 +99,7 @@ export const validateCommissionConfig = async (businessId: string): Promise<{
       message: `Taxa de comissão configurada: ${(defaultRate * 100).toFixed(1)}%`,
     };
   } catch (error) {
-    console.error('âŒ Erro ao validar configuração de comissão:', error);
+    console.error('࢝Œ Erro ao validar configuração de comissão:', error);
     return {
       hasValidConfig: false,
       message: 'Erro ao verificar configuração de comissão',

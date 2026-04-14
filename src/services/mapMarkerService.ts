@@ -34,7 +34,7 @@ class MapMarkerService {
       return true;
     } catch (error) {
       this.isStorageConnected = false;
-      console.error('âŒ Falha na conexão com Firebase Storage:', error);
+      console.error('࢝Œ Falha na conexão com Firebase Storage:', error);
       console.error('ðŸ”§ Verifique as storage.rules e configuração do Firebase');
 
       return false;
@@ -45,7 +45,7 @@ class MapMarkerService {
   async getBusinessLogoUrl(businessId: string): Promise<string | null> {
     try {
       if (!this.isStorageConnected) {
-        console.warn('âš ï¸ Storage não conectado. Tentando reconectar...');
+        console.warn('âš ௸ Storage não conectado. Tentando reconectar...');
         const connected = await this.testStorageConnection();
         if (!connected) {
           return null;
@@ -72,7 +72,7 @@ class MapMarkerService {
       );
 
       if (!logoFile) {
-        console.log(`âš ï¸ Logo não encontrado para business: ${businessId}`);
+        console.log(`âš ௸ Logo não encontrado para business: ${businessId}`);
         return null;
       }
 
@@ -87,7 +87,7 @@ class MapMarkerService {
       return logoUrl;
 
     } catch (error) {
-      console.error(`âŒ Erro ao buscar logo do business ${businessId}:`, error);
+      console.error(`࢝Œ Erro ao buscar logo do business ${businessId}:`, error);
       return null;
     }
   }
@@ -113,12 +113,12 @@ class MapMarkerService {
 
   // Prepara marcadores com logos para o mapa
   async prepareMarkersWithLogos(businesses: Omit<BusinessMarker, 'logoUrl'>[]): Promise<BusinessMarker[]> {
-    console.log(`ðŸ—ºï¸ Preparando ${businesses.length} marcadores com logos...`);
+    console.log(`ðŸ—º௸ Preparando ${businesses.length} marcadores com logos...`);
 
     // Testa conexão primeiro
     const isConnected = await this.testStorageConnection();
     if (!isConnected) {
-      console.warn('âš ï¸ Retornando marcadores sem logos devido à falha de conexão');
+      console.warn('âš ௸ Retornando marcadores sem logos devido à falha de conexão');
       return businesses.map(business => ({ ...business, logoUrl: undefined }));
     }
 
@@ -163,14 +163,14 @@ class MapMarkerService {
       await Promise.allSettled(promises);
       console.log('âœ… Pré-carregamento de logos concluído');
     } catch (error) {
-      console.error('âŒ Erro no pré-carregamento:', error);
+      console.error('࢝Œ Erro no pré-carregamento:', error);
     }
   }
 
   // Limpa cache de imagens
   clearCache(): void {
     this.imageCache = {};
-    console.log('ðŸ—‘ï¸ Cache de logos limpo');
+    console.log('ðŸ—‘௸ Cache de logos limpo');
   }
 
   // Obtém estatísticas do cache

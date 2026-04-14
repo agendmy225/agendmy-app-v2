@@ -305,7 +305,7 @@ const ServiceManagementScreen: React.FC = () => {
 
       if (editingService) {
         // Editar serviço existente
-        console.log('âœï¸ Editando serviço existente:', editingService.id);
+        console.log('âœ௸ Editando serviço existente:', editingService.id);
         await updateService(businessId, editingService.id, serviceData);
 
         // Atualizar localmente
@@ -332,7 +332,7 @@ const ServiceManagementScreen: React.FC = () => {
 
       setModalVisible(false);
     } catch (error) {
-      console.error('âŒ Erro detalhado ao salvar serviço:', error);
+      console.error('࢝Œ Erro detalhado ao salvar serviço:', error);
       console.error('ðŸ” Tipo do erro:', typeof error);
       console.error('ðŸ“Š Stack trace:', (error as Error)?.stack);
       console.error('ðŸ’¬ Mensagem do erro:', (error as Error)?.message);
@@ -591,7 +591,7 @@ const ServiceManagementScreen: React.FC = () => {
                 <View style={styles.packageCreationContainer}>
                   <Text style={styles.modalLabel}>Selecione o Serviço Base para o Pacote</Text>
                   {baseServiceId === '' && (
-                    <Text style={styles.warningText}>âš ï¸ Selecione um serviço base para continuar</Text>
+                    <Text style={styles.warningText}>âš ௸ Selecione um serviço base para continuar</Text>
                   )}
                   {services
                     .filter(s => !s.numSessions || s.numSessions <= 1)

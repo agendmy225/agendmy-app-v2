@@ -11,7 +11,7 @@ export const useCachedFirebaseImage = (storagePath: string | null | undefined) =
 
     const loadImage = async () => {
       if (!storagePath || storagePath.includes('placeholder')) {
-        console.warn('âš ï¸ StoragePath inválido ou placeholder:', storagePath);
+        console.warn('âš ௸ StoragePath inválido ou placeholder:', storagePath);
         if (isMounted) {
           setImageSource(null);
           setLoading(false);
@@ -37,14 +37,14 @@ export const useCachedFirebaseImage = (storagePath: string | null | undefined) =
             setImageSource(cachedImageBase64);
             setError(null);
           } else {
-            console.error('âŒ Falha ao carregar/redimensionar imagem:', storagePath);
+            console.error('࢝Œ Falha ao carregar/redimensionar imagem:', storagePath);
             setImageSource(null);
             setError('Erro ao carregar imagem');
           }
           setLoading(false);
         }
       } catch (err) {
-        console.error('âŒ Erro no useCachedFirebaseImage:', err);
+        console.error('࢝Œ Erro no useCachedFirebaseImage:', err);
         if (isMounted) {
           setImageSource(null);
           setError(`Erro ao carregar imagem: ${err}`);

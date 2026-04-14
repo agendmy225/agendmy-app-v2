@@ -59,7 +59,7 @@ export const saveAppointment = async (appointmentData: AppointmentData): Promise
     });
 
     if (!currentUser) {
-      console.error('âŒ [saveAppointment] Usuário não autenticado');
+      console.error('࢝Œ [saveAppointment] Usuário não autenticado');
       throw new Error('Usuário não autenticado. Por favor, faça login novamente.');
     }
 
@@ -80,10 +80,10 @@ export const saveAppointment = async (appointmentData: AppointmentData): Promise
             clientNameFinal: clientName,
           });
         } else {
-          console.log('âš ï¸ [saveAppointment] Documento do usuário não encontrado no Firestore');
+          console.log('âš ௸ [saveAppointment] Documento do usuário não encontrado no Firestore');
         }
       } catch (userError) {
-        console.error('âŒ [saveAppointment] Erro ao buscar dados do usuário:', userError);
+        console.error('࢝Œ [saveAppointment] Erro ao buscar dados do usuário:', userError);
         // Silently fail
       }
     }
@@ -109,7 +109,7 @@ export const saveAppointment = async (appointmentData: AppointmentData): Promise
       console.log('âœ… [saveAppointment] Agendamento salvo com sucesso! ID:', appointmentRef.id);
       return appointmentRef.id;
     } catch (firestoreError) {
-      console.error('âŒ [saveAppointment] Erro do Firestore:', firestoreError);
+      console.error('࢝Œ [saveAppointment] Erro do Firestore:', firestoreError);
       console.error('ðŸ“Š [saveAppointment] Detalhes do erro do Firestore:', {
         code: (firestoreError as any)?.code,
         message: (firestoreError as any)?.message,
@@ -118,7 +118,7 @@ export const saveAppointment = async (appointmentData: AppointmentData): Promise
       throw new Error(`Erro ao salvar no banco de dados: ${(firestoreError as any)?.message || 'Erro desconhecido'}`);
     }
   } catch (error) {
-    console.error('âŒ [saveAppointment] Erro geral:', error);
+    console.error('࢝Œ [saveAppointment] Erro geral:', error);
     console.error('ðŸ“Š [saveAppointment] Stack trace:', (error as Error)?.stack);
 
     // Não mostrar Alert aqui, deixar para a tela que chama

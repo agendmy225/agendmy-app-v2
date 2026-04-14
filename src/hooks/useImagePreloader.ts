@@ -38,7 +38,7 @@ class ImageCacheManager {
                     resolve(true);
                 })
                 .catch((error) => {
-                    console.error(`âŒ Erro ao pré-carregar imagem: ${uri}`, error);
+                    console.error(`࢝Œ Erro ao pré-carregar imagem: ${uri}`, error);
                     this.cache.set(uri, { uri, loaded: false, error: true });
                     resolve(false);
                 });
