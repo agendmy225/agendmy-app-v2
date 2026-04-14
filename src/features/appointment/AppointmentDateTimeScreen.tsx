@@ -19,7 +19,7 @@ import { getBusinessById } from '../../services/businesses';
 type AppointmentDateTimeScreenRouteProp = RouteProp<AppStackParamList, 'AppointmentDateTime'>;
 type AppointmentDateTimeScreenNavigationProp = StackNavigationProp<AppStackParamList, 'AppointmentDateTime'>;
 
-// FunÃ§Ã£o para gerar dias disponÃ­veis (prÃ³ximos 30 dias)
+// Função para gerar dias disponíveis (próximos 30 dias)
 const generateAvailableDays = () => {
   const days = [];
   const today = new Date();
@@ -39,7 +39,7 @@ const generateAvailableDays = () => {
   return days;
 };
 
-// FunÃ§Ã£o para gerar horÃ¡rios baseados no horÃ¡rio de funcionamento do estabelecimento
+// Função para gerar horários baseados no horário de funcionamento do estabelecimento
 const generateTimeSlots = (startTime: string, endTime: string, intervalMinutes = 60): string[] => {
   const slots: string[] = [];
 
@@ -158,16 +158,16 @@ const AppointmentDateTimeScreen: React.FC = () => {
 
   const handleDateSelect = (date: string) => {
     if (isPackage) {
-      // Para pacotes, permitir seleÃ§Ã£o mÃºltipla mas nÃ£o duplicar datas
+      // Para pacotes, permitir seleção múltipla mas não duplicar datas
       const alreadySelected = selectedSessions.some(session => session.date === date);
       if (alreadySelected) {
-        // Se jÃ¡ estÃ¡ selecionada, remover todas as sessÃµes desta data
+        // Se já está selecionada, remover todas as sessÃµes desta data
         setSelectedSessions(prev => prev.filter(session => session.date !== date));
       }
       setSelectedDate(date);
       setSelectedTime(null);
     } else {
-      // Para serviÃ§os Ãºnicos, comportamento normal
+      // Para serviços únicos, comportamento normal
       setSelectedDate(date);
       setSelectedTime(null);
     }
@@ -176,7 +176,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
   const handleTimeSelect = (time: string) => {
     if (isPackage) {
       if (selectedDate && selectedSessions.length < requiredSessions) {
-        // Verificar se essa combinaÃ§Ã£o data/hora jÃ¡ foi selecionada
+        // Verificar se essa combinação data/hora já foi selecionada
         const alreadyExists = selectedSessions.some(
           session => session.date === selectedDate && session.time === time,
         );
@@ -202,7 +202,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
           businessId,
           serviceId,
           professionalId,
-          sessions: selectedSessions, // MÃºltiplas sessÃµes
+          sessions: selectedSessions, // Múltiplas sessÃµes
         });
       }
     } else {
@@ -227,13 +227,13 @@ const AppointmentDateTimeScreen: React.FC = () => {
         >
           <Text style={styles.backButtonText}>â†</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Escolha data e horÃ¡rio</Text>
+        <Text style={styles.headerTitle}>Escolha data e horário</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content}>
         <View style={styles.appointmentInfo}>
-          <Text style={styles.infoTitle}>ServiÃ§o:</Text>
+          <Text style={styles.infoTitle}>Serviço:</Text>
           <Text style={styles.infoValue}>{serviceName}</Text>
           <Text style={styles.infoTitle}>Profissional:</Text>
           <Text style={styles.infoValue}>{professionalName}</Text>
@@ -314,11 +314,11 @@ const AppointmentDateTimeScreen: React.FC = () => {
 
         {selectedDate && (
           <View style={styles.timeSection}>
-            <Text style={styles.sectionTitle}>Selecione um horÃ¡rio</Text>
+            <Text style={styles.sectionTitle}>Selecione um horário</Text>
             {loadingTimes ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#007AFF" />
-                <Text style={styles.loadingText}>Carregando horÃ¡rios disponÃ­veis...</Text>
+                <Text style={styles.loadingText}>Carregando horários disponíveis...</Text>
               </View>
             ) : (
               <View style={styles.timeSlotsContainer}>

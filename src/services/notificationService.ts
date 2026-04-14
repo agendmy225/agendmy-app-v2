@@ -22,12 +22,12 @@ class NotificationService {
       requestPermissions: Platform.OS === 'ios',
     });
 
-    // Criar canal de notificaÃ§Ã£o para Android
+    // Criar canal de notificação para Android
     PushNotification.createChannel(
       {
         channelId: 'default',
         channelName: 'Default Channel',
-        channelDescription: 'Canal padrÃ£o para notificaÃ§Ãµes',
+        channelDescription: 'Canal padrão para notificaçÃµes',
         playSound: true,
         soundName: 'default',
         importance: 4, // High importance
@@ -38,7 +38,7 @@ class NotificationService {
   }
 
   /**
-   * Solicita permissÃ£o do usuÃ¡rio para receber notificaÃ§Ãµes push.
+   * Solicita permissão do usuário para receber notificaçÃµes push.
    */
   public async requestUserPermission(userId: string | null): Promise<void> {
     if (!userId) return;
@@ -54,12 +54,12 @@ class NotificationService {
         this.getAndSaveFcmToken(userId);
       }
     } catch (error) {
-      console.error('Erro ao solicitar permissÃ£o de notificaÃ§Ã£o:', error);
+      console.error('Erro ao solicitar permissão de notificação:', error);
     }
   }
 
   /**
-   * ObtÃ©m o token FCM do dispositivo e salva no Firestore para o usuÃ¡rio logado.
+   * Obtém o token FCM do dispositivo e salva no Firestore para o usuário logado.
    */
   private async getAndSaveFcmToken(userId: string): Promise<void> {
     try {
@@ -79,15 +79,15 @@ class NotificationService {
   }
 
   /**
-   * Configura os listeners para notificaÃ§Ãµes recebidas enquanto o app estÃ¡ em primeiro plano (foreground)
-   * e para quando o usuÃ¡rio abre o app clicando em uma notificaÃ§Ã£o.
+   * Configura os listeners para notificaçÃµes recebidas enquanto o app está em primeiro plano (foreground)
+   * e para quando o usuário abre o app clicando em uma notificação.
    */
   public initializeNotificationListeners(): () => void {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       console.log('A new FCM message arrived!', JSON.stringify(remoteMessage));
       if (remoteMessage.notification) {
         this.displayLocalNotification(
-          remoteMessage.notification.title || 'Nova NotificaÃ§Ã£o',
+          remoteMessage.notification.title || 'Nova Notificação',
           remoteMessage.notification.body || '',
         );
       }
@@ -115,8 +115,8 @@ class NotificationService {
   }
 
   /**
-   * Exibe uma notificaÃ§Ã£o local usando react-native-push-notification.
-   * NecessÃ¡rio para mostrar notificaÃ§Ãµes quando o app estÃ¡ em primeiro plano.
+   * Exibe uma notificação local usando react-native-push-notification.
+   * Necessário para mostrar notificaçÃµes quando o app está em primeiro plano.
    */
   private async displayLocalNotification(title: string, body: string): Promise<void> {
     try {
@@ -143,7 +143,7 @@ class NotificationService {
         actions: ['OK'],
       });
     } catch (error) {
-      console.error('Erro ao exibir notificaÃ§Ã£o local:', error);
+      console.error('Erro ao exibir notificação local:', error);
     }
   }
 }

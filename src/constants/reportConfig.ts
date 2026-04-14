@@ -1,16 +1,16 @@
-// ConfiguraÃ§Ãµes para relatÃ³rios financeiros
+// ConfiguraçÃµes para relatórios financeiros
 export const REPORT_CONFIG = {
-  // IMPORTANTE: NÃƒO usar valor fixo - sempre usar configuraÃ§Ã£o do usuÃ¡rio
-  // Se nÃ£o houver configuraÃ§Ã£o, o sistema deve alertar o usuÃ¡rio para configurar
+  // IMPORTANTE: NÃƒO usar valor fixo - sempre usar configuração do usuário
+  // Se não houver configuração, o sistema deve alertar o usuário para configurar
   DEFAULT_COMMISSION_RATE: null, // Removido valor fixo
   
-  // ConfiguraÃ§Ãµes de formataÃ§Ã£o
+  // ConfiguraçÃµes de formatação
   CURRENCY_LOCALE: 'pt-BR',
   CURRENCY_CODE: 'BRL',
   
-  // PerÃ­odos disponÃ­veis para relatÃ³rios
+  // Períodos disponíveis para relatórios
   AVAILABLE_PERIODS: [
-    { value: 'daily', label: 'DiÃ¡rio' },
+    { value: 'daily', label: 'Diário' },
     { value: 'weekly', label: 'Semanal' },
     { value: 'monthly', label: 'Mensal' },
     { value: 'yearly', label: 'Anual' },
@@ -23,14 +23,14 @@ export const REPORT_CONFIG = {
   // Status de agendamentos cancelados
   CANCELED_STATUSES: ['canceled', 'cancelled'],
   
-  // ConfiguraÃ§Ãµes de cache
+  // ConfiguraçÃµes de cache
   CACHE_DURATION_MS: 5 * 60 * 1000, // 5 minutos
 } as const;
 
 export type ReportPeriod = typeof REPORT_CONFIG.AVAILABLE_PERIODS[number]['value'];
 
 /**
- * Formata valor monetÃ¡rio no padrÃ£o brasileiro
+ * Formata valor monetário no padrão brasileiro
  */
 export const formatCurrency = (value: number): string => {
   const numValue = typeof value === 'number' ? value : parseFloat(value as string) || 0;
@@ -48,14 +48,14 @@ export const isRevenueStatus = (status: string): boolean => {
 };
 
 /**
- * Verifica se um status de agendamento Ã© de cancelamento
+ * Verifica se um status de agendamento é de cancelamento
  */
 export const isCanceledStatus = (status: string): boolean => {
   return REPORT_CONFIG.CANCELED_STATUSES.includes(status as any);
 };
 
 /**
- * Valida se um valor monetÃ¡rio Ã© vÃ¡lido
+ * Valida se um valor monetário é válido
  */
 export const isValidPrice = (price: unknown): price is number => {
   if (typeof price === 'number') {
@@ -69,7 +69,7 @@ export const isValidPrice = (price: unknown): price is number => {
 };
 
 /**
- * Converte um valor para nÃºmero monetÃ¡rio vÃ¡lido
+ * Converte um valor para número monetário válido
  */
 export const toValidPrice = (price: unknown): number => {
   if (typeof price === 'number') {

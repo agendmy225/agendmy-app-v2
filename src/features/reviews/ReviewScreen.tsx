@@ -21,7 +21,7 @@ interface ReviewScreenParams {
   serviceId: string | null; // Allow null for general business reviews
   professionalId?: string;
   professionalName?: string;
-  appointmentId?: string; // Tornar opcional para permitir avaliaÃ§Ãµes gerais
+  appointmentId?: string; // Tornar opcional para permitir avaliaçÃµes gerais
 }
 
 const ReviewScreen: React.FC = () => {
@@ -34,7 +34,7 @@ const ReviewScreen: React.FC = () => {
   const { businessId, businessName, serviceId, professionalId, professionalName, appointmentId } =
     route.params as ReviewScreenParams;
 
-  const screenTitle = serviceId ? 'Avaliar ServiÃ§o' : 'Avaliar Estabelecimento';
+  const screenTitle = serviceId ? 'Avaliar Serviço' : 'Avaliar Estabelecimento';
 
   const renderStars = () => {
     const stars = [];
@@ -69,18 +69,18 @@ const ReviewScreen: React.FC = () => {
 
   const handleSubmitReview = async () => {
     if (rating === 0) {
-      Alert.alert('AvaliaÃ§Ã£o obrigatÃ³ria', 'Por favor, selecione uma classificaÃ§Ã£o de 1 a 5 estrelas.');
+      Alert.alert('Avaliação obrigatória', 'Por favor, selecione uma classificação de 1 a 5 estrelas.');
       return;
     }
 
     if (comment.trim().length < 10) {
-      Alert.alert('ComentÃ¡rio muito curto', 'Por favor, escreva um comentÃ¡rio de pelo menos 10 caracteres.');
+      Alert.alert('Comentário muito curto', 'Por favor, escreva um comentário de pelo menos 10 caracteres.');
       return;
     }
 
     // Allow reviews without serviceId for general business reviews
     // if (!serviceId) { // Remove this check since general business reviews don't have serviceId
-    //   Alert.alert('Erro', 'ID do serviÃ§o nÃ£o encontrado. NÃ£o Ã© possÃ­vel enviar a avaliaÃ§Ã£o.');
+    //   Alert.alert('Erro', 'ID do serviço não encontrado. Não é possível enviar a avaliação.');
     //   return;
     // }
 
@@ -90,7 +90,7 @@ const ReviewScreen: React.FC = () => {
       await addReview({
         businessId,
         userId: user?.uid || 'anonymous',
-        userName: user?.displayName || user?.email?.split('@')[0] || 'UsuÃ¡rio AnÃ´nimo',
+        userName: user?.displayName || user?.email?.split('@')[0] || 'Usuário AnÃ´nimo',
         serviceId: serviceId || undefined, // Allow undefined for general business reviews
         professionalId,
         professionalName,
@@ -100,8 +100,8 @@ const ReviewScreen: React.FC = () => {
       });
 
       Alert.alert(
-        'AvaliaÃ§Ã£o enviada!',
-        'Obrigado pelo seu feedback. Sua avaliaÃ§Ã£o foi publicada com sucesso e jÃ¡ aparece na pÃ¡gina do estabelecimento.',
+        'Avaliação enviada!',
+        'Obrigado pelo seu feedback. Sua avaliação foi publicada com sucesso e já aparece na página do estabelecimento.',
         [
           {
             text: 'OK',
@@ -110,11 +110,11 @@ const ReviewScreen: React.FC = () => {
         ],
       );
     } catch (error) {
-      console.error('Erro ao enviar avaliaÃ§Ã£o:', error);
+      console.error('Erro ao enviar avaliação:', error);
 
       Alert.alert(
         'Erro ao enviar',
-        'NÃ£o foi possÃ­vel enviar sua avaliaÃ§Ã£o. Tente novamente.',
+        'Não foi possível enviar sua avaliação. Tente novamente.',
         [{ text: 'OK' }],
       );
     } finally {
@@ -133,7 +133,7 @@ const ReviewScreen: React.FC = () => {
           <View style={styles.headerSpacer} />
         </View>
 
-        {/* InformaÃ§Ãµes do serviÃ§o */}
+        {/* InformaçÃµes do serviço */}
         <View style={styles.serviceInfo}>
           <Icon name="business" size={24} color={colors.primary} />
           <View style={styles.serviceDetails}>
@@ -144,7 +144,7 @@ const ReviewScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* AvaliaÃ§Ã£o por estrelas */}
+        {/* Avaliação por estrelas */}
         <View style={styles.ratingSection}>
           <Text style={styles.sectionTitle}>Como foi sua experiÃªncia?</Text>
           <View style={styles.starsContainer}>
@@ -153,12 +153,12 @@ const ReviewScreen: React.FC = () => {
           <Text style={styles.ratingText}>{getRatingText()}</Text>
         </View>
 
-        {/* ComentÃ¡rio */}
+        {/* Comentário */}
         <View style={styles.commentSection}>
           <Text style={styles.sectionTitle}>Conte-nos mais sobre sua experiÃªncia</Text>
           <TextInput
             style={styles.commentInput}
-            placeholder="Escreva seu comentÃ¡rio aqui... (mÃ­nimo 10 caracteres)"
+            placeholder="Escreva seu comentário aqui... (mínimo 10 caracteres)"
             placeholderTextColor={colors.lightText}
             multiline
             numberOfLines={4}
@@ -171,14 +171,14 @@ const ReviewScreen: React.FC = () => {
 
         {/* Dicas */}
         <View style={styles.tipsSection}>
-          <Text style={styles.tipsTitle}>ðŸ’¡ Dicas para uma boa avaliaÃ§Ã£o:</Text>
-          <Text style={styles.tip}>â€¢ Seja especÃ­fico sobre o que gostou ou nÃ£o gostou</Text>
+          <Text style={styles.tipsTitle}>ðŸ’¡ Dicas para uma boa avaliação:</Text>
+          <Text style={styles.tip}>â€¢ Seja específico sobre o que gostou ou não gostou</Text>
           <Text style={styles.tip}>â€¢ Mencione a qualidade do atendimento</Text>
           <Text style={styles.tip}>â€¢ Comente sobre a pontualidade</Text>
-          <Text style={styles.tip}>â€¢ Seja respeitoso em seus comentÃ¡rios</Text>
+          <Text style={styles.tip}>â€¢ Seja respeitoso em seus comentários</Text>
         </View>
 
-        {/* BotÃ£o de envio */}
+        {/* Botão de envio */}
         <TouchableOpacity
           style={[
             styles.submitButton,
@@ -188,7 +188,7 @@ const ReviewScreen: React.FC = () => {
           disabled={isSubmitting || rating === 0}
         >
           <Text style={styles.submitButtonText}>
-            {isSubmitting ? 'Enviando...' : 'Enviar AvaliaÃ§Ã£o'}
+            {isSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
           </Text>
         </TouchableOpacity>
       </ScrollView>

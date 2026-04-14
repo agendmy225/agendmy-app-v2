@@ -13,44 +13,44 @@ import { useNavigation } from '@react-navigation/native'; // Adicionar useNaviga
 import { StackNavigationProp } from '@react-navigation/stack'; // Adicionar StackNavigationProp
 import { AppStackParamList } from '../../types/types'; // Adicionar AppStackParamList
 import { colors } from '../../constants/colors';
-import { getClientAppointments, getBusinessAppointments, Appointment } from '../../services/appointments'; // Usar importaÃ§Ã£o nomeada
-import { getBusinessByOwnerId } from '../../services/businesses'; // Importar funÃ§Ã£o para buscar negÃ³cio do proprietÃ¡rio
+import { getClientAppointments, getBusinessAppointments, Appointment } from '../../services/appointments'; // Usar importação nomeada
+import { getBusinessByOwnerId } from '../../services/businesses'; // Importar função para buscar negócio do proprietário
 import { firebaseAuth } from '../../config/firebase';
 
 
-// Usar o tipo Appointment importado, que Ã© mais completo
-type AppointmentType = Appointment & { image?: string }; // Adicionar image opcional se necessÃ¡rio para UI
+// Usar o tipo Appointment importado, que é mais completo
+type AppointmentType = Appointment & { image?: string }; // Adicionar image opcional se necessário para UI
 
 const AppointmentsScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [appointments, setAppointments] = useState<AppointmentType[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [isOwner, setIsOwner] = useState(false); // Adicionar estado para detectar se Ã© proprietÃ¡rio
+  const [isOwner, setIsOwner] = useState(false); // Adicionar estado para detectar se é proprietário
   const [businessId, setBusinessId] = useState<string | null>(null); // Adicionar estado para businessId
-  const navigation = useNavigation<StackNavigationProp<AppStackParamList>>() as any; // Mover inicializaÃ§Ã£o de navigation para cÃ¡
+  const navigation = useNavigation<StackNavigationProp<AppStackParamList>>() as any; // Mover inicialização de navigation para cá
 
-  // Detectar se o usuÃ¡rio Ã© proprietÃ¡rio
+  // Detectar se o usuário é proprietário
   const checkUserType = async () => {
     try {
       const currentUser = firebaseAuth.currentUser;
       if (!currentUser) return false;
 
-      // Verificar se o usuÃ¡rio possui um negÃ³cio (Ã© proprietÃ¡rio)
+      // Verificar se o usuário possui um negócio (é proprietário)
       const business = await getBusinessByOwnerId(currentUser.uid);
       if (business) {
         setIsOwner(true);
         setBusinessId(business.id);
-        console.log('âœ… [AppointmentsScreen] UsuÃ¡rio Ã© proprietÃ¡rio, businessId:', business.id);
+        console.log('âœ… [AppointmentsScreen] Usuário é proprietário, businessId:', business.id);
         return true;
       } else {
         setIsOwner(false);
         setBusinessId(null);
-        console.log('âœ… [AppointmentsScreen] UsuÃ¡rio Ã© cliente');
+        console.log('âœ… [AppointmentsScreen] Usuário é cliente');
         return false;
       }
     } catch (error) {
-      console.error('âŒ [AppointmentsScreen] Erro ao verificar tipo de usuÃ¡rio:', error);
+      console.error('âŒ [AppointmentsScreen] Erro ao verificar tipo de usuário:', error);
       setIsOwner(false);
       setBusinessId(null);
       return false;
@@ -62,33 +62,33 @@ const AppointmentsScreen: React.FC = () => {
     try {
       const currentUser = firebaseAuth.currentUser;
       if (!currentUser) {
-        console.log('âŒ [AppointmentsScreen] UsuÃ¡rio nÃ£o autenticado');
+        console.log('âŒ [AppointmentsScreen] Usuário não autenticado');
         return;
       }
 
       console.log('ðŸ” [AppointmentsScreen] Carregando agendamentos...');
       
-      // Verificar tipo de usuÃ¡rio primeiro
+      // Verificar tipo de usuário primeiro
       const userIsOwner = await checkUserType();
       
       let userAppointments: Appointment[] = [];
 
       if (userIsOwner) {
-        console.log('ðŸ‘‘ [AppointmentsScreen] Carregando agendamentos como proprietÃ¡rio...');
+        console.log('ðŸ‘‘ [AppointmentsScreen] Carregando agendamentos como proprietário...');
         
         // Obter o businessId atualizado
         const business = await getBusinessByOwnerId(currentUser.uid);
         const currentBusinessId = business?.id;
         
         if (currentBusinessId) {
-          // Para proprietÃ¡rios: carregar TANTO agendamentos como cliente QUANTO agendamentos do negÃ³cio
+          // Para proprietários: carregar TANTO agendamentos como cliente QUANTO agendamentos do negócio
           const [clientAppointments, businessAppointments] = await Promise.all([
             getClientAppointments().catch(err => {
               console.warn('âš ï¸ [AppointmentsScreen] Erro ao carregar agendamentos como cliente:', err);
               return [];
             }),
             getBusinessAppointments(currentBusinessId).catch(err => {
-              console.warn('âš ï¸ [AppointmentsScreen] Erro ao carregar agendamentos do negÃ³cio:', err);
+              console.warn('âš ï¸ [AppointmentsScreen] Erro ao carregar agendamentos do negócio:', err);
               return [];
             })
           ]);
@@ -100,13 +100,13 @@ const AppointmentsScreen: React.FC = () => {
           );
 
           userAppointments = uniqueAppointments;
-          console.log('âœ… [AppointmentsScreen] Agendamentos carregados para proprietÃ¡rio:', {
+          console.log('âœ… [AppointmentsScreen] Agendamentos carregados para proprietário:', {
             clientAppointments: clientAppointments.length,
             businessAppointments: businessAppointments.length,
             total: userAppointments.length
           });
         } else {
-          console.log('âš ï¸ [AppointmentsScreen] ProprietÃ¡rio sem negÃ³cio, carregando como cliente');
+          console.log('âš ï¸ [AppointmentsScreen] Proprietário sem negócio, carregando como cliente');
           userAppointments = await getClientAppointments();
         }
       } else {
@@ -153,11 +153,11 @@ const AppointmentsScreen: React.FC = () => {
       case 'confirmed':
         return 'Confirmado';
       case 'completed':
-        return 'ConcluÃ­do';
+        return 'Concluído';
       case 'cancelled':
         return 'Cancelado';
       case 'no_show':
-        return 'NÃ£o compareceu';
+        return 'Não compareceu';
       default:
         return '';
     }
@@ -183,7 +183,7 @@ const AppointmentsScreen: React.FC = () => {
     <View style={styles.appointmentCardContainer}>
       <TouchableOpacity
         style={styles.appointmentCard}
-        onPress={() => navigation.navigate('BusinessDetails', { businessId: item.businessId })} // Navegar para detalhes do negÃ³cio
+        onPress={() => navigation.navigate('BusinessDetails', { businessId: item.businessId })} // Navegar para detalhes do negócio
       >
         <Image
           source={{
@@ -194,7 +194,7 @@ const AppointmentsScreen: React.FC = () => {
         <View style={styles.appointmentInfo}>
           <Text style={styles.businessName}>{item.businessName}</Text>
           <Text style={styles.serviceName}>{item.serviceName}</Text>
-          {/* Mostrar nome do cliente para proprietÃ¡rios */}
+          {/* Mostrar nome do cliente para proprietários */}
           {isOwner && item.clientName && (
             <Text style={styles.clientName}>Cliente: {item.clientName}</Text>
           )}
@@ -219,7 +219,7 @@ const AppointmentsScreen: React.FC = () => {
             appointmentId: item.id, // Passar appointmentId
           })}
         >
-          <Text style={styles.reviewButtonText}>Avaliar ServiÃ§o</Text>
+          <Text style={styles.reviewButtonText}>Avaliar Serviço</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -231,7 +231,7 @@ const AppointmentsScreen: React.FC = () => {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>
-            {isOwner ? 'Agendamentos do NegÃ³cio' : 'Meus Agendamentos'}
+            {isOwner ? 'Agendamentos do Negócio' : 'Meus Agendamentos'}
           </Text>
         </View>
         <View style={styles.loadingContainer}>
@@ -246,7 +246,7 @@ const AppointmentsScreen: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>
-          {isOwner ? 'Agendamentos do NegÃ³cio' : 'Meus Agendamentos'}
+          {isOwner ? 'Agendamentos do Negócio' : 'Meus Agendamentos'}
         </Text>
       </View>
 
@@ -264,7 +264,7 @@ const AppointmentsScreen: React.FC = () => {
               activeTab === 'upcoming' && styles.activeTabButtonText,
             ]}
           >
-            PrÃ³ximos
+            Próximos
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -302,9 +302,9 @@ const AppointmentsScreen: React.FC = () => {
           />
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>VocÃª nÃ£o tem agendamentos prÃ³ximos.</Text>
+            <Text style={styles.emptyText}>VocÃª não tem agendamentos próximos.</Text>
             <TouchableOpacity style={styles.bookButton}>
-              <Text style={styles.bookButtonText}>Agendar ServiÃ§o</Text>
+              <Text style={styles.bookButtonText}>Agendar Serviço</Text>
             </TouchableOpacity>
           </View>
         )
@@ -325,7 +325,7 @@ const AppointmentsScreen: React.FC = () => {
           />
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>VocÃª nÃ£o tem agendamentos anteriores.</Text>
+            <Text style={styles.emptyText}>VocÃª não tem agendamentos anteriores.</Text>
           </View>
         )
       )}

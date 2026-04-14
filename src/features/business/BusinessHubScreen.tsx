@@ -12,13 +12,13 @@ type BusinessHubNavigationProp = StackNavigationProp<AppStackParamList>;
 
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', screen: 'DashboardScreen' },
-  { id: 'services', label: 'Gerenciar ServiÃ§os', icon: 'content-cut', screen: 'ServiceManagement' },
+  { id: 'services', label: 'Gerenciar Serviços', icon: 'content-cut', screen: 'ServiceManagement' },
   { id: 'professionals', label: 'Gerenciar Profissionais', icon: 'group', screen: 'ProfessionalManagementScreen' },
-  { id: 'promotions', label: 'Gerenciar PromoÃ§Ãµes', icon: 'local-offer', screen: 'PromotionManagement' },
+  { id: 'promotions', label: 'Gerenciar PromoçÃµes', icon: 'local-offer', screen: 'PromotionManagement' },
   { id: 'chats', label: 'Mensagens', icon: 'chat', screen: 'ChatManagementScreen' },
-  { id: 'reports', label: 'RelatÃ³rios Financeiros', icon: 'assessment', screen: 'FinancialReportsScreen' },
-  { id: 'reviews', label: 'Gerenciar AvaliaÃ§Ãµes', icon: 'star-rate', screen: 'ReviewsManagementScreen' },
-  { id: 'settings', label: 'ConfiguraÃ§Ãµes do NegÃ³cio', icon: 'settings', screen: 'BusinessSettingsScreen' },
+  { id: 'reports', label: 'Relatórios Financeiros', icon: 'assessment', screen: 'FinancialReportsScreen' },
+  { id: 'reviews', label: 'Gerenciar AvaliaçÃµes', icon: 'star-rate', screen: 'ReviewsManagementScreen' },
+  { id: 'settings', label: 'ConfiguraçÃµes do Negócio', icon: 'settings', screen: 'BusinessSettingsScreen' },
 ] as const;
 
 const BusinessHubScreen: React.FC = () => {
@@ -42,7 +42,7 @@ const BusinessHubScreen: React.FC = () => {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.centerContainer}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Meu NegÃ³cio</Text>
+          <Text style={styles.headerTitle}>Meu Negócio</Text>
         </View>
         <CreateBusinessCard onBusinessCreated={handleBusinessCreated} />
       </ScrollView>
@@ -52,7 +52,7 @@ const BusinessHubScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Meu NegÃ³cio</Text>
+        <Text style={styles.headerTitle}>Meu Negócio</Text>
       </View>
       <View style={styles.menuContainer}>
         {menuItems.map((item) => (

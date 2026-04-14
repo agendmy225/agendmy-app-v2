@@ -33,7 +33,7 @@ export const OptimizedBusinessMarker: React.FC<BusinessMarkerProps> = memo(({ bu
     }
   }, [imageLoaded, imageError]);
 
-  // NÃ£o renderiza se nÃ£o tiver localizaÃ§Ã£o
+  // Não renderiza se não tiver localização
   if (!business.location?.latitude || !business.location?.longitude) {
     return null;
   }
@@ -52,7 +52,7 @@ export const OptimizedBusinessMarker: React.FC<BusinessMarkerProps> = memo(({ bu
 
   return (
     <Marker
-      key={`marker_${business.id}`} // Key Ãºnica para evitar reutilizaÃ§Ã£o
+      key={`marker_${business.id}`} // Key única para evitar reutilização
       coordinate={{
         latitude: business.location.latitude,
         longitude: business.location.longitude,
@@ -60,7 +60,7 @@ export const OptimizedBusinessMarker: React.FC<BusinessMarkerProps> = memo(({ bu
       onPress={onPress}
       title={business.name}
       description={business.description}
-      // CRÃTICO: SÃ³ para de rastrear mudanÃ§as quando tudo estiver renderizado
+      // CRÃTICO: Só para de rastrear mudanças quando tudo estiver renderizado
       tracksViewChanges={!isRenderComplete}
     >
       <View style={styles.markerContainer}>

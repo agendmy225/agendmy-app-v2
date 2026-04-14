@@ -14,7 +14,7 @@ export const useFirebaseImage = (storagePath: string | null | undefined) => {
         if (isMounted) {
           setImageSource(null);
           setLoading(false);
-          setError('Caminho de storage invÃ¡lido');
+          setError('Caminho de storage inválido');
         }
         return;
       }
@@ -25,7 +25,7 @@ export const useFirebaseImage = (storagePath: string | null | undefined) => {
         
         console.log('ðŸ”¥ Obtendo imagem base64 do Firebase para:', storagePath);
         
-        // Usar o serviÃ§o de cache para obter a imagem em base64
+        // Usar o serviço de cache para obter a imagem em base64
         const base64Image = await imageCacheService.getImage(storagePath);
         
         if (isMounted) {
@@ -65,7 +65,7 @@ export const useFirebaseImage = (storagePath: string | null | undefined) => {
   }, [storagePath]);
 
   return {
-    imageUrl: imageSource, // Agora retorna base64 ao invÃ©s de URL
+    imageUrl: imageSource, // Agora retorna base64 ao invés de URL
     imageSource, // Para compatibilidade
     loading,
     error,

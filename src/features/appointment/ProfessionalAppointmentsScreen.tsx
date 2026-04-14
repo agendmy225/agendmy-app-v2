@@ -88,7 +88,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
             if (!businessSnapshot.empty) {
                 setBusinessId(businessSnapshot.docs[0].id);
             } else {
-                Alert.alert('Erro', 'Estabelecimento nÃ£o encontrado.');
+                Alert.alert('Erro', 'Estabelecimento não encontrado.');
             }
         } catch (error) {
             console.error('Error fetching business:', error);
@@ -207,17 +207,17 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
             onRefresh();
         } catch (error) {
             console.error('Error updating appointment status:', error);
-            Alert.alert('Erro', 'NÃ£o foi possÃ­vel atualizar o status do agendamento.');
+            Alert.alert('Erro', 'Não foi possível atualizar o status do agendamento.');
         }
     };
 
     // Handle appointment deletion
     const handleDeleteAppointment = (appointment: Appointment) => {
         Alert.alert(
-            'Confirmar ExclusÃ£o',
+            'Confirmar Exclusão',
             `Tem certeza que deseja cancelar o agendamento de ${appointment.clientName} em ${appointment.date} Ã s ${appointment.time}?`,
             [
-                { text: 'NÃ£o', style: 'cancel' },
+                { text: 'Não', style: 'cancel' },
                 {
                     text: 'Sim, Cancelar',
                     style: 'destructive',
@@ -261,7 +261,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
     // Handle create appointment
     const handleCreateAppointment = async () => {
         if (!selectedProfessional || !selectedService || !clientName.trim()) {
-            Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatÃ³rios.');
+            Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
             return;
         }
 
@@ -291,14 +291,14 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
             onRefresh();
         } catch (error) {
             console.error('Error creating appointment:', error);
-            Alert.alert('Erro', 'NÃ£o foi possÃ­vel criar o agendamento.');
+            Alert.alert('Erro', 'Não foi possível criar o agendamento.');
         }
     };
 
     // Handle edit appointment
     const handleEditAppointment = async () => {
         if (!selectedAppointment || !selectedService || !clientName.trim()) {
-            Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatÃ³rios.');
+            Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
             return;
         }
 
@@ -316,7 +316,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
             onRefresh();
         } catch (error) {
             console.error('Error updating appointment:', error);
-            Alert.alert('Erro', 'NÃ£o foi possÃ­vel atualizar o agendamento.');
+            Alert.alert('Erro', 'Não foi possível atualizar o agendamento.');
         }
     };
 
@@ -337,7 +337,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
         switch (status) {
             case 'scheduled': return 'Agendado';
             case 'confirmed': return 'Confirmado';
-            case 'completed': return 'ConcluÃ­do';
+            case 'completed': return 'Concluído';
             case 'cancelled': return 'Cancelado';
             case 'no_show': return 'Faltou';
             default: return status;
@@ -349,7 +349,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
         <View key={appointment.id} style={styles.appointmentItem}>
             <View style={styles.appointmentHeader}>
                 <View style={styles.appointmentInfo}>
-                    <Text style={styles.clientName}>{appointment.clientName || 'Cliente nÃ£o informado'}</Text>
+                    <Text style={styles.clientName}>{appointment.clientName || 'Cliente não informado'}</Text>
                     <Text style={styles.serviceName}>{appointment.serviceName}</Text>
                     <Text style={styles.dateTime}>{appointment.date} Ã s {appointment.time}</Text>
                 </View>
@@ -499,7 +499,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                         </View>
 
                         <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>ServiÃ§o *</Text>
+                            <Text style={styles.inputLabel}>Serviço *</Text>
                             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                 {services.map(service => (
                                     <TouchableOpacity
@@ -539,7 +539,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                             </View>
 
                             <View style={styles.dateTimeItem}>
-                                <Text style={styles.inputLabel}>HorÃ¡rio *</Text>
+                                <Text style={styles.inputLabel}>Horário *</Text>
                                 <TouchableOpacity
                                     style={styles.dateTimeButton}
                                     onPress={() => setShowTimePicker(true)}
@@ -553,12 +553,12 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                         </View>
 
                         <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>ObservaÃ§Ãµes</Text>
+                            <Text style={styles.inputLabel}>ObservaçÃµes</Text>
                             <TextInput
                                 style={[styles.input, styles.textArea]}
                                 value={notes}
                                 onChangeText={setNotes}
-                                placeholder="ObservaÃ§Ãµes sobre o agendamento (opcional)"
+                                placeholder="ObservaçÃµes sobre o agendamento (opcional)"
                                 multiline
                                 numberOfLines={3}
                             />
@@ -637,7 +637,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                 <Icon name="search" size={20} color={colors.lightText} />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Buscar profissional, cliente ou serviÃ§o"
+                    placeholder="Buscar profissional, cliente ou serviço"
                     value={searchText}
                     onChangeText={setSearchText}
                 />

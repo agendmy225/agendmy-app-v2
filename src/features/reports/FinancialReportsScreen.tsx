@@ -103,7 +103,7 @@ const FinancialReportsScreen: React.FC = () => {
 
       setLoading(false);
     } catch (loadError) {
-      console.error('Erro ao carregar relatÃ³rios:', loadError);
+      console.error('Erro ao carregar relatórios:', loadError);
       setLoading(false);
     }
   }, [businessId]);
@@ -122,7 +122,7 @@ const FinancialReportsScreen: React.FC = () => {
 
   const handleGenerateReport = async () => {
     if (!businessId) {
-      Alert.alert('Erro', 'ID do estabelecimento nÃ£o encontrado.');
+      Alert.alert('Erro', 'ID do estabelecimento não encontrado.');
       return;
     }
 
@@ -133,8 +133,8 @@ const FinancialReportsScreen: React.FC = () => {
 
       if (!commissionValidation.hasValidConfig) {
         Alert.alert(
-          'ConfiguraÃ§Ã£o NecessÃ¡ria',
-          `${commissionValidation.message}\n\nConfigure a taxa de comissÃ£o nas configuraÃ§Ãµes do seu negÃ³cio para gerar relatÃ³rios.`,
+          'Configuração Necessária',
+          `${commissionValidation.message}\n\nConfigure a taxa de comissão nas configuraçÃµes do seu negócio para gerar relatórios.`,
           [{ text: 'Entendi', style: 'default' }]
         );
         setGeneratingReport(false);
@@ -148,13 +148,13 @@ const FinancialReportsScreen: React.FC = () => {
         start = new Date(startDate);
         end = new Date(endDate);
       } catch (dateError) {
-        Alert.alert('Erro', 'Formato de data invÃ¡lido. Use o formato AAAA-MM-DD.');
+        Alert.alert('Erro', 'Formato de data inválido. Use o formato AAAA-MM-DD.');
         setGeneratingReport(false);
         return;
       }
 
       if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        Alert.alert('Erro', 'Formato de data invÃ¡lido. Use o formato AAAA-MM-DD.');
+        Alert.alert('Erro', 'Formato de data inválido. Use o formato AAAA-MM-DD.');
         setGeneratingReport(false);
         return;
       }
@@ -167,7 +167,7 @@ const FinancialReportsScreen: React.FC = () => {
 
       const now = new Date();
       if (start > now) {
-        Alert.alert('Erro', 'A data inicial nÃ£o pode ser no futuro.');
+        Alert.alert('Erro', 'A data inicial não pode ser no futuro.');
         setGeneratingReport(false);
         return;
       }
@@ -182,13 +182,13 @@ const FinancialReportsScreen: React.FC = () => {
       const newReport = await generateFinancialReport(reportParams);
       setReports([newReport, ...reports]);
       setGenerateModalVisible(false);
-      Alert.alert('Sucesso', 'RelatÃ³rio financeiro gerado com sucesso!');
+      Alert.alert('Sucesso', 'Relatório financeiro gerado com sucesso!');
       setGeneratingReport(false);
     } catch (error) {
-      console.error('Erro ao gerar relatÃ³rio:', error);
+      console.error('Erro ao gerar relatório:', error);
       const errorMessage = error instanceof Error
         ? error.message
-        : 'Ocorreu um erro ao gerar o relatÃ³rio. Tente novamente.';
+        : 'Ocorreu um erro ao gerar o relatório. Tente novamente.';
       Alert.alert('Erro', errorMessage);
       setGeneratingReport(false);
     }
@@ -196,13 +196,13 @@ const FinancialReportsScreen: React.FC = () => {
 
   const handleDeleteReport = async (reportId: string) => {
     if (!businessId) {
-      Alert.alert('Erro', 'ID do estabelecimento nÃ£o encontrado.');
+      Alert.alert('Erro', 'ID do estabelecimento não encontrado.');
       return;
     }
 
     Alert.alert(
-      'Confirmar ExclusÃ£o',
-      'Tem certeza de que deseja excluir este relatÃ³rio? Esta aÃ§Ã£o nÃ£o pode ser desfeita.',
+      'Confirmar Exclusão',
+      'Tem certeza de que deseja excluir este relatório? Esta ação não pode ser desfeita.',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -213,10 +213,10 @@ const FinancialReportsScreen: React.FC = () => {
               await deleteFinancialReport(businessId, reportId);
               setReports(prevReports => prevReports.filter(report => report.id !== reportId));
               setReportModalVisible(false);
-              Alert.alert('Sucesso', 'RelatÃ³rio excluÃ­do com sucesso.');
+              Alert.alert('Sucesso', 'Relatório excluído com sucesso.');
             } catch (deleteError) {
-              console.error('Erro ao excluir relatÃ³rio:', deleteError);
-              Alert.alert('Erro', 'Ocorreu um erro ao excluir o relatÃ³rio. Tente novamente.');
+              console.error('Erro ao excluir relatório:', deleteError);
+              Alert.alert('Erro', 'Ocorreu um erro ao excluir o relatório. Tente novamente.');
             }
           },
         },
@@ -260,7 +260,7 @@ const FinancialReportsScreen: React.FC = () => {
     if (!pStartDate || !pEndDate) { return ''; }
     switch (period) {
       case 'daily':
-        return `DiÃ¡rio - ${formatDate(pStartDate)}`;
+        return `Diário - ${formatDate(pStartDate)}`;
       case 'weekly':
         return `Semanal - ${formatDate(pStartDate)} a ${formatDate(pEndDate)}`;
       case 'monthly':
@@ -323,7 +323,7 @@ const FinancialReportsScreen: React.FC = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>RelatÃ³rio Financeiro</Text>
+              <Text style={styles.modalTitle}>Relatório Financeiro</Text>
               <TouchableOpacity style={styles.closeButton} onPress={() => setReportModalVisible(false)}>
                 <Text style={styles.closeButtonText}>âœ•</Text>
               </TouchableOpacity>
@@ -350,7 +350,7 @@ const FinancialReportsScreen: React.FC = () => {
                   <Text style={styles.detailValue}>{selectedReport.totalAppointments}</Text>
                 </View>
                 <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>Agendamentos ConcluÃ­dos</Text>
+                  <Text style={styles.detailLabel}>Agendamentos Concluídos</Text>
                   <Text style={styles.detailValue}>{selectedReport.completedAppointments}</Text>
                 </View>
                 <View style={styles.detailItem}>
@@ -375,7 +375,7 @@ const FinancialReportsScreen: React.FC = () => {
                           <Text style={styles.detailValue}>{data.appointmentsCount}</Text>
                         </View>
                         <View style={styles.detailItem}>
-                          <Text style={styles.detailLabel}>ComissÃ£o</Text>
+                          <Text style={styles.detailLabel}>Comissão</Text>
                           <Text style={[styles.detailValue, styles.commissionValue]}>
                             {formatCurrency(data.commission)}
                           </Text>
@@ -384,12 +384,12 @@ const FinancialReportsScreen: React.FC = () => {
                     </View>
                   ))
                 ) : (
-                  <Text style={styles.emptySubtext}>Nenhuma comissÃ£o calculada no perÃ­odo</Text>
+                  <Text style={styles.emptySubtext}>Nenhuma comissão calculada no período</Text>
                 )}
               </View>
 
               <View style={styles.reportDetailSection}>
-                <Text style={styles.sectionTitle}>Receita por ServiÃ§o</Text>
+                <Text style={styles.sectionTitle}>Receita por Serviço</Text>
                 {Object.entries(selectedReport.serviceRevenue).length > 0 ? (
                   Object.entries(selectedReport.serviceRevenue).map(([id, data]) => (
                     <View key={id} style={styles.serviceItem}>
@@ -407,7 +407,7 @@ const FinancialReportsScreen: React.FC = () => {
                     </View>
                   ))
                 ) : (
-                  <Text style={styles.emptySubtext}>Nenhuma receita por serviÃ§o no perÃ­odo</Text>
+                  <Text style={styles.emptySubtext}>Nenhuma receita por serviço no período</Text>
                 )}
               </View>
             </ScrollView>
@@ -417,7 +417,7 @@ const FinancialReportsScreen: React.FC = () => {
                 style={styles.deleteButton}
                 onPress={() => selectedReport?.id && handleDeleteReport(selectedReport.id)}
               >
-                <Text style={styles.deleteButtonText}>Excluir RelatÃ³rio</Text>
+                <Text style={styles.deleteButtonText}>Excluir Relatório</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.closeModalButton} onPress={() => setReportModalVisible(false)}>
                 <Text style={styles.closeModalButtonText}>Fechar</Text>
@@ -439,7 +439,7 @@ const FinancialReportsScreen: React.FC = () => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Gerar RelatÃ³rio Financeiro</Text>
+            <Text style={styles.modalTitle}>Gerar Relatório Financeiro</Text>
             <TouchableOpacity style={styles.closeButton} onPress={() => setGenerateModalVisible(false)}>
               <Text style={styles.closeButtonText}>âœ•</Text>
             </TouchableOpacity>
@@ -447,7 +447,7 @@ const FinancialReportsScreen: React.FC = () => {
 
           <ScrollView style={styles.modalContent}>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>PerÃ­odo</Text>
+              <Text style={styles.inputLabel}>Período</Text>
               <View style={styles.periodButtonsContainer}>
                 {(['daily', 'weekly', 'monthly', 'yearly', 'custom'] as const).map((period) => (
                   <TouchableOpacity
@@ -456,7 +456,7 @@ const FinancialReportsScreen: React.FC = () => {
                     onPress={() => setReportPeriod(period)}
                   >
                     <Text style={[styles.periodButtonText, reportPeriod === period && styles.activePeriodButtonText]}>
-                      {period === 'daily' ? 'DiÃ¡rio' : period === 'weekly' ? 'Semanal' : period === 'monthly' ? 'Mensal' : period === 'yearly' ? 'Anual' : 'Personalizado'}
+                      {period === 'daily' ? 'Diário' : period === 'weekly' ? 'Semanal' : period === 'monthly' ? 'Mensal' : period === 'yearly' ? 'Anual' : 'Personalizado'}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -482,7 +482,7 @@ const FinancialReportsScreen: React.FC = () => {
               {generatingReport ? (
                 <ActivityIndicator size="small" color={colors.white} />
               ) : (
-                <Text style={styles.generateButtonText}>Gerar RelatÃ³rio</Text>
+                <Text style={styles.generateButtonText}>Gerar Relatório</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -495,7 +495,7 @@ const FinancialReportsScreen: React.FC = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Carregando relatÃ³rios...</Text>
+        <Text style={styles.loadingText}>Carregando relatórios...</Text>
       </View>
     );
   }
@@ -503,7 +503,7 @@ const FinancialReportsScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>RelatÃ³rios Financeiros</Text>
+        <Text style={styles.headerTitle}>Relatórios Financeiros</Text>
       </View>
 
       <ScrollView
@@ -514,9 +514,9 @@ const FinancialReportsScreen: React.FC = () => {
           reports.map(report => renderReportItem(report))
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Nenhum relatÃ³rio encontrado</Text>
+            <Text style={styles.emptyText}>Nenhum relatório encontrado</Text>
             <Text style={styles.emptySubtext}>
-              Gere seu primeiro relatÃ³rio financeiro para visualizar suas receitas e comissÃµes.
+              Gere seu primeiro relatório financeiro para visualizar suas receitas e comissÃµes.
             </Text>
           </View>
         )}

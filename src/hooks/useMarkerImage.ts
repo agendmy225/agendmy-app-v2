@@ -42,7 +42,7 @@ export const useMarkerImage = (
     try {
       const cacheFilePath = getCacheFilePath(id);
 
-      // Verifica se jÃ¡ existe no cache
+      // Verifica se já existe no cache
       if (enableCache && await RNFS.exists(cacheFilePath)) {
         console.log(`ðŸ“¦ Imagem do marker ${id} encontrada no cache local`);
         return cacheFilePath;
@@ -70,7 +70,7 @@ export const useMarkerImage = (
 
   const loadMarkerImage = useCallback(async () => {
     if (!businessId) {
-      setState(prev => ({ ...prev, error: 'BusinessId nÃ£o fornecido', isReady: false }));
+      setState(prev => ({ ...prev, error: 'BusinessId não fornecido', isReady: false }));
       return;
     }
 
@@ -83,20 +83,20 @@ export const useMarkerImage = (
       const businessFolderRef = ref(storage, `businesses/${businessId}`);
       const files = await listAll(businessFolderRef);
 
-      // Procura por arquivos que comeÃ§am com 'logo_'
+      // Procura por arquivos que começam com 'logo_'
       const logoFile = files.items.find(item => item.name.startsWith('logo_'));
 
       if (!logoFile) {
-        throw new Error('Logo nÃ£o encontrado');
+        throw new Error('Logo não encontrado');
       }
 
-      // ObtÃ©m a URL de download do logo encontrado
+      // Obtém a URL de download do logo encontrado
       const downloadUrl = await getDownloadURL(logoFile);
 
       // Faz download e cache da imagem
       const localPath = await downloadAndCacheImage(downloadUrl, businessId);
 
-      // PrÃ©-carrega a imagem para garantir que estÃ¡ vÃ¡lida
+      // Pré-carrega a imagem para garantir que está válida
       await new Promise<void>((resolve, reject) => {
         Image.getSize(
           Platform.OS === 'android' ? `file://${localPath}` : localPath,
@@ -161,7 +161,7 @@ export const useMarkerImage = (
 };
 
 /**
- * Hook para carregar mÃºltiplas imagens de marcadores
+ * Hook para carregar múltiplas imagens de marcadores
  */
 export const useMultipleMarkerImages = (
   businessIds: string[]
@@ -197,14 +197,14 @@ export const useMultipleMarkerImages = (
             const businessFolderRef = ref(storage, `businesses/${businessId}`);
             const files = await listAll(businessFolderRef);
 
-            // Procura por arquivos que comeÃ§am com 'logo_'
+            // Procura por arquivos que começam com 'logo_'
             const logoFile = files.items.find(item => item.name.startsWith('logo_'));
 
             if (!logoFile) {
-              throw new Error('Logo nÃ£o encontrado');
+              throw new Error('Logo não encontrado');
             }
 
-            // ObtÃ©m a URL de download do logo encontrado
+            // Obtém a URL de download do logo encontrado
             const downloadUrl = await getDownloadURL(logoFile);
 
             // Atualiza estado individual
@@ -235,7 +235,7 @@ export const useMultipleMarkerImages = (
     }
 
     setIsLoading(false);
-    console.log(`âœ… Carregamento de marcadores concluÃ­do`);
+    console.log(`âœ… Carregamento de marcadores concluído`);
   }, [businessIds]);
 
   useEffect(() => {

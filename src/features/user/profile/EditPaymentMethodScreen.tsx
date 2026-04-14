@@ -13,14 +13,14 @@ const EditPaymentMethodScreen: React.FC = () => {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Editar CartÃ£o</Text>
+        <Text style={styles.headerTitle}>Editar Cartão</Text>
       </View>
       <View style={styles.content}>
         <View style={styles.comingSoonContainer}>
           <Icon name="credit-card" size={64} color={colors.lightText} />
           <Text style={styles.comingSoonTitle}>Em Breve</Text>
           <Text style={styles.comingSoonText}>
-            A ediÃ§Ã£o de cartÃµes estarÃ¡ disponÃ­vel apÃ³s a integraÃ§Ã£o com o gateway de pagamento.
+            A edição de cartÃµes estará disponível após a integração com o gateway de pagamento.
           </Text>
         </View>
       </View>

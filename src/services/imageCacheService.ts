@@ -20,7 +20,7 @@ class ImageCacheService {
     console.log('ðŸš€ ImageCacheService CORRIGIDO iniciado');
     console.log('ðŸŽ¯ OBJETIVO: Logos 50x50px para markers, Covers em qualidade original para cards');
     console.log('ðŸ”§ ESTRATÃ‰GIA: Logo = resize 50x50px qualidade 30% | Cover = qualidade original 70%');
-    console.log('ðŸ“‹ FILTRO: Apenas paths com "/logo" serÃ£o redimensionados');
+    console.log('ðŸ“‹ FILTRO: Apenas paths com "/logo" serão redimensionados');
   }
 
   private getCacheKey(url: string): string {
@@ -38,7 +38,7 @@ class ImageCacheService {
       const cachedData = await this.safeAsyncStorageGet(cacheKey);
 
       if (!cachedData) {
-        console.log('âŒ Imagem nÃ£o encontrada no cache:', storagePath);
+        console.log('âŒ Imagem não encontrada no cache:', storagePath);
         return null;
       }
 
@@ -66,14 +66,14 @@ class ImageCacheService {
   async cacheImage(storagePath: string): Promise<string | null> {
     try {
       const isLogo = storagePath.includes('/logo');
-      console.log(`ðŸ“¥ INÃCIO - Baixando ${isLogo ? 'LOGO (serÃ¡ redimensionado)' : 'COVER/CARD (qualidade original)'}:`, storagePath);
+      console.log(`ðŸ“¥ INÃCIO - Baixando ${isLogo ? 'LOGO (será redimensionado)' : 'COVER/CARD (qualidade original)'}:`, storagePath);
 
       // Obter URL de download do Firebase
       const storageRef = ref(firebaseStorage, storagePath);
       const downloadURL = await getDownloadURL(storageRef);
       console.log('ðŸ”¥ URL obtida do Firebase');
 
-      // Definir caminho temporÃ¡rio
+      // Definir caminho temporário
       const fileName = `temp_${Date.now()}.jpg`;
       const tempPath = `${RNFS.CachesDirectoryPath}/${fileName}`;
 
@@ -108,7 +108,7 @@ class ImageCacheService {
           }
         );
 
-        console.log('âœ… Redimensionamento de LOGO concluÃ­do:', {
+        console.log('âœ… Redimensionamento de LOGO concluído:', {
           width: resizedImage.width,
           height: resizedImage.height,
         });
@@ -127,7 +127,7 @@ class ImageCacheService {
         console.log('âœ… Logo 50x50px pronto para cache');
       } else {
         // CARDS/COVERS: Manter qualidade original, apenas comprimir levemente
-        console.log('ðŸ“· COVER/CARD DETECTADO - Mantendo qualidade original com compressÃ£o leve...');
+        console.log('ðŸ“· COVER/CARD DETECTADO - Mantendo qualidade original com compressão leve...');
         
         // Para covers, obter as dimensÃµes originais da imagem
         const getImageDimensions = (): Promise<{ width: number; height: number }> => {
@@ -140,7 +140,7 @@ class ImageCacheService {
               },
               (error) => {
                 console.error('âŒ Erro ao obter dimensÃµes:', error);
-                // Fallback para dimensÃµes padrÃ£o se nÃ£o conseguir ler
+                // Fallback para dimensÃµes padrão se não conseguir ler
                 resolve({ width: 800, height: 600 });
               }
             );
@@ -161,7 +161,7 @@ class ImageCacheService {
           false, // keepMeta
         );
 
-        console.log('âœ… CompressÃ£o leve de COVER concluÃ­da:', {
+        console.log('âœ… Compressão leve de COVER concluída:', {
           width: compressedImage.width,
           height: compressedImage.height,
         });
@@ -198,11 +198,11 @@ class ImageCacheService {
       const cacheKey = this.getCacheKey(storagePath);
       const saveSuccess = await this.safeAsyncStorageSet(cacheKey, JSON.stringify(cacheEntry));
 
-      // Limpar arquivo temporÃ¡rio original
+      // Limpar arquivo temporário original
       try {
         await RNFS.unlink(tempPath);
       } catch (cleanupError) {
-        console.warn('âš ï¸ Erro ao limpar temporÃ¡rio original:', cleanupError);
+        console.warn('âš ï¸ Erro ao limpar temporário original:', cleanupError);
       }
 
       if (saveSuccess) {
@@ -218,11 +218,11 @@ class ImageCacheService {
   }
 
   /**
-   * ObtÃ©m imagem (cache primeiro, depois baixa se necessÃ¡rio)
+   * Obtém imagem (cache primeiro, depois baixa se necessário)
    */
   async getImage(storagePath: string): Promise<string | null> {
     if (!storagePath || storagePath.includes('placeholder')) {
-      console.warn('âš ï¸ StoragePath invÃ¡lido:', storagePath);
+      console.warn('âš ï¸ StoragePath inválido:', storagePath);
       return null;
     }
 
@@ -233,7 +233,7 @@ class ImageCacheService {
         return cachedImage;
       }
 
-      // Se nÃ£o tem cache, baixa e redimensiona
+      // Se não tem cache, baixa e redimensiona
       return await this.cacheImage(storagePath);
     } catch (error) {
       console.error('âŒ Erro ao obter imagem:', error);
@@ -261,7 +261,7 @@ class ImageCacheService {
   }
 
   /**
-   * ObtÃ©m dados do AsyncStorage com tratamento de erro
+   * Obtém dados do AsyncStorage com tratamento de erro
    */
   private async safeAsyncStorageGet(key: string): Promise<string | null> {
     try {
@@ -283,7 +283,7 @@ class ImageCacheService {
   }
 
   /**
-   * Limpa cache se necessÃ¡rio
+   * Limpa cache se necessário
    */
   private async cleanupCacheIfNeeded(): Promise<void> {
     try {
@@ -341,7 +341,7 @@ class ImageCacheService {
   }
 
   /**
-   * ObtÃ©m informaÃ§Ãµes do cache
+   * Obtém informaçÃµes do cache
    */
   async getCacheInfo(): Promise<{ count: number; totalSize: number }> {
     try {

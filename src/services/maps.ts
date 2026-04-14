@@ -25,15 +25,15 @@ export interface NearbyBusiness extends BusinessLocation {
   [key: string]: unknown; // For other business properties
 }
 
-// Solicitar permissÃ£o de localizaÃ§Ã£o
+// Solicitar permissão de localização
 export const requestLocationPermission = async (): Promise<boolean> => {
   try {
     if (Platform.OS === 'android') {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
-          title: 'PermissÃ£o de LocalizaÃ§Ã£o',
-          message: 'Este app precisa acessar sua localizaÃ§Ã£o para mostrar estabelecimentos prÃ³ximos.',
+          title: 'Permissão de Localização',
+          message: 'Este app precisa acessar sua localização para mostrar estabelecimentos próximos.',
           buttonNeutral: 'Perguntar depois',
           buttonNegative: 'Cancelar',
           buttonPositive: 'OK',
@@ -41,14 +41,14 @@ export const requestLocationPermission = async (): Promise<boolean> => {
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     }
-    return true; // iOS jÃ¡ lida com permissÃµes automaticamente
+    return true; // iOS já lida com permissÃµes automaticamente
   } catch (error) {
-    console.error('Erro ao solicitar permissÃ£o de localizaÃ§Ã£o:', error);
+    console.error('Erro ao solicitar permissão de localização:', error);
     return false;
   }
 };
 
-// Obter localizaÃ§Ã£o atual (melhorada)
+// Obter localização atual (melhorada)
 export const getCurrentLocation = async (options?: {
   enableHighAccuracy?: boolean;
   timeout?: number;
@@ -59,7 +59,7 @@ export const getCurrentLocation = async (options?: {
       const hasPermission = await requestLocationPermission();
 
       if (!hasPermission) {
-        Alert.alert('PermissÃ£o Negada', 'PermissÃ£o de localizaÃ§Ã£o Ã© necessÃ¡ria para esta funcionalidade.');
+        Alert.alert('Permissão Negada', 'Permissão de localização é necessária para esta funcionalidade.');
         resolve(null);
         return;
       }
@@ -72,7 +72,7 @@ export const getCurrentLocation = async (options?: {
 
       Geolocation.getCurrentPosition(
         (position) => {
-          console.log('LocalizaÃ§Ã£o atual obtida:', {
+          console.log('Localização atual obtida:', {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
             accuracy: position.coords.accuracy,
@@ -84,21 +84,21 @@ export const getCurrentLocation = async (options?: {
           });
         },
         (error) => {
-          console.error('Erro ao obter localizaÃ§Ã£o atual:', error);
-          Alert.alert('Erro', 'NÃ£o foi possÃ­vel obter sua localizaÃ§Ã£o. Verifique se o GPS estÃ¡ ativado.');
+          console.error('Erro ao obter localização atual:', error);
+          Alert.alert('Erro', 'Não foi possível obter sua localização. Verifique se o GPS está ativado.');
           resolve(null);
         },
         geoOptions
       );
     } catch (error) {
-      console.error('Erro ao obter localizaÃ§Ã£o atual:', error);
-      Alert.alert('Erro', 'NÃ£o foi possÃ­vel obter sua localizaÃ§Ã£o. Verifique se o GPS estÃ¡ ativado.');
+      console.error('Erro ao obter localização atual:', error);
+      Alert.alert('Erro', 'Não foi possível obter sua localização. Verifique se o GPS está ativado.');
       resolve(null);
     }
   });
 };
 
-// Obter endereÃ§o a partir de coordenadas (usando Google Geocoding API)
+// Obter endereço a partir de coordenadas (usando Google Geocoding API)
 export const getAddressFromCoordinates = async (
   latitude: number,
   longitude: number,
@@ -125,7 +125,7 @@ export const getAddressFromCoordinates = async (
   }
 };
 
-// Obter coordenadas a partir de um endereÃ§o (usando Google Geocoding API)
+// Obter coordenadas a partir de um endereço (usando Google Geocoding API)
 export const getCoordinatesFromAddress = async (
   address: string,
   apiKey: string,
@@ -157,19 +157,19 @@ export const getCoordinatesFromAddress = async (
   }
 };
 
-// Salvar localizaÃ§Ã£o do estabelecimento
+// Salvar localização do estabelecimento
 export const saveBusinessLocation = async (
   businessId: string,
   location: LocationData,
 ): Promise<string> => {
   try {
-    // Verificar se jÃ¡ existe uma localizaÃ§Ã£o para este estabelecimento
+    // Verificar se já existe uma localização para este estabelecimento
     const businessLocationsRef = collection(firestore, 'businessLocations');
     const q = query(businessLocationsRef, where('businessId', '==', businessId), limit(1));
     const locationSnapshot = await getDocs(q);
 
     if (!locationSnapshot.empty) {
-      // Atualizar localizaÃ§Ã£o existente
+      // Atualizar localização existente
       const locationDoc = locationSnapshot.docs[0];
       const locationDocRef = doc(firestore, 'businessLocations', locationDoc.id);
       await updateDoc(locationDocRef, {
@@ -179,7 +179,7 @@ export const saveBusinessLocation = async (
 
       return locationDoc.id;
     } else {
-      // Criar nova localizaÃ§Ã£o
+      // Criar nova localização
       const locationRef = await addDoc(businessLocationsRef, {
         businessId,
         location,
@@ -194,7 +194,7 @@ export const saveBusinessLocation = async (
   }
 };
 
-// Obter localizaÃ§Ã£o do estabelecimento
+// Obter localização do estabelecimento
 export const getBusinessLocation = async (
   businessId: string,
 ): Promise<BusinessLocation | null> => {
@@ -220,7 +220,7 @@ export const getBusinessLocation = async (
   }
 };
 
-// Buscar estabelecimentos prÃ³ximos
+// Buscar estabelecimentos próximos
 export const getNearbyBusinesses = async (
   latitude: number,
   longitude: number,
@@ -228,14 +228,14 @@ export const getNearbyBusinesses = async (
   categories: string[] = [],
 ): Promise<NearbyBusiness[]> => {
   try {
-    // Em uma implementaÃ§Ã£o real, usarÃ­amos GeoFirestore ou uma soluÃ§Ã£o similar
+    // Em uma implementação real, usaríamos GeoFirestore ou uma solução similar
     // para consultas geoespaciais. Para simplificar, vamos simular isso.    // Buscar todos os estabelecimentos
     const businessesRef = collection(firestore, 'businesses');
     const businessesSnapshot = await getDocs(businessesRef);
 
     const businesses: NearbyBusiness[] = [];
 
-    // Para cada estabelecimento, buscar sua localizaÃ§Ã£o
+    // Para cada estabelecimento, buscar sua localização
     for (const businessDoc of businessesSnapshot.docs) {
       const business = businessDoc.data();
 
@@ -254,7 +254,7 @@ export const getNearbyBusinesses = async (
       if (!locationSnapshot.empty) {
         const locationData = locationSnapshot.docs[0].data().location;
 
-        // Calcular distÃ¢ncia (fÃ³rmula de Haversine)
+        // Calcular distÃ¢ncia (fórmula de Haversine)
         const distance = calculateDistance(
           latitude,
           longitude,
@@ -267,7 +267,7 @@ export const getNearbyBusinesses = async (
           businesses.push({
             id: businessDoc.id,
             businessId: businessDoc.id,
-            name: business.name || 'Nome nÃ£o informado',
+            name: business.name || 'Nome não informado',
             categories: business.categories,
             active: business.active,
             ...business,
@@ -285,7 +285,7 @@ export const getNearbyBusinesses = async (
   }
 };
 
-// FunÃ§Ã£o auxiliar para calcular distÃ¢ncia entre duas coordenadas (fÃ³rmula de Haversine)
+// Função auxiliar para calcular distÃ¢ncia entre duas coordenadas (fórmula de Haversine)
 const calculateDistance = (
   lat1: number,
   lon1: number,
@@ -308,7 +308,7 @@ const deg2rad = (deg: number): number => {
   return deg * (Math.PI / 180);
 };
 
-// Verificar se estabelecimentos tÃªm dados de localizaÃ§Ã£o (melhorado)
+// Verificar se estabelecimentos tÃªm dados de localização (melhorado)
 export const checkBusinessesLocationData = async (): Promise<{
   total: number;
   withLocation: number;
@@ -334,14 +334,14 @@ export const checkBusinessesLocationData = async (): Promise<{
     for (const businessDoc of businessesSnapshot.docs) {
       const business = businessDoc.data();
       const businessId = businessDoc.id;
-      const businessName = business.name || 'Nome nÃ£o informado';
+      const businessName = business.name || 'Nome não informado';
 
-      // Verificar localizaÃ§Ã£o
+      // Verificar localização
       let hasLocation = false;
       if (business.location?.latitude && business.location?.longitude) {
         hasLocation = true;
       } else {
-        // Verificar se tem localizaÃ§Ã£o na coleÃ§Ã£o separada
+        // Verificar se tem localização na coleção separada
         const locationSnapshot = await getDocs(
           query(
             collection(firestore, 'businessLocations'),
@@ -364,7 +364,7 @@ export const checkBusinessesLocationData = async (): Promise<{
         withoutLocation.push(`${businessName} (ID: ${businessId})`);
       }
 
-      // Verificar imagens vÃ¡lidas
+      // Verificar imagens válidas
       const hasValidImage = hasValidBusinessImage(business);
       if (hasValidImage) {
         withValidImages++;
@@ -386,7 +386,7 @@ export const checkBusinessesLocationData = async (): Promise<{
   }
 };
 
-// FunÃ§Ã£o auxiliar para verificar se um estabelecimento tem imagem vÃ¡lida
+// Função auxiliar para verificar se um estabelecimento tem imagem válida
 const hasValidBusinessImage = (business: any): boolean => {
   const images = [business.logo, business.imageUrl, business.coverImage].filter(Boolean);
 
@@ -404,18 +404,18 @@ const hasValidBusinessImage = (business: any): boolean => {
   return false;
 };
 
-// FunÃ§Ã£o para validar se uma URL de imagem Ã© vÃ¡lida
+// Função para validar se uma URL de imagem é válida
 export const validateImageUrl = async (url: string): Promise<boolean> => {
   if (!url || typeof url !== 'string') {
     return false;
   }
 
-  // Verificar se nÃ£o Ã© placeholder
+  // Verificar se não é placeholder
   if (url.includes('via.placeholder.com') || url.includes('placeholder')) {
     return false;
   }
 
-  // Verificar se Ã© uma URL vÃ¡lida
+  // Verificar se é uma URL válida
   if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('file://')) {
     return false;
   }
@@ -425,7 +425,7 @@ export const validateImageUrl = async (url: string): Promise<boolean> => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    // Tentar fazer uma requisiÃ§Ã£o HEAD para verificar se a imagem existe
+    // Tentar fazer uma requisição HEAD para verificar se a imagem existe
     const response = await fetch(url, {
       method: 'HEAD',
       signal: controller.signal,

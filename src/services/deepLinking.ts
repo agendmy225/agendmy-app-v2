@@ -9,7 +9,7 @@ export interface DeepLinkOptions {
 
 /**
  * Abre um deep link de forma robusta, especialmente para Android 11+ (API 30+)
- * com targetSdkVersion 35. Implementa estratÃ©gias mÃºltiplas para garantir
+ * com targetSdkVersion 35. Implementa estratégias múltiplas para garantir
  * que os links funcionem tanto no Expo Go quanto em APKs gerados.
  */
 export class DeepLinkService {
@@ -21,7 +21,7 @@ export class DeepLinkService {
     const fallbackUrl = options.fallbackUrl || `https://www.instagram.com/${username}`;
 
     try {
-      // EstratÃ©gia 1: Tentar abrir diretamente (funciona melhor em builds release)
+      // Estratégia 1: Tentar abrir diretamente (funciona melhor em builds release)
       if (Platform.OS === 'android') {
         try {
           await Linking.openURL(instagramUrl);
@@ -31,14 +31,14 @@ export class DeepLinkService {
         }
       }
 
-      // EstratÃ©gia 2: Verificar se pode abrir e entÃ£o abrir
+      // Estratégia 2: Verificar se pode abrir e então abrir
       const canOpen = await Linking.canOpenURL(instagramUrl);
       if (canOpen) {
         await Linking.openURL(instagramUrl);
         return true;
       }
 
-      // EstratÃ©gia 3: Fallback para URL web
+      // Estratégia 3: Fallback para URL web
       if (fallbackUrl) {
         const canOpenFallback = await Linking.canOpenURL(fallbackUrl);
         if (canOpenFallback) {
@@ -47,16 +47,16 @@ export class DeepLinkService {
         }
       }
 
-      // Se chegou aqui, nenhuma estratÃ©gia funcionou
-      throw new Error('NÃ£o foi possÃ­vel abrir o Instagram');
+      // Se chegou aqui, nenhuma estratégia funcionou
+      throw new Error('Não foi possível abrir o Instagram');
 
     } catch (error) {
       console.error('Erro ao abrir Instagram:', error);
 
       if (options.showErrorAlert !== false) {
         Alert.alert(
-          options.errorTitle || 'Instagram nÃ£o encontrado',
-          options.errorMessage || 'O Instagram nÃ£o estÃ¡ instalado ou nÃ£o pode ser aberto. Deseja abrir no navegador?',
+          options.errorTitle || 'Instagram não encontrado',
+          options.errorMessage || 'O Instagram não está instalado ou não pode ser aberto. Deseja abrir no navegador?',
           [
             { text: 'Cancelar', style: 'cancel' },
             {
@@ -64,7 +64,7 @@ export class DeepLinkService {
               onPress: () => {
                 if (fallbackUrl) {
                   Linking.openURL(fallbackUrl).catch(() => {
-                    Alert.alert('Erro', 'NÃ£o foi possÃ­vel abrir o link');
+                    Alert.alert('Erro', 'Não foi possível abrir o link');
                   });
                 }
               }
@@ -86,7 +86,7 @@ export class DeepLinkService {
     const fallbackUrl = options.fallbackUrl || `https://wa.me/${phone}${message ? `?text=${encodedMessage}` : ''}`;
 
     try {
-      // EstratÃ©gia similar ao Instagram
+      // Estratégia similar ao Instagram
       if (Platform.OS === 'android') {
         try {
           await Linking.openURL(whatsappUrl);
@@ -110,15 +110,15 @@ export class DeepLinkService {
         }
       }
 
-      throw new Error('NÃ£o foi possÃ­vel abrir o WhatsApp');
+      throw new Error('Não foi possível abrir o WhatsApp');
 
     } catch (error) {
       console.error('Erro ao abrir WhatsApp:', error);
 
       if (options.showErrorAlert !== false) {
         Alert.alert(
-          options.errorTitle || 'WhatsApp nÃ£o encontrado',
-          options.errorMessage || 'O WhatsApp nÃ£o estÃ¡ instalado ou nÃ£o pode ser aberto. Deseja abrir no navegador?',
+          options.errorTitle || 'WhatsApp não encontrado',
+          options.errorMessage || 'O WhatsApp não está instalado ou não pode ser aberto. Deseja abrir no navegador?',
           [
             { text: 'Cancelar', style: 'cancel' },
             {
@@ -126,7 +126,7 @@ export class DeepLinkService {
               onPress: () => {
                 if (fallbackUrl) {
                   Linking.openURL(fallbackUrl).catch(() => {
-                    Alert.alert('Erro', 'NÃ£o foi possÃ­vel abrir o link');
+                    Alert.alert('Erro', 'Não foi possível abrir o link');
                   });
                 }
               }
@@ -140,7 +140,7 @@ export class DeepLinkService {
   }
 
   /**
-   * MÃ©todo genÃ©rico para qualquer deep link
+   * Método genérico para qualquer deep link
    */
   static async openDeepLink(
     appUrl: string,
@@ -148,7 +148,7 @@ export class DeepLinkService {
     options: DeepLinkOptions = {}
   ): Promise<boolean> {
     try {
-      // EstratÃ©gia 1: Tentar abrir diretamente (Android)
+      // Estratégia 1: Tentar abrir diretamente (Android)
       if (Platform.OS === 'android') {
         try {
           await Linking.openURL(appUrl);
@@ -158,14 +158,14 @@ export class DeepLinkService {
         }
       }
 
-      // EstratÃ©gia 2: Verificar e abrir
+      // Estratégia 2: Verificar e abrir
       const canOpen = await Linking.canOpenURL(appUrl);
       if (canOpen) {
         await Linking.openURL(appUrl);
         return true;
       }
 
-      // EstratÃ©gia 3: Fallback
+      // Estratégia 3: Fallback
       if (fallbackUrl) {
         const canOpenFallback = await Linking.canOpenURL(fallbackUrl);
         if (canOpenFallback) {
@@ -174,15 +174,15 @@ export class DeepLinkService {
         }
       }
 
-      throw new Error('NÃ£o foi possÃ­vel abrir o aplicativo');
+      throw new Error('Não foi possível abrir o aplicativo');
 
     } catch (error) {
       console.error('Erro ao abrir deep link:', error);
 
       if (options.showErrorAlert !== false) {
         Alert.alert(
-          options.errorTitle || 'Aplicativo nÃ£o encontrado',
-          options.errorMessage || 'O aplicativo nÃ£o estÃ¡ instalado ou nÃ£o pode ser aberto.',
+          options.errorTitle || 'Aplicativo não encontrado',
+          options.errorMessage || 'O aplicativo não está instalado ou não pode ser aberto.',
           [{ text: 'OK' }]
         );
       }

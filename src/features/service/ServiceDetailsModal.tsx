@@ -16,7 +16,7 @@ type ProfessionalType = {
   specialty: string;
   rating: number;
   image: string;
-  services?: string[]; // IDs dos serviÃ§os que o profissional realiza
+  services?: string[]; // IDs dos serviços que o profissional realiza
 };
 
 type ServiceDetailsModalProps = {
@@ -46,18 +46,18 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
   const [filteredProfessionals, setFilteredProfessionals] = useState<ProfessionalType[]>([]);
 
   useEffect(() => {
-    // Filtrar profissionais que podem realizar este serviÃ§o
+    // Filtrar profissionais que podem realizar este serviço
     const filtered = professionals.filter(professional => {
-      // Se o profissional nÃ£o tem serviÃ§os definidos, ele pode realizar todos os serviÃ§os
+      // Se o profissional não tem serviços definidos, ele pode realizar todos os serviços
       if (!professional.services || professional.services.length === 0) {
         return true;
       }
-      // Caso contrÃ¡rio, verificar se o serviÃ§o estÃ¡ na lista de serviÃ§os do profissional
+      // Caso contrário, verificar se o serviço está na lista de serviços do profissional
       return professional.services.includes(service.id);
     });
     setFilteredProfessionals(filtered);
 
-    // Resetar seleÃ§Ã£o quando o modal abre ou o serviÃ§o muda
+    // Resetar seleção quando o modal abre ou o serviço muda
     setSelectedProfessional(null);
   }, [service.id, professionals]);
 
@@ -105,7 +105,7 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Detalhes do ServiÃ§o</Text>
+            <Text style={styles.modalTitle}>Detalhes do Serviço</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>âœ•</Text>
             </TouchableOpacity>
@@ -146,7 +146,7 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
                 filteredProfessionals.map(renderProfessionalItem)
               ) : (
                 <Text style={styles.noProfessionalsText}>
-                  Nenhum profissional disponÃ­vel para este serviÃ§o
+                  Nenhum profissional disponível para este serviço
                 </Text>
               )}
             </View>

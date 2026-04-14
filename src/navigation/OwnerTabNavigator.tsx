@@ -6,20 +6,20 @@ import Icon from 'react-native-vector-icons/MaterialIcons'; // Importar Icon
 import { colors } from '../constants/colors';
 import { OwnerTabParamList } from '../types/types';
 
-// Telas do proprietÃ¡rio
-// import DashboardScreen from '../screens/owner/DashboardScreen'; // SerÃ¡ acessado via BusinessHubScreen
+// Telas do proprietário
+// import DashboardScreen from '../screens/owner/DashboardScreen'; // Será acessado via BusinessHubScreen
 import AppointmentManagementScreen from '../features/appointment/AppointmentManagementScreen';
 import OwnerHomeScreen from '../screens/OwnerHomeScreen'; // Tela inicial igual ao CLIENT
-// import ServiceManagementScreen from '../screens/owner/ServiceManagementScreen'; // SerÃ¡ acessado via BusinessHubScreen
-// import ProfessionalManagementScreen from '../screens/owner/ProfessionalManagementScreen'; // SerÃ¡ acessado via BusinessHubScreen
-// import FinancialReportsScreen from '../screens/owner/FinancialReportsScreen'; // SerÃ¡ acessado via BusinessHubScreen
-// import BusinessSettingsScreen from '../screens/owner/BusinessSettingsScreen'; // SerÃ¡ acessado via BusinessHubScreen
-// import ReviewsManagementScreen from '../screens/owner/ReviewsManagementScreen'; // SerÃ¡ acessado via BusinessHubScreen
+// import ServiceManagementScreen from '../screens/owner/ServiceManagementScreen'; // Será acessado via BusinessHubScreen
+// import ProfessionalManagementScreen from '../screens/owner/ProfessionalManagementScreen'; // Será acessado via BusinessHubScreen
+// import FinancialReportsScreen from '../screens/owner/FinancialReportsScreen'; // Será acessado via BusinessHubScreen
+// import BusinessSettingsScreen from '../screens/owner/BusinessSettingsScreen'; // Será acessado via BusinessHubScreen
+// import ReviewsManagementScreen from '../screens/owner/ReviewsManagementScreen'; // Será acessado via BusinessHubScreen
 import BusinessHubScreen from '../features/business/BusinessHubScreen'; // Nova tela Hub
 
-const Tab = createBottomTabNavigator<OwnerTabParamList>(); // OwnerTabParamList precisarÃ¡ ser atualizado
+const Tab = createBottomTabNavigator<OwnerTabParamList>(); // OwnerTabParamList precisará ser atualizado
 
-// Helper functions para Ã­cones da TabBar
+// Helper functions para ícones da TabBar
 const renderHomeIcon = ({ color, size }: { color: string; size: number }) => (
   <Icon name="home" size={size} color={color} />
 );
@@ -29,7 +29,7 @@ const renderAppointmentsIcon = ({ color, size }: { color: string; size: number }
 );
 
 const renderBusinessHubIcon = ({ color, size }: { color: string; size: number }) => (
-  <Icon name="business" size={size} color={color} /> // Ãcone para o Hub de NegÃ³cios
+  <Icon name="business" size={size} color={color} /> // Ãcone para o Hub de Negócios
 );
 
 const OwnerTabNavigator: React.FC = () => {
@@ -53,7 +53,7 @@ const OwnerTabNavigator: React.FC = () => {
           name="OwnerHome" // Nova aba inicial idÃªntica ao CLIENT
           component={OwnerHomeScreen}
           options={{
-            tabBarLabel: 'InÃ­cio',
+            tabBarLabel: 'Início',
             tabBarIcon: renderHomeIcon,
           }}
           listeners={({ navigation }) => ({
@@ -64,7 +64,7 @@ const OwnerTabNavigator: React.FC = () => {
           })}
         />
         <Tab.Screen
-          name="AppointmentManagement" // MantÃ©m Agendamentos como uma aba principal
+          name="AppointmentManagement" // Mantém Agendamentos como uma aba principal
           component={AppointmentManagementScreen}
           options={{
             tabBarLabel: 'Agendamentos',
@@ -78,10 +78,10 @@ const OwnerTabNavigator: React.FC = () => {
           })}
         />
         <Tab.Screen
-          name="BusinessHub" // Nova aba para o Hub de NegÃ³cios
+          name="BusinessHub" // Nova aba para o Hub de Negócios
           component={BusinessHubScreen}
           options={{
-            tabBarLabel: 'Meu NegÃ³cio',
+            tabBarLabel: 'Meu Negócio',
             tabBarIcon: renderBusinessHubIcon,
           }}
           listeners={({ navigation }) => ({
@@ -106,9 +106,9 @@ const styles = StyleSheet.create({
 
 export default OwnerTabNavigator;
 
-// iconStyles nÃ£o Ã© mais necessÃ¡rio se os Ã­cones sÃ£o de react-native-vector-icons
+// iconStyles não é mais necessário se os ícones são de react-native-vector-icons
 // const iconStyles = StyleSheet.create({
 //   tabIcon: {
-//     fontSize: 24, // O size Ã© passado diretamente para o Icon component
+//     fontSize: 24, // O size é passado diretamente para o Icon component
 //   },
 // });

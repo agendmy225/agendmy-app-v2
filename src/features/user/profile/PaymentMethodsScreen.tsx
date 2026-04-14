@@ -40,12 +40,12 @@ const PaymentMethodsScreen: React.FC = () => {
   const loadPaymentMethods = async () => {
     try {
       setLoading(true);
-      // TODO: Implementar chamada real para Firebase/API para carregar mÃ©todos de pagamento
-      // Por enquanto, sem dados mockados - aguardando implementaÃ§Ã£o
+      // TODO: Implementar chamada real para Firebase/API para carregar métodos de pagamento
+      // Por enquanto, sem dados mockados - aguardando implementação
       setPaymentMethods([]);
     } catch (error) {
-      console.error('Erro ao carregar mÃ©todos de pagamento:', error);
-      Alert.alert('Erro', 'NÃ£o foi possÃ­vel carregar os mÃ©todos de pagamento.');
+      console.error('Erro ao carregar métodos de pagamento:', error);
+      Alert.alert('Erro', 'Não foi possível carregar os métodos de pagamento.');
     } finally {
       setLoading(false);
     }
@@ -61,8 +61,8 @@ const PaymentMethodsScreen: React.FC = () => {
 
   const handleDeletePaymentMethod = (paymentMethod: PaymentMethod) => {
     Alert.alert(
-      'Remover CartÃ£o',
-      `Deseja remover o cartÃ£o ${paymentMethod.brand} final ${paymentMethod.lastFourDigits}?`,
+      'Remover Cartão',
+      `Deseja remover o cartão ${paymentMethod.brand} final ${paymentMethod.lastFourDigits}?`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -78,10 +78,10 @@ const PaymentMethodsScreen: React.FC = () => {
     try {
       // Aqui vocÃª faria a chamada para remover do Firebase/API
       setPaymentMethods(prev => prev.filter(pm => pm.id !== paymentMethodId));
-      Alert.alert('Sucesso', 'CartÃ£o removido com sucesso!');
+      Alert.alert('Sucesso', 'Cartão removido com sucesso!');
     } catch (error) {
-      console.error('Erro ao remover cartÃ£o:', error);
-      Alert.alert('Erro', 'NÃ£o foi possÃ­vel remover o cartÃ£o.');
+      console.error('Erro ao remover cartão:', error);
+      Alert.alert('Erro', 'Não foi possível remover o cartão.');
     }
   };
 
@@ -89,10 +89,10 @@ const PaymentMethodsScreen: React.FC = () => {
     try {
       await setDefaultPaymentMethod(paymentMethodId);
       setPaymentMethods(prev => prev.map(pm => ({ ...pm, isDefault: pm.id === paymentMethodId })));
-      Alert.alert('Sucesso', 'CartÃ£o padrÃ£o atualizado!');
+      Alert.alert('Sucesso', 'Cartão padrão atualizado!');
     } catch (error) {
-      console.error('Erro ao definir cartÃ£o padrÃ£o:', error);
-      Alert.alert('Erro', 'NÃ£o foi possÃ­vel definir o cartÃ£o como padrÃ£o.');
+      console.error('Erro ao definir cartão padrão:', error);
+      Alert.alert('Erro', 'Não foi possível definir o cartão como padrão.');
     }
   };
 
@@ -123,13 +123,13 @@ const PaymentMethodsScreen: React.FC = () => {
             <Text style={styles.cardBrand}>{paymentMethod.brand}</Text>
             <Text style={styles.cardNumber}>**** **** **** {paymentMethod.lastFourDigits}</Text>
             <Text style={styles.cardExpiry}>
-              VÃ¡lido atÃ© {paymentMethod.expiryMonth}/{paymentMethod.expiryYear}
+              Válido até {paymentMethod.expiryMonth}/{paymentMethod.expiryYear}
             </Text>
           </View>
         </View>
         {paymentMethod.isDefault && (
           <View style={styles.defaultBadge}>
-            <Text style={styles.defaultText}>PadrÃ£o</Text>
+            <Text style={styles.defaultText}>Padrão</Text>
           </View>
         )}
       </View>
@@ -140,7 +140,7 @@ const PaymentMethodsScreen: React.FC = () => {
             style={styles.actionButton}
             onPress={() => handleSetDefault(paymentMethod.id)}
           >
-            <Text style={styles.actionButtonText}>Definir como padrÃ£o</Text>
+            <Text style={styles.actionButtonText}>Definir como padrão</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity
@@ -163,7 +163,7 @@ const PaymentMethodsScreen: React.FC = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Carregando mÃ©todos de pagamento...</Text>
+        <Text style={styles.loadingText}>Carregando métodos de pagamento...</Text>
       </View>
     );
   }
@@ -177,16 +177,16 @@ const PaymentMethodsScreen: React.FC = () => {
         >
           <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>MÃ©todos de Pagamento</Text>
+        <Text style={styles.headerTitle}>Métodos de Pagamento</Text>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {paymentMethods.length === 0 ? (
           <View style={styles.emptyState}>
             <Icon name="credit-card" size={64} color={colors.lightText} />
-            <Text style={styles.emptyStateTitle}>Nenhum cartÃ£o cadastrado</Text>
+            <Text style={styles.emptyStateTitle}>Nenhum cartão cadastrado</Text>
             <Text style={styles.emptyStateText}>
-              Adicione um cartÃ£o de crÃ©dito ou dÃ©bito para facilitar seus pagamentos.
+              Adicione um cartão de crédito ou débito para facilitar seus pagamentos.
             </Text>
           </View>
         ) : (
@@ -200,7 +200,7 @@ const PaymentMethodsScreen: React.FC = () => {
           onPress={handleAddPaymentMethod}
         >
           <Icon name="add" size={24} color={colors.white} />
-          <Text style={styles.addButtonText}>Adicionar CartÃ£o</Text>
+          <Text style={styles.addButtonText}>Adicionar Cartão</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

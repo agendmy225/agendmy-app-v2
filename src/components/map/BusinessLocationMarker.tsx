@@ -63,12 +63,12 @@ export const BusinessLocationMarker: React.FC<BusinessLocationMarkerProps> = mem
       onPress={onPress}
       title={business.name}
       description={business.description}
-      // CRÃTICO: Para quando renderizaÃ§Ã£o estiver completa
+      // CRÃTICO: Para quando renderização estiver completa
       tracksViewChanges={!isRenderComplete}
     >
       <View style={styles.markerContainer}>
         <View style={styles.markerWrapper}>
-          {/* Por enquanto, vamos usar apenas o marcador padrÃ£o com inicial */}
+          {/* Por enquanto, vamos usar apenas o marcador padrão com inicial */}
           <View style={styles.defaultMarker}>
             <Text style={styles.defaultMarkerText}>
               {business.name.charAt(0).toUpperCase()}

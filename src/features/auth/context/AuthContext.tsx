@@ -26,10 +26,10 @@ import { FavoriteItem, addToFavorites, removeFromFavorites, getUserFavorites } f
 import { notificationService } from '../../../services/notificationService';
 import { Business } from '../../../services/businesses';
 
-// Tipos de usuÃ¡rio
+// Tipos de usuário
 export type UserType = 'client' | 'owner';
 
-// Interface para o usuÃ¡rio autenticado
+// Interface para o usuário autenticado
 interface User {
   uid: string;
   email: string | null;
@@ -39,14 +39,14 @@ interface User {
   photoURL?: string | null;
 }
 
-// Interface para os dados de atualizaÃ§Ã£o de perfil
+// Interface para os dados de atualização de perfil
 export interface UpdateProfileData {
   displayName?: string;
   email?: string;
   photoURL?: string;
 }
 
-// Interface para o contexto de autenticaÃ§Ã£o
+// Interface para o contexto de autenticação
 export interface AuthContextData {
   user: User | null;
   loading: boolean;
@@ -63,15 +63,15 @@ export interface AuthContextData {
   sendVerificationEmail: () => Promise<void>;
 }
 
-// CriaÃ§Ã£o do contexto
+// Criação do contexto
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-// Props para o provedor de autenticaÃ§Ã£o
+// Props para o provedor de autenticação
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Provedor de autenticaÃ§Ã£o
+// Provedor de autenticação
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,14 +82,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const subscriber = onAuthStateChanged(firebaseAuth, async (firebaseAuthUser: FirebaseAuthTypes.User | null) => {
       if (firebaseAuthUser) {
         try {
-          console.log('ðŸ” AuthContext: Buscando dados do usuÃ¡rio no Firestore para UID:', firebaseAuthUser.uid);
+          console.log('ðŸ” AuthContext: Buscando dados do usuário no Firestore para UID:', firebaseAuthUser.uid);
           const userDocRef = doc(firebaseDb, 'users', firebaseAuthUser.uid);
           const userDocSnap = await getDoc(userDocRef);
           let userDataFromDb: User | null = null;
 
           if (userDocSnap.exists()) {
             const dbData = userDocSnap.data();
-            console.log('âœ… AuthContext: Dados do usuÃ¡rio encontrados no Firestore:', { userType: dbData?.userType, businessId: dbData?.businessId });
+            console.log('âœ… AuthContext: Dados do usuário encontrados no Firestore:', { userType: dbData?.userType, businessId: dbData?.businessId });
             userDataFromDb = {
               uid: firebaseAuthUser.uid,
               email: firebaseAuthUser.email,
@@ -100,7 +100,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             };
             setUser(userDataFromDb);
           } else {
-            console.log('âš ï¸ AuthContext: UsuÃ¡rio nÃ£o encontrado no Firestore, usando dados bÃ¡sicos do Auth');
+            console.log('âš ï¸ AuthContext: Usuário não encontrado no Firestore, usando dados básicos do Auth');
             userDataFromDb = {
               uid: firebaseAuthUser.uid,
               email: firebaseAuthUser.email,
@@ -115,12 +115,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             await refreshFavoritesInternal();
           }
         } catch (error) {
-          console.error('âŒ AuthContext: Erro ao buscar dados do usuÃ¡rio no Firestore:', error);
+          console.error('âŒ AuthContext: Erro ao buscar dados do usuário no Firestore:', error);
           setUser(null);
           setFavorites([]);
         }
       } else {
-        console.log('ðŸ”“ AuthContext: UsuÃ¡rio nÃ£o autenticado');
+        console.log('ðŸ”“ AuthContext: Usuário não autenticado');
         setUser(null);
         setFavorites([]);
       }
@@ -132,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshFavoritesInternal = async () => {
     try {
-      console.log('ðŸ”„ AuthContext: Carregando favoritos do usuÃ¡rio');
+      console.log('ðŸ”„ AuthContext: Carregando favoritos do usuário');
       const userFavorites = await getUserFavorites();
       console.log('âœ… AuthContext: Favoritos carregados com sucesso:', userFavorites.length, 'items');
       setFavorites(userFavorites);
@@ -150,7 +150,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const toggleFavorite = async (businessData: Pick<Business, 'id' | 'name' | 'address' | 'rating' | 'imageUrl' | 'coverImage'>) => {
     if (!user) {
-      throw new Error('UsuÃ¡rio nÃ£o autenticado para favoritar.');
+      throw new Error('Usuário não autenticado para favoritar.');
     }
     try {
       const isCurrentlyFavorite = favorites.some(fav => fav.businessId === businessData.id);
@@ -188,7 +188,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           if (expectedUserType && actualUserType !== expectedUserType) {
             await authSignOut(firebaseAuth);
-            throw new Error(`Esta conta Ã© de ${actualUserType === 'client' ? 'cliente' : 'proprietÃ¡rio'}. Para acessar como ${expectedUserType === 'client' ? 'cliente' : 'proprietÃ¡rio'}, use a conta correta.`);
+            throw new Error(`Esta conta é de ${actualUserType === 'client' ? 'cliente' : 'proprietário'}. Para acessar como ${expectedUserType === 'client' ? 'cliente' : 'proprietário'}, use a conta correta.`);
           }
 
           if (actualUserType === 'client') {
@@ -196,10 +196,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         } else {
           await authSignOut(firebaseAuth);
-          throw new Error('Dados do usuÃ¡rio nÃ£o encontrados. Entre em contato com o suporte.');
+          throw new Error('Dados do usuário não encontrados. Entre em contato com o suporte.');
         }
       }
-      // Solicitar permissÃ£o de notificaÃ§Ã£o e registrar token FCM apÃ³s login
+      // Solicitar permissão de notificação e registrar token FCM após login
       try {
         const loggedUser = firebaseAuth.currentUser;
         if (loggedUser) {
@@ -212,7 +212,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
         errorMessage = 'E-mail ou senha incorretos. Verifique seus dados.';
       } else if (err.code === 'auth/invalid-email') {
-        errorMessage = 'E-mail invÃ¡lido. Verifique o formato.';
+        errorMessage = 'E-mail inválido. Verifique o formato.';
       } else if (err.code === 'auth/too-many-requests') {
         errorMessage = 'Muitas tentativas de login. Tente novamente mais tarde.';
       }
@@ -241,7 +241,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await setDoc(userDocRef, userDataForFirestore);
 
       if (userType === 'owner' && establishmentName) {
-        // Criar documento na coleÃ§Ã£o 'businesses' para o novo negÃ³cio
+        // Criar documento na coleção 'businesses' para o novo negócio
         const { addDoc, collection: fsCollection } = await import('@react-native-firebase/firestore');
         const businessRef = await addDoc(fsCollection(firebaseDb, 'businesses'), {
           ownerId: firebaseAuthUser.uid,
@@ -287,12 +287,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           updatedAt: serverTimestamp(),
         });
 
-        // Salvar businessId no documento do usuÃ¡rio
+        // Salvar businessId no documento do usuário
         await updateDoc(doc(firebaseDb, 'users', firebaseAuthUser.uid), {
           businessId: businessRef.id,
         });
 
-        // Criar documento na coleÃ§Ã£o 'owners' com referÃªncia ao negÃ³cio
+        // Criar documento na coleção 'owners' com referÃªncia ao negócio
         const ownerDocRef = doc(firebaseDb, 'owners', firebaseAuthUser.uid);
         await setDoc(ownerDocRef, {
           userId: firebaseAuthUser.uid,
@@ -326,9 +326,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const err = error as { code: string };
       let errorMessage = 'Ocorreu um erro durante o cadastro.';
       if (err.code === 'auth/email-already-in-use') {
-        errorMessage = 'Este e-mail jÃ¡ estÃ¡ em uso. Tente outro ou faÃ§a login.';
+        errorMessage = 'Este e-mail já está em uso. Tente outro ou faça login.';
       } else if (err.code === 'auth/invalid-email') {
-        errorMessage = 'E-mail invÃ¡lido. Verifique o formato.';
+        errorMessage = 'E-mail inválido. Verifique o formato.';
       } else if (err.code === 'auth/weak-password') {
         errorMessage = 'Senha muito fraca. Use pelo menos 6 caracteres.';
       }
@@ -374,14 +374,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
       }
     } catch (error) {
-      console.error("Erro ao recarregar usuÃ¡rio:", error);
+      console.error("Erro ao recarregar usuário:", error);
     }
   };
 
   const reauthenticate = async (password: string) => {
     const firebaseAuthUser = firebaseAuth.currentUser;
     if (!firebaseAuthUser || !firebaseAuthUser.email) {
-      throw new Error('UsuÃ¡rio nÃ£o encontrado ou sem e-mail para reautenticar.');
+      throw new Error('Usuário não encontrado ou sem e-mail para reautenticar.');
     }
     const credential = EmailAuthProvider.credential(firebaseAuthUser.email, password);
     try {
@@ -397,7 +397,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updateUserProfile = async (data: UpdateProfileData) => {
     const firebaseAuthUser = firebaseAuth.currentUser;
-    if (!firebaseAuthUser) throw new Error('UsuÃ¡rio nÃ£o autenticado.');
+    if (!firebaseAuthUser) throw new Error('Usuário não autenticado.');
 
     try {
       let photoURL = data.photoURL;
@@ -434,7 +434,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       const err = error as { code: string; message: string };
       if (err.code === 'auth/requires-recent-login') {
-        throw new Error('Esta operaÃ§Ã£o Ã© sensÃ­vel e requer autenticaÃ§Ã£o recente. Por favor, faÃ§a login novamente.');
+        throw new Error('Esta operação é sensível e requer autenticação recente. Por favor, faça login novamente.');
       }
       throw new Error(`Erro ao atualizar o perfil: ${err.message || 'Causa desconhecida'}`);
     }
@@ -442,13 +442,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updateUserPassword = async (password: string) => {
     const firebaseAuthUser = firebaseAuth.currentUser;
-    if (!firebaseAuthUser) throw new Error('UsuÃ¡rio nÃ£o autenticado.');
+    if (!firebaseAuthUser) throw new Error('Usuário não autenticado.');
     try {
       await updatePassword(firebaseAuthUser, password);
     } catch (error) {
       const err = error as { code: string };
       if (err.code === 'auth/requires-recent-login') {
-        throw new Error('Esta operaÃ§Ã£o Ã© sensÃ­vel e requer autenticaÃ§Ã£o recente. Por favor, faÃ§a login novamente.');
+        throw new Error('Esta operação é sensível e requer autenticação recente. Por favor, faça login novamente.');
       }
       throw new Error('Erro ao atualizar a senha.');
     }
@@ -456,11 +456,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const sendVerificationEmail = async () => {
     const firebaseAuthUser = firebaseAuth.currentUser;
-    if (!firebaseAuthUser) throw new Error('UsuÃ¡rio nÃ£o autenticado.');
+    if (!firebaseAuthUser) throw new Error('Usuário não autenticado.');
     try {
       await sendEmailVerification(firebaseAuthUser);
     } catch {
-      throw new Error('Erro ao enviar e-mail de verificaÃ§Ã£o.');
+      throw new Error('Erro ao enviar e-mail de verificação.');
     }
   };
 

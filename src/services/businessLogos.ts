@@ -13,11 +13,11 @@ class BusinessLogosService {
   private downloadingLogos: Set<string> = new Set();
 
   /**
-   * Testa a conexÃ£o com o Firebase Storage
+   * Testa a conexão com o Firebase Storage
    */
   async testStorageConnection(): Promise<boolean> {
     try {
-      console.log('ðŸ”¥ Testando conexÃ£o com Firebase Storage...');
+      console.log('ðŸ”¥ Testando conexão com Firebase Storage...');
 
       // Tenta listar uma pasta para verificar conectividade
       const businessesRef = storageRef(firebaseStorage, 'businesses');
@@ -34,7 +34,7 @@ class BusinessLogosService {
   }
 
   /**
-   * Busca o logo de um business especÃ­fico
+   * Busca o logo de um business específico
    */
   async getBusinessLogo(businessId: string): Promise<BusinessLogo | null> {
     try {
@@ -45,7 +45,7 @@ class BusinessLogosService {
         return cachedLogo;
       }
 
-      // Evita mÃºltiplas requisiÃ§Ãµes simultÃ¢neas para o mesmo business
+      // Evita múltiplas requisiçÃµes simultÃ¢neas para o mesmo business
       if (this.downloadingLogos.has(businessId)) {
         console.log(`â³ Aguardando download do logo do business ${businessId}...`);
         return null;
@@ -58,7 +58,7 @@ class BusinessLogosService {
       const businessRef = storageRef(firebaseStorage, `businesses/${businessId}`);
       const listResult = await listAll(businessRef);
 
-      // Procura por arquivos que comeÃ§am com "logo_"
+      // Procura por arquivos que começam com "logo_"
       const logoFiles = listResult.items.filter(item =>
         item.name.startsWith('logo_') &&
         (item.name.endsWith('.jpg') || item.name.endsWith('.jpeg') || item.name.endsWith('.png'))
@@ -70,7 +70,7 @@ class BusinessLogosService {
         return null;
       }
 
-      // Pega o primeiro logo encontrado (ou o mais recente se houver lÃ³gica de ordenaÃ§Ã£o)
+      // Pega o primeiro logo encontrado (ou o mais recente se houver lógica de ordenação)
       const logoFile = logoFiles[0];
       const downloadUrl = await getDownloadURL(logoFile);
 
@@ -103,7 +103,7 @@ class BusinessLogosService {
   }
 
   /**
-   * Busca logos de mÃºltiplos businesses
+   * Busca logos de múltiplos businesses
    */
   async getMultipleBusinessLogos(businessIds: string[]): Promise<Map<string, BusinessLogo>> {
     console.log(`ðŸ” Buscando logos para ${businessIds.length} businesses...`);
@@ -138,7 +138,7 @@ class BusinessLogosService {
   }
 
   /**
-   * Retorna estatÃ­sticas do cache
+   * Retorna estatísticas do cache
    */
   getCacheStats(): { size: number; businesses: string[] } {
     return {

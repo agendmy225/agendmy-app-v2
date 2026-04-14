@@ -11,11 +11,11 @@ export const useCachedFirebaseImage = (storagePath: string | null | undefined) =
 
     const loadImage = async () => {
       if (!storagePath || storagePath.includes('placeholder')) {
-        console.warn('âš ï¸ StoragePath invÃ¡lido ou placeholder:', storagePath);
+        console.warn('âš ï¸ StoragePath inválido ou placeholder:', storagePath);
         if (isMounted) {
           setImageSource(null);
           setLoading(false);
-          setError('Caminho de storage invÃ¡lido');
+          setError('Caminho de storage inválido');
         }
         return;
       }
@@ -28,7 +28,7 @@ export const useCachedFirebaseImage = (storagePath: string | null | undefined) =
         
         console.log('ðŸ”„ HOOK - Carregando imagem REDIMENSIONADA:', storagePath);
         
-        // Usar o serviÃ§o de cache NOVO com redimensionamento real
+        // Usar o serviço de cache NOVO com redimensionamento real
         const cachedImageBase64 = await imageCacheService.getImage(storagePath);
         
         if (isMounted) {

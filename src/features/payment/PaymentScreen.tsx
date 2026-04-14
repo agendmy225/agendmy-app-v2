@@ -33,7 +33,7 @@ const PaymentScreen: React.FC = () => {
   const [pixPollingActive, setPixPollingActive] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Campos do cartÃ£o
+  // Campos do cartão
   const [cardNumber, setCardNumber] = useState('');
   const [cardHolder, setCardHolder] = useState('');
   const [expiry, setExpiry] = useState('');
@@ -84,7 +84,7 @@ const PaymentScreen: React.FC = () => {
   };
 
   const handlePayPix = async () => {
-    if (!user?.email) { Alert.alert('Erro', 'E-mail nÃ£o encontrado.'); return; }
+    if (!user?.email) { Alert.alert('Erro', 'E-mail não encontrado.'); return; }
     setIsLoading(true);
     try {
       const result = await createPixPayment(appointmentId, amountInCents, description, user.email);
@@ -98,12 +98,12 @@ const PaymentScreen: React.FC = () => {
   };
 
   const handlePayCard = async () => {
-    if (!validateCardNumber(cardNumber)) { Alert.alert('Erro', 'NÃºmero do cartÃ£o invÃ¡lido.'); return; }
-    if (!cardHolder.trim()) { Alert.alert('Erro', 'Nome no cartÃ£o obrigatÃ³rio.'); return; }
-    if (expiry.length < 5) { Alert.alert('Erro', 'Validade invÃ¡lida.'); return; }
-    if (cvv.length < 3) { Alert.alert('Erro', 'CVV invÃ¡lido.'); return; }
-    if (cpf.replace(/\D/g, '').length < 11) { Alert.alert('Erro', 'CPF invÃ¡lido.'); return; }
-    if (!user?.email) { Alert.alert('Erro', 'E-mail nÃ£o encontrado.'); return; }
+    if (!validateCardNumber(cardNumber)) { Alert.alert('Erro', 'Número do cartão inválido.'); return; }
+    if (!cardHolder.trim()) { Alert.alert('Erro', 'Nome no cartão obrigatório.'); return; }
+    if (expiry.length < 5) { Alert.alert('Erro', 'Validade inválida.'); return; }
+    if (cvv.length < 3) { Alert.alert('Erro', 'CVV inválido.'); return; }
+    if (cpf.replace(/\D/g, '').length < 11) { Alert.alert('Erro', 'CPF inválido.'); return; }
+    if (!user?.email) { Alert.alert('Erro', 'E-mail não encontrado.'); return; }
 
     const [expMonth, expYear] = expiry.split('/');
     const cardData: CardData = {
@@ -153,7 +153,7 @@ const PaymentScreen: React.FC = () => {
 
           {isPending && paymentResult.pixQrCode && (
             <View style={styles.pixContainer}>
-              <Text style={styles.pixInstruction}>Escaneie o QR Code ou copie o cÃ³digo Pix</Text>
+              <Text style={styles.pixInstruction}>Escaneie o QR Code ou copie o código Pix</Text>
               {paymentResult.pixQrCodeBase64 && (
                 <Image
                   source={{ uri: `data:image/png;base64,${paymentResult.pixQrCodeBase64}` }}
@@ -166,27 +166,27 @@ const PaymentScreen: React.FC = () => {
                 onPress={() => {
                   const Clipboard = require('@react-native-clipboard/clipboard').default;
                   Clipboard.setString(paymentResult.pixQrCode!);
-                  Alert.alert('Copiado!', 'CÃ³digo Pix copiado para a Ã¡rea de transferÃªncia.');
+                  Alert.alert('Copiado!', 'Código Pix copiado para a área de transferÃªncia.');
                 }}
               >
                 <Icon name="content-copy" size={18} color={colors.white} />
-                <Text style={styles.pixCopyText}>Copiar cÃ³digo Pix</Text>
+                <Text style={styles.pixCopyText}>Copiar código Pix</Text>
               </TouchableOpacity>
               {paymentResult.pixExpirationDate && (
                 <Text style={styles.pixExpiry}>
-                  VÃ¡lido atÃ©: {new Date(paymentResult.pixExpirationDate).toLocaleString('pt-BR')}
+                  Válido até: {new Date(paymentResult.pixExpirationDate).toLocaleString('pt-BR')}
                 </Text>
               )}
               <View style={styles.pollingIndicator}>
                 <ActivityIndicator size="small" color={colors.primary} />
-                <Text style={styles.pollingText}>Aguardando confirmaÃ§Ã£o do pagamento...</Text>
+                <Text style={styles.pollingText}>Aguardando confirmação do pagamento...</Text>
               </View>
             </View>
           )}
 
           {isApproved && (
             <Text style={styles.approvedMsg}>
-              Seu agendamento estÃ¡ confirmado! VocÃª receberÃ¡ uma notificaÃ§Ã£o de lembrete.
+              Seu agendamento está confirmado! VocÃª receberá uma notificação de lembrete.
             </Text>
           )}
 
@@ -203,7 +203,7 @@ const PaymentScreen: React.FC = () => {
     );
   }
 
-  // â”€â”€ FormulÃ¡rio de pagamento â”€â”€
+  // â”€â”€ Formulário de pagamento â”€â”€
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -221,9 +221,9 @@ const PaymentScreen: React.FC = () => {
           <Text style={styles.summaryAmount}>{formatAmount(amountInCents)}</Text>
         </View>
 
-        {/* Abas de mÃ©todo */}
+        {/* Abas de método */}
         <View style={styles.tabRow}>
-          {([['pix', 'Pix', 'qr-code-2'], ['credit', 'CrÃ©dito', 'credit-card'], ['debit', 'DÃ©bito', 'payment']] as const).map(
+          {([['pix', 'Pix', 'qr-code-2'], ['credit', 'Crédito', 'credit-card'], ['debit', 'Débito', 'payment']] as const).map(
             ([key, label, icon]) => (
               <TouchableOpacity
                 key={key}
@@ -243,10 +243,10 @@ const PaymentScreen: React.FC = () => {
               <Icon name="qr-code-2" size={48} color={colors.primary} />
               <Text style={styles.pixInfoTitle}>Pagar com Pix</Text>
               <Text style={styles.pixInfoText}>
-                Ao confirmar, um QR Code Pix serÃ¡ gerado. Escaneie com o app do seu banco para pagar instantaneamente.
+                Ao confirmar, um QR Code Pix será gerado. Escaneie com o app do seu banco para pagar instantaneamente.
               </Text>
               <View style={styles.pixBenefits}>
-                {['AprovaÃ§Ã£o instantÃ¢nea', 'Sem taxas adicionais', 'DisponÃ­vel 24h'].map(t => (
+                {['Aprovação instantÃ¢nea', 'Sem taxas adicionais', 'Disponível 24h'].map(t => (
                   <View key={t} style={styles.pixBenefit}>
                     <Icon name="check" size={16} color={colors.success} />
                     <Text style={styles.pixBenefitText}>{t}</Text>
@@ -258,10 +258,10 @@ const PaymentScreen: React.FC = () => {
             <>
               <View style={styles.cardPreview}>
                 <Icon name="credit-card" size={24} color={colors.lightText} />
-                <Text style={styles.cardBrandText}>{cardBrand || 'CartÃ£o'}</Text>
+                <Text style={styles.cardBrandText}>{cardBrand || 'Cartão'}</Text>
               </View>
 
-              <Text style={styles.fieldLabel}>NÃºmero do cartÃ£o</Text>
+              <Text style={styles.fieldLabel}>Número do cartão</Text>
               <TextInput
                 style={styles.input}
                 value={cardNumber}
@@ -272,12 +272,12 @@ const PaymentScreen: React.FC = () => {
                 maxLength={19}
               />
 
-              <Text style={styles.fieldLabel}>Nome no cartÃ£o</Text>
+              <Text style={styles.fieldLabel}>Nome no cartão</Text>
               <TextInput
                 style={styles.input}
                 value={cardHolder}
                 onChangeText={setCardHolder}
-                placeholder="Como estÃ¡ no cartÃ£o"
+                placeholder="Como está no cartão"
                 placeholderTextColor={colors.placeholderText}
                 autoCapitalize="characters"
               />

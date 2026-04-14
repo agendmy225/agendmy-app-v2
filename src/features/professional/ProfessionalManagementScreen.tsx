@@ -39,7 +39,7 @@ const ProfessionalManagementScreen: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
 
-  // Estado para o modal de adiÃ§Ã£o/ediÃ§Ã£o de profissional
+  // Estado para o modal de adição/edição de profissional
   const [modalVisible, setModalVisible] = useState(false);
   const [editingProfessional, setEditingProfessional] = useState<Professional | null>(null);
   const [professionalName, setProfessionalName] = useState('');
@@ -71,7 +71,7 @@ const ProfessionalManagementScreen: React.FC = () => {
         setLoading(false);
       }
     } catch (error) {
-      console.error("Erro ao buscar ID do negÃ³cio:", error);
+      console.error("Erro ao buscar ID do negócio:", error);
       setLoading(false);
     }
   }, [user]);
@@ -144,14 +144,14 @@ const ProfessionalManagementScreen: React.FC = () => {
       await signOut();
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      Alert.alert('Erro', 'NÃ£o foi possÃ­vel fazer logout. Tente novamente.');
+      Alert.alert('Erro', 'Não foi possível fazer logout. Tente novamente.');
     }
   };
 
   const handleImageSelection = async (type: 'profile' | 'portfolio') => {
     const storagePath = `professional_images/${user?.uid}/${Date.now()}.jpg`;
 
-    showImagePickerDialog(`Selecionar Imagem ${type === 'profile' ? 'de Perfil' : 'do PortfÃ³lio'}`, async () => {
+    showImagePickerDialog(`Selecionar Imagem ${type === 'profile' ? 'de Perfil' : 'do Portfólio'}`, async () => {
       try {
         setIsUploading(true);
         const result = await selectAndUploadImage({ storageKey: storagePath });
@@ -198,11 +198,11 @@ const ProfessionalManagementScreen: React.FC = () => {
 
   const saveProfessional = async () => {
     if (!professionalName || !professionalSpecialty) {
-      Alert.alert('Erro de ValidaÃ§Ã£o', 'Nome e Especialidade sÃ£o campos obrigatÃ³rios.');
+      Alert.alert('Erro de Validação', 'Nome e Especialidade são campos obrigatórios.');
       return;
     }
     if (!businessId) {
-      Alert.alert('Erro CrÃ­tico', 'O estabelecimento nÃ£o foi identificado. NÃ£o Ã© possÃ­vel salvar.');
+      Alert.alert('Erro Crítico', 'O estabelecimento não foi identificado. Não é possível salvar.');
       return;
     }
 
@@ -237,7 +237,7 @@ const ProfessionalManagementScreen: React.FC = () => {
       fetchProfessionals();
     } catch (error) {
       console.error("Erro ao salvar profissional:", error);
-      Alert.alert('Erro', 'NÃ£o foi possÃ­vel salvar o profissional.');
+      Alert.alert('Erro', 'Não foi possível salvar o profissional.');
     } finally {
       setIsUploading(false);
     }
@@ -251,17 +251,17 @@ const ProfessionalManagementScreen: React.FC = () => {
       fetchProfessionals();
     } catch (error) {
       console.error("Erro ao alterar status do profissional:", error);
-      Alert.alert('Erro', 'NÃ£o foi possÃ­vel alterar o status do profissional.');
+      Alert.alert('Erro', 'Não foi possível alterar o status do profissional.');
     }
   };
 
   const deleteProfessional = async (id: string) => {
     if (!businessId) {
-      Alert.alert('Erro', 'Estabelecimento nÃ£o identificado.');
+      Alert.alert('Erro', 'Estabelecimento não identificado.');
       return;
     }
     Alert.alert(
-      'Confirmar ExclusÃ£o',
+      'Confirmar Exclusão',
       'Tem certeza que deseja excluir este profissional?',
       [
         { text: 'Cancelar', style: 'cancel' },
@@ -272,11 +272,11 @@ const ProfessionalManagementScreen: React.FC = () => {
             try {
               const professionalRef = doc(firestore, 'professionals', id);
               await deleteDoc(professionalRef);
-              Alert.alert('Sucesso', 'Profissional excluÃ­do com sucesso!');
+              Alert.alert('Sucesso', 'Profissional excluído com sucesso!');
               fetchProfessionals();
             } catch (error) {
               console.error("Erro ao excluir profissional:", error);
-              Alert.alert('Erro', 'NÃ£o foi possÃ­vel excluir o profissional.');
+              Alert.alert('Erro', 'Não foi possível excluir o profissional.');
             }
           },
         },
@@ -413,7 +413,7 @@ const ProfessionalManagementScreen: React.FC = () => {
 
               <TextInput
                 style={styles.input}
-                placeholder="DescriÃ§Ã£o (fale sobre o profissional)"
+                placeholder="Descrição (fale sobre o profissional)"
                 value={professionalBio}
                 onChangeText={setProfessionalBio}
                 multiline
@@ -433,7 +433,7 @@ const ProfessionalManagementScreen: React.FC = () => {
                 </View>
               ) : null}
 
-              <Button title="Adicionar Imagem ao PortfÃ³lio" onPress={() => handleImageSelection('portfolio')} disabled={isUploading} />
+              <Button title="Adicionar Imagem ao Portfólio" onPress={() => handleImageSelection('portfolio')} disabled={isUploading} />
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.portfolioScrollView}>
                 {portfolioImages.map((uri, index) => (
                   <View key={index} style={styles.portfolioImageContainer}>
@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   modalContent: {
-    // O ScrollView interno cuidarÃ¡ da rolagem
+    // O ScrollView interno cuidará da rolagem
   },
   modalTitle: {
     fontSize: 20,

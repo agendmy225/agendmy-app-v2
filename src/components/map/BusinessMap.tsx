@@ -11,7 +11,7 @@ import {
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useMarkerImage } from '../../hooks/useMarkerImage';
 import { businessLogosService } from '../../services/businessLogos';
-import { BusinessLocationIconMarker } from './BusinessLocationIconMarker'; // Marcador com Ã­cones para BusinessLocation
+import { BusinessLocationIconMarker } from './BusinessLocationIconMarker'; // Marcador com ícones para BusinessLocation
 
 interface BusinessLocation {
   businessId: string;
@@ -19,7 +19,7 @@ interface BusinessLocation {
   latitude: number;
   longitude: number;
   description?: string;
-  category?: string; // Adicionado para suportar Ã­cones por categoria
+  category?: string; // Adicionado para suportar ícones por categoria
 }
 
 interface BusinessMapProps {
@@ -110,7 +110,7 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
 
       const message = isConnected
         ? 'Firebase Storage conectado com sucesso!'
-        : 'Falha na conexÃ£o com Firebase Storage';
+        : 'Falha na conexão com Firebase Storage';
 
       console.log(message);
 
@@ -138,7 +138,7 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
   };
 
   /**
-   * Executa teste automÃ¡tico ao montar o componente
+   * Executa teste automático ao montar o componente
    */
   useEffect(() => {
     testStorageConnection();
