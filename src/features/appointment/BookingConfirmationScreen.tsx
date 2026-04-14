@@ -82,7 +82,7 @@ const BookingConfirmationScreen: React.FC = () => {
 
         // Set a timeout to prevent infinite loading
         const timeoutId = setTimeout(() => {
-          console.error('࢏° [BookingConfirmation] Timeout ao carregar dados');
+          console.error('ϰ [BookingConfirmation] Timeout ao carregar dados');
           setLoading(false);
           Alert.alert('Erro', 'Tempo limite excedido ao carregar dados. Tente novamente.');
         }, 15000); // 15 seconds timeout

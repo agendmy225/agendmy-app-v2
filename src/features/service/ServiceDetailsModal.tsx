@@ -16,7 +16,7 @@ type ProfessionalType = {
   specialty: string;
   rating: number;
   image: string;
-  services?: string[]; // IDs dos serviços que o profissional realiza
+  services?: string[];
 };
 
 type ServiceDetailsModalProps = {
@@ -46,18 +46,13 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
   const [filteredProfessionals, setFilteredProfessionals] = useState<ProfessionalType[]>([]);
 
   useEffect(() => {
-    // Filtrar profissionais que podem realizar este serviço
     const filtered = professionals.filter(professional => {
-      // Se o profissional não tem serviços definidos, ele pode realizar todos os serviços
       if (!professional.services || professional.services.length === 0) {
         return true;
       }
-      // Caso contrário, verificar se o serviço está na lista de serviços do profissional
       return professional.services.includes(service.id);
     });
     setFilteredProfessionals(filtered);
-
-    // Resetar seleção quando o modal abre ou o serviço muda
     setSelectedProfessional(null);
   }, [service.id, professionals]);
 
@@ -84,7 +79,7 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
           <Text style={styles.professionalName}>{professional.name}</Text>
           <Text style={styles.professionalSpecialty}>{professional.specialty}</Text>
           <View style={styles.ratingContainer}>
-            <Text style={styles.ratingIcon}>{'ࢭ'}</Text>
+            <Text style={styles.ratingIcon}>{'⭐'}</Text>
             <Text style={styles.ratingText}>{professional.rating.toFixed(1)}</Text>
           </View>
         </View>
@@ -107,7 +102,7 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Detalhes do Serviço</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>âœ•</Text>
+              <Text style={styles.closeButtonText}>✕</Text>
             </TouchableOpacity>
           </View>
 
@@ -126,15 +121,15 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
 
               <View style={styles.serviceInfo}>
                 <View style={styles.infoItem}>
-                  <Text style={styles.infoIcon}>{'࢏±௸'}</Text>
+                  <Text style={styles.infoIcon}>{'⏱️'}</Text>
                   <Text style={styles.infoText}>{service.duration}</Text>
                 </View>
                 <View style={styles.infoItem}>
-                  <Text style={styles.infoIcon}>{'ðŸ’°'}</Text>
+                  <Text style={styles.infoIcon}>{'💰'}</Text>
                   <Text style={styles.infoText}>{'R$ '}{service.price.toFixed(2)}</Text>
                 </View>
                 <View style={styles.infoItem}>
-                  <Text style={styles.infoIcon}>{'ðŸ·௸'}</Text>
+                  <Text style={styles.infoIcon}>{'🏷️'}</Text>
                   <Text style={styles.infoText}>{service.category}</Text>
                 </View>
               </View>

@@ -47,7 +47,7 @@ class ImageCacheService {
       // Verificar se o cache expirou
       const age = Date.now() - cacheEntry.timestamp;
       if (age > CACHE_EXPIRATION) {
-        console.log('࢏° Cache expirado, removendo:', storagePath);
+        console.log('ϰ Cache expirado, removendo:', storagePath);
         await AsyncStorage.removeItem(cacheKey);
         return null;
       }

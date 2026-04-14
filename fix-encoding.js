@@ -1,99 +1,92 @@
 const fs = require('fs');
 const path = require('path');
 
+function decodeDoubleUTF8(buf) {
+  // Try to decode as latin1 then re-encode as UTF-8
+  const latin1 = buf.toString('latin1');
+  try {
+    // Check if this is double-encoded UTF-8
+    const decoded = Buffer.from(latin1, 'latin1');
+    const utf8 = decoded.toString('utf8');
+    if (!utf8.includes('\uFFFD')) {
+      return utf8;
+    }
+  } catch(e) {}
+  return buf.toString('utf8');
+}
+
 function fixFile(filePath) {
   const buf = fs.readFileSync(filePath);
+  const latin1str = buf.toString('latin1');
+  
+  // Try to re-decode as UTF-8
+  const rebuf = Buffer.from(latin1str, 'latin1');
+  const decoded = rebuf.toString('utf8');
+  
+  // Check if decoded version has fewer replacement chars
+  const originalBadChars = (buf.toString('utf8').match(/\uFFFD/g) || []).length;
+  const decodedBadChars = (decoded.match(/\uFFFD/g) || []).length;
+  
+  // Check if file has problematic patterns
+  const originalUtf8 = buf.toString('utf8');
+  
+  // Fix common double-encoded Portuguese characters
+  let fixed = originalUtf8;
+  
+  // These are the actual UTF-8 strings that appear in the file when read as utf8
+  // but were originally double-encoded
+  const replacements = [
+    // 2-byte chars encoded twice (most common Portuguese)
+    ['\u00c3\u00a3', 'ã'],  // ã
+    ['\u00c3\u00a7', 'ç'],  // ç  
+    ['\u00c3\u00a1', 'á'],  // á
+    ['\u00c3\u00a9', 'é'],  // é
+    ['\u00c3\u00aa', 'ê'],  // ê
+    ['\u00c3\u00b3', 'ó'],  // ó
+    ['\u00c3\u00ba', 'ú'],  // ú
+    ['\u00c3\u00ad', 'í'],  // í
+    ['\u00c3\u00a0', 'à'],  // à
+    ['\u00c3\u00a2', 'â'],  // â
+    ['\u00c3\u00b4', 'ô'],  // ô
+    ['\u00c3\u00b5', 'õ'],  // õ
+    ['\u00c3\u0089', 'É'],  // É
+    ['\u00c3\u0093', 'Ó'],  // Ó
+    ['\u00c3\u0094', 'Ô'],  // Ô
+    ['\u00c3\u0095', 'Õ'],  // Õ
+    ['\u00c3\u0087', 'Ç'],  // Ç
+    ['\u00c3\u0081', 'Á'],  // Á
+    ['\u00c3\u008d', 'Í'],  // Í
+    // 3-byte emoji encoded twice
+    ['\u00e2\u00ad\u0090', '⭐'],  // ⭐
+    ['\u00e2\u0098\u0085', '★'],   // ★
+    ['\u00e2\u0098\u0086', '☆'],   // ☆
+    ['\u00e2\u009c\u0093', '✓'],   // ✓
+    ['\u00e2\u009c\u0094', '✔'],   // ✔
+    ['\u00e2\u009d\u00a4', '❤'],   // ❤
+    ['\u00e2\u0080\u009c', '\u201c'],  // "
+    ['\u00e2\u0080\u009d', '\u201d'],  // "
+    ['\u00e2\u0080\u0099', '\u2019'],  // '
+    ['\u00e2\u0080\u00a2', '\u2022'],  // •
+    ['\u00e2\u0080\u0093', '-'],        // –
+    ['\u00e2\u0080\u0094', '-'],        // —
+    // timer emoji
+    ['\u00e2\u00b1\u00ef\u00b8', '⏱'],  // ⏱
+    // check mark
+    ['\u00c3\u00a2\u00e2\u0082\u00ac\u00a2', '•'],
+    // star
+    ['\u00c3\u00a2\u00c2\u00ad\u00c2\u0090', '⭐'],
+  ];
+  
   let changed = false;
-  
-  // Convert buffer to array of bytes for processing
-  const bytes = [];
-  for (let i = 0; i < buf.length; i++) {
-    bytes.push(buf[i]);
-  }
-  
-  const result = [];
-  let i = 0;
-  
-  while (i < bytes.length) {
-    // Check for double-encoded UTF-8 sequences (0xC3 followed by 0x82 or 0x83)
-    // Pattern: C3 A2 + 2 more bytes = double-encoded 3-byte UTF-8
-    if (bytes[i] === 0xC3 && bytes[i+1] === 0xA2 && i+3 < bytes.length) {
-      // This is â (U+00E2) double-encoded, likely an emoji
-      // Get the next two bytes to determine the original character
-      const b2 = bytes[i+2];
-      const b3 = bytes[i+3];
-      
-      if (b2 === 0xC2 && b3 === 0xAD && i+5 < bytes.length) {
-        // â­ = star emoji area
-        const b4 = bytes[i+4];
-        if (b4 === 0x90) {
-          // ⭐ U+2B50
-          result.push(0xE2, 0xAD, 0x90);
-          i += 5;
-          changed = true;
-          continue;
-        }
-      }
-      if (b2 === 0xC2 && b3 === 0xB1) {
-        // â± = timer
-        if (bytes[i+4] === 0xC2 && bytes[i+5] === 0xAF && bytes[i+6] === 0xC2 && bytes[i+7] === 0xB8) {
-          // ⏱️
-          result.push(0xE2, 0xB1, 0xAF, 0xB8);
-          i += 8;
-          changed = true;
-          continue;
-        }
-      }
-      if (b2 === 0xC2 && b3 === 0x98) {
-        const b4 = bytes[i+4];
-        if (b4 === 0x85) { result.push(0xE2, 0x98, 0x85); i+=5; changed=true; continue; } // ★
-        if (b4 === 0x86) { result.push(0xE2, 0x98, 0x86); i+=5; changed=true; continue; } // ☆
-      }
-      if (b2 === 0xC2 && b3 === 0x9C) {
-        const b4 = bytes[i+4];
-        if (b4 === 0x93) { result.push(0xE2, 0x9C, 0x93); i+=5; changed=true; continue; } // ✓
-        if (b4 === 0x94) { result.push(0xE2, 0x9C, 0x94); i+=5; changed=true; continue; } // ✔
-      }
-      if (b2 === 0xC2 && b3 === 0x80) {
-        const b4 = bytes[i+4];
-        if (b4 === 0x9C) { result.push(0xE2, 0x80, 0x9C); i+=5; changed=true; continue; } // "
-        if (b4 === 0x9D) { result.push(0xE2, 0x80, 0x9D); i+=5; changed=true; continue; } // "
-        if (b4 === 0x99) { result.push(0xE2, 0x80, 0x99); i+=5; changed=true; continue; } // '
-        if (b4 === 0xA2) { result.push(0xE2, 0x80, 0xA2); i+=5; changed=true; continue; } // •
-        if (b4 === 0x93) { result.push(0x2D); i+=5; changed=true; continue; } // -
-        if (b4 === 0x94) { result.push(0x2D); i+=5; changed=true; continue; } // -
-      }
+  for (const [bad, good] of replacements) {
+    if (fixed.includes(bad)) {
+      fixed = fixed.split(bad).join(good);
+      changed = true;
     }
-    
-    // Check for double-encoded 2-byte sequences (C3 + byte)
-    if (bytes[i] === 0xC3 && i+1 < bytes.length) {
-      const b2 = bytes[i+1];
-      // These are already single-byte encoded chars that got double-encoded
-      if (b2 >= 0x80 && b2 <= 0xBF) {
-        // Check if next byte is C2 (another double-encoding indicator)
-        if (bytes[i+2] === 0xC2 && i+3 < bytes.length) {
-          const b3 = bytes[i+3];
-          // This is a double-encoded 2-byte UTF-8 sequence
-          // Original char code = ((b2 & 0x3F) << 6) | (b3 & 0x3F)
-          const charCode = ((b2 & 0x3F) << 6) | (b3 & 0x3F);
-          if (charCode > 0x7F) {
-            const str = String.fromCodePoint(charCode);
-            const encoded = Buffer.from(str, 'utf8');
-            for (const byte of encoded) result.push(byte);
-            i += 4;
-            changed = true;
-            continue;
-          }
-        }
-      }
-    }
-    
-    result.push(bytes[i]);
-    i++;
   }
   
   if (changed) {
-    fs.writeFileSync(filePath, Buffer.from(result));
+    fs.writeFileSync(filePath, fixed, 'utf8');
     return true;
   }
   return false;

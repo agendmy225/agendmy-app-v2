@@ -47,7 +47,7 @@ class BusinessLogosService {
 
       // Evita múltiplas requisições simultâneas para o mesmo business
       if (this.downloadingLogos.has(businessId)) {
-        console.log(`࢏³ Aguardando download do logo do business ${businessId}...`);
+        console.log(`ϳ Aguardando download do logo do business ${businessId}...`);
         return null;
       }
 
