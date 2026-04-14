@@ -61,7 +61,7 @@ export const uploadImageToFirebase = async (
       throw new Error('Usuário não autenticado');
     }
 
-    // Criar referÃªncia no Firebase Storage
+    // Criar referência no Firebase Storage
     const storageRef = ref(storage, storageKey);
 
     // Converter URI para Blob
@@ -148,7 +148,7 @@ export const deleteImageFromFirebase = async (
       return;
     }
 
-    // A referÃªncia pode ser criada diretamente do caminho do storage
+    // A referência pode ser criada diretamente do caminho do storage
     const reference = ref(storage, imageUrl);
     await deleteObject(reference);
   } catch (error: unknown) {

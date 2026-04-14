@@ -38,7 +38,7 @@ const CreateBusinessCard: React.FC<CreateBusinessCardProps> = ({ onBusinessCreat
 
       Alert.alert(
         'Sucesso!',
-        `Seu negócio "${businessName}" foi criado com sucesso. VocÃª pode editá-lo nas configuraçÃµes.`,
+        `Seu negócio "${businessName}" foi criado com sucesso. Você pode editá-lo nas configurações.`,
         [
           {
             text: 'OK',
@@ -64,7 +64,7 @@ const CreateBusinessCard: React.FC<CreateBusinessCardProps> = ({ onBusinessCreat
         </View>
         <Text style={styles.title}>Criar Novo Negócio</Text>
         <Text style={styles.description}>
-          VocÃª ainda não possui um negócio associado Ã  sua conta. Crie um agora para começar a gerenciar seus serviços e agendamentos.
+          Você ainda não possui um negócio associado à sua conta. Crie um agora para começar a gerenciar seus serviços e agendamentos.
         </Text>
         <TouchableOpacity
           style={[styles.button, creating && styles.buttonDisabled]}

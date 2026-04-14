@@ -21,7 +21,7 @@ interface ReviewScreenParams {
   serviceId: string | null; // Allow null for general business reviews
   professionalId?: string;
   professionalName?: string;
-  appointmentId?: string; // Tornar opcional para permitir avaliaçÃµes gerais
+  appointmentId?: string; // Tornar opcional para permitir avaliações gerais
 }
 
 const ReviewScreen: React.FC = () => {
@@ -90,7 +90,7 @@ const ReviewScreen: React.FC = () => {
       await addReview({
         businessId,
         userId: user?.uid || 'anonymous',
-        userName: user?.displayName || user?.email?.split('@')[0] || 'Usuário AnÃ´nimo',
+        userName: user?.displayName || user?.email?.split('@')[0] || 'Usuário Anônimo',
         serviceId: serviceId || undefined, // Allow undefined for general business reviews
         professionalId,
         professionalName,
@@ -133,7 +133,7 @@ const ReviewScreen: React.FC = () => {
           <View style={styles.headerSpacer} />
         </View>
 
-        {/* InformaçÃµes do serviço */}
+        {/* Informações do serviço */}
         <View style={styles.serviceInfo}>
           <Icon name="business" size={24} color={colors.primary} />
           <View style={styles.serviceDetails}>
@@ -146,7 +146,7 @@ const ReviewScreen: React.FC = () => {
 
         {/* Avaliação por estrelas */}
         <View style={styles.ratingSection}>
-          <Text style={styles.sectionTitle}>Como foi sua experiÃªncia?</Text>
+          <Text style={styles.sectionTitle}>Como foi sua experiência?</Text>
           <View style={styles.starsContainer}>
             {renderStars()}
           </View>
@@ -155,7 +155,7 @@ const ReviewScreen: React.FC = () => {
 
         {/* Comentário */}
         <View style={styles.commentSection}>
-          <Text style={styles.sectionTitle}>Conte-nos mais sobre sua experiÃªncia</Text>
+          <Text style={styles.sectionTitle}>Conte-nos mais sobre sua experiência</Text>
           <TextInput
             style={styles.commentInput}
             placeholder="Escreva seu comentário aqui... (mínimo 10 caracteres)"
@@ -172,10 +172,10 @@ const ReviewScreen: React.FC = () => {
         {/* Dicas */}
         <View style={styles.tipsSection}>
           <Text style={styles.tipsTitle}>ðŸ’¡ Dicas para uma boa avaliação:</Text>
-          <Text style={styles.tip}>â€¢ Seja específico sobre o que gostou ou não gostou</Text>
-          <Text style={styles.tip}>â€¢ Mencione a qualidade do atendimento</Text>
-          <Text style={styles.tip}>â€¢ Comente sobre a pontualidade</Text>
-          <Text style={styles.tip}>â€¢ Seja respeitoso em seus comentários</Text>
+          <Text style={styles.tip}>• Seja específico sobre o que gostou ou não gostou</Text>
+          <Text style={styles.tip}>• Mencione a qualidade do atendimento</Text>
+          <Text style={styles.tip}>• Comente sobre a pontualidade</Text>
+          <Text style={styles.tip}>• Seja respeitoso em seus comentários</Text>
         </View>
 
         {/* Botão de envio */}

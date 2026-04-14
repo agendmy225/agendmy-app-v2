@@ -39,7 +39,7 @@ const SupportScreen: React.FC = () => {
       id: 'payment',
       title: 'Pagamentos',
       icon: 'payment',
-      description: 'Cobranças, reembolsos, cartÃµes',
+      description: 'Cobranças, reembolsos, cartões',
     },
     {
       id: 'technical',
@@ -51,7 +51,7 @@ const SupportScreen: React.FC = () => {
       id: 'other',
       title: 'Outros assuntos',
       icon: 'help-outline',
-      description: 'SugestÃµes, reclamaçÃµes gerais',
+      description: 'Sugestões, reclamações gerais',
     },
   ];
 

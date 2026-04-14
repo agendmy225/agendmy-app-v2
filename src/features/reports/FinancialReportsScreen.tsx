@@ -134,7 +134,7 @@ const FinancialReportsScreen: React.FC = () => {
       if (!commissionValidation.hasValidConfig) {
         Alert.alert(
           'Configuração Necessária',
-          `${commissionValidation.message}\n\nConfigure a taxa de comissão nas configuraçÃµes do seu negócio para gerar relatórios.`,
+          `${commissionValidation.message}\n\nConfigure a taxa de comissão nas configurações do seu negócio para gerar relatórios.`,
           [{ text: 'Entendi', style: 'default' }]
         );
         setGeneratingReport(false);
@@ -160,7 +160,7 @@ const FinancialReportsScreen: React.FC = () => {
       }
 
       if (start > end) {
-        Alert.alert('Erro', 'A data inicial deve ser anterior Ã  data final.');
+        Alert.alert('Erro', 'A data inicial deve ser anterior à data final.');
         setGeneratingReport(false);
         return;
       }
@@ -360,7 +360,7 @@ const FinancialReportsScreen: React.FC = () => {
               </View>
 
               <View style={styles.reportDetailSection}>
-                <Text style={styles.sectionTitle}>ComissÃµes por Profissional</Text>
+                <Text style={styles.sectionTitle}>Comissões por Profissional</Text>
                 {Object.entries(selectedReport.professionalCommissions).length > 0 ? (
                   Object.entries(selectedReport.professionalCommissions).map(([id, data]) => (
                     <View key={id} style={styles.commissionItem}>
@@ -516,7 +516,7 @@ const FinancialReportsScreen: React.FC = () => {
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Nenhum relatório encontrado</Text>
             <Text style={styles.emptySubtext}>
-              Gere seu primeiro relatório financeiro para visualizar suas receitas e comissÃµes.
+              Gere seu primeiro relatório financeiro para visualizar suas receitas e comissões.
             </Text>
           </View>
         )}

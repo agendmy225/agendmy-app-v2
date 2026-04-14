@@ -271,7 +271,7 @@ const DashboardScreen: React.FC = () => {
 ðŸ‘‡ Veja o perfil completo e agende seu horário:
 ${profileUrl}
 
-ðŸ“± Baixe nosso app para uma experiÃªncia completa:
+ðŸ“± Baixe nosso app para uma experiência completa:
 ${appDownloadUrl}
 
 #Agendmy #${professional.specialty.replace(/\s+/g, '')}`;
@@ -355,9 +355,9 @@ ${appDownloadUrl}
         </View>
       </View>
 
-      {/* AvaliaçÃµes */}
+      {/* Avaliações */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>AvaliaçÃµes</Text>
+        <Text style={styles.sectionTitle}>Avaliações</Text>
         <View style={styles.ratingCard}>
           <Text style={styles.ratingValue}>{stats.averageRating.toFixed(1)}</Text>
           <View style={styles.starsContainer}>
@@ -371,9 +371,9 @@ ${appDownloadUrl}
         </View>
       </View>
 
-      {/* AçÃµes Rápidas */}
+      {/* Ações Rápidas */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>AçÃµes Rápidas</Text>
+        <Text style={styles.sectionTitle}>Ações Rápidas</Text>
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={styles.actionButton}

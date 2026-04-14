@@ -45,7 +45,7 @@ const ServiceManagementScreen: React.FC = () => {
   const [serviceDuration, setServiceDuration] = useState('');
   const [serviceCategory, setServiceCategory] = useState('');
   const [selectedProfessionals, setSelectedProfessionals] = useState<string[]>([]);
-  const [numSessions, setNumSessions] = useState('1'); // Campo para número de sessÃµes
+  const [numSessions, setNumSessions] = useState('1'); // Campo para número de sessões
   const [baseServiceId, setBaseServiceId] = useState(''); // ID do serviço base para pacotes
   const [isCreatingPackage, setIsCreatingPackage] = useState(false); // Se está criando pacote
   const [userModifiedName, setUserModifiedName] = useState(false); // Se usuário modificou o nome manualmente
@@ -172,14 +172,14 @@ const ServiceManagementScreen: React.FC = () => {
     setServiceDuration(service.duration);
     setServiceCategory(service.category);
     setSelectedProfessionals(service.professionalIds || []);
-    setNumSessions(service.numSessions?.toString() || '1'); // Carregar número de sessÃµes ou padrão 1
+    setNumSessions(service.numSessions?.toString() || '1'); // Carregar número de sessões ou padrão 1
     setBaseServiceId(''); // Reset para edição
     setIsCreatingPackage(false); // Reset modo pacote
     setUserModifiedName(false); // Reset flag de modificação
     setModalVisible(true);
   };
 
-  // Função para lidar com mudança no número de sessÃµes
+  // Função para lidar com mudança no número de sessões
   const handleNumSessionsChange = (value: string) => {
     setNumSessions(value);
     const sessions = parseInt(value, 10);
@@ -223,7 +223,7 @@ const ServiceManagementScreen: React.FC = () => {
       // Usar preço do serviço base como sugestão inicial em vez de vazio
       setServicePrice((baseService.price || 0).toString());
     }
-  };  // Atualizar nome do pacote quando mudar número de sessÃµes
+  };  // Atualizar nome do pacote quando mudar número de sessões
   const updatePackageName = useCallback(() => {
     if (baseServiceId && parseInt(numSessions, 10) > 1 && !userModifiedName) {
       const baseService = services.find(s => s.id === baseServiceId);
@@ -233,7 +233,7 @@ const ServiceManagementScreen: React.FC = () => {
     }
   }, [baseServiceId, numSessions, services, userModifiedName]);
 
-  // Efeito para atualizar nome do pacote quando número de sessÃµes muda
+  // Efeito para atualizar nome do pacote quando número de sessões muda
   useEffect(() => {
     updatePackageName();
   }, [updatePackageName]);
@@ -258,7 +258,7 @@ const ServiceManagementScreen: React.FC = () => {
     // Validação específica para pacotes
     const sessions = parseInt(numSessions, 10);
     if (sessions > 1 && !editingService && !baseServiceId) {
-      Alert.alert('Erro', 'Para criar um pacote, vocÃª deve:\n\n1. Definir o número de sessÃµes (maior que 1)\n2. Selecionar um serviço base na lista exibida\n3. Definir o preço do pacote\n\nPor favor, selecione um serviço base primeiro.');
+      Alert.alert('Erro', 'Para criar um pacote, você deve:\n\n1. Definir o número de sessões (maior que 1)\n2. Selecionar um serviço base na lista exibida\n3. Definir o preço do pacote\n\nPor favor, selecione um serviço base primeiro.');
       return;
     }
 
@@ -274,7 +274,7 @@ const ServiceManagementScreen: React.FC = () => {
         return;
       }
 
-      console.log('ðŸ”§ ValidaçÃµes passaram, construindo serviceData...');
+      console.log('ðŸ”§ Validações passaram, construindo serviceData...');
       console.log('ðŸ“Š Dados do formulário:', {
         name: serviceName,
         description: serviceDescription,
@@ -415,7 +415,7 @@ const ServiceManagementScreen: React.FC = () => {
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>Tipo:</Text>
               <Text style={[styles.detailValue, styles.packageText]}>
-                Pacote ({item.numSessions} sessÃµes)
+                Pacote ({item.numSessions} sessões)
               </Text>
             </View>
           )}
@@ -568,7 +568,7 @@ const ServiceManagementScreen: React.FC = () => {
             </View>
 
             <ScrollView>
-              {/* Campo de Número de SessÃµes movido para o topo */}
+              {/* Campo de Número de Sessões movido para o topo */}
               <Text style={styles.modalLabel}>Tipo de Serviço</Text>
               <TextInput
                 style={styles.modalInput}
@@ -582,7 +582,7 @@ const ServiceManagementScreen: React.FC = () => {
               {parseInt(numSessions, 10) > 1 && (
                 <View style={styles.packageInfoContainer}>
                   <Text style={styles.packageInfoText}>
-                    ðŸ’¡ Modo Pacote Ativado: Selecione um serviço base abaixo para criar um pacote de {numSessions} sessÃµes
+                    ðŸ’¡ Modo Pacote Ativado: Selecione um serviço base abaixo para criar um pacote de {numSessions} sessões
                   </Text>
                 </View>
               )}

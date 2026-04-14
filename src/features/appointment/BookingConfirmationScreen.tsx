@@ -68,7 +68,7 @@ const BookingConfirmationScreen: React.FC = () => {
   const [professionalData, setProfessionalData] = useState<Professional | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Verificar se é um pacote com múltiplas sessÃµes
+  // Verificar se é um pacote com múltiplas sessões
   const isPackage = Boolean(sessions && sessions.length > 0);
   const appointmentSessions = isPackage ? sessions : [{ date: date!, time: time! }];
 
@@ -197,7 +197,7 @@ const BookingConfirmationScreen: React.FC = () => {
       });
 
       if (isPackage && appointmentSessions) {
-        console.log('ðŸ“¦ Processando pacote com múltiplas sessÃµes:', appointmentSessions.length);
+        console.log('ðŸ“¦ Processando pacote com múltiplas sessões:', appointmentSessions.length);
         // Para pacotes, criar múltiplos agendamentos
         const appointmentPromises = appointmentSessions.map(async (session, index) => {
           console.log(`ðŸ“… Criando sessão ${index + 1}:`, session);
@@ -210,7 +210,7 @@ const BookingConfirmationScreen: React.FC = () => {
             serviceName: serviceData?.name || 'Serviço',
             professionalName: professionalData?.name || 'Profissional',
             businessName: businessData?.name || 'Estabelecimento',
-            price: (serviceData?.price || 0) / appointmentSessions.length, // Dividir o preço entre as sessÃµes
+            price: (serviceData?.price || 0) / appointmentSessions.length, // Dividir o preço entre as sessões
             duration: String(serviceData?.duration || 0),
             status: 'scheduled' as const,
           };
@@ -220,7 +220,7 @@ const BookingConfirmationScreen: React.FC = () => {
         });
 
         const results = await Promise.all(appointmentPromises);
-        console.log('âœ… Todas as sessÃµes do pacote foram salvas:', results);
+        console.log('âœ… Todas as sessões do pacote foram salvas:', results);
 
       } else {
         console.log('ðŸ“… Processando sessão única');
@@ -272,7 +272,7 @@ const BookingConfirmationScreen: React.FC = () => {
       Alert.alert(
         'Agendamento Confirmado',
         isPackage && appointmentSessions
-          ? `Seu pacote com ${appointmentSessions.length} sessÃµes foi confirmado com sucesso!`
+          ? `Seu pacote com ${appointmentSessions.length} sessões foi confirmado com sucesso!`
           : 'Seu agendamento foi confirmado com sucesso!',
         [
           {
@@ -422,10 +422,10 @@ const BookingConfirmationScreen: React.FC = () => {
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>Tipo:</Text>
                 <Text style={styles.detailValue}>
-                  Pacote com {appointmentSessions?.length || 0} sessÃµes
+                  Pacote com {appointmentSessions?.length || 0} sessões
                 </Text>
               </View>
-              <Text style={styles.sessionsTitle}>SessÃµes agendadas:</Text>
+              <Text style={styles.sessionsTitle}>Sessões agendadas:</Text>
               {appointmentSessions?.map((session, index) => (
                 <View key={index} style={styles.sessionRow}>
                   <Text style={styles.sessionNumber}>Sessão {index + 1}:</Text>
@@ -470,7 +470,7 @@ const BookingConfirmationScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Política de Cancelamento</Text>
           <Text style={styles.policyText}>
-            Cancelamentos devem ser realizados com pelo menos 24 horas de antecedÃªncia.
+            Cancelamentos devem ser realizados com pelo menos 24 horas de antecedência.
             Cancelamentos com menos de 24 horas ou não comparecimento podem estar sujeitos a cobrança.
           </Text>
         </View>
@@ -486,7 +486,7 @@ const BookingConfirmationScreen: React.FC = () => {
             <ActivityIndicator color={colors.white} size="small" />
           ) : (
             <Text style={styles.confirmButtonText}>
-              {isPackage && appointmentSessions ? `Confirmar ${appointmentSessions.length} SessÃµes` : 'Confirmar Agendamento'}
+              {isPackage && appointmentSessions ? `Confirmar ${appointmentSessions.length} Sessões` : 'Confirmar Agendamento'}
             </Text>
           )}
         </TouchableOpacity>

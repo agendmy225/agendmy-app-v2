@@ -27,7 +27,7 @@ class NotificationService {
       {
         channelId: 'default',
         channelName: 'Default Channel',
-        channelDescription: 'Canal padrão para notificaçÃµes',
+        channelDescription: 'Canal padrão para notificações',
         playSound: true,
         soundName: 'default',
         importance: 4, // High importance
@@ -38,7 +38,7 @@ class NotificationService {
   }
 
   /**
-   * Solicita permissão do usuário para receber notificaçÃµes push.
+   * Solicita permissão do usuário para receber notificações push.
    */
   public async requestUserPermission(userId: string | null): Promise<void> {
     if (!userId) return;
@@ -79,7 +79,7 @@ class NotificationService {
   }
 
   /**
-   * Configura os listeners para notificaçÃµes recebidas enquanto o app está em primeiro plano (foreground)
+   * Configura os listeners para notificações recebidas enquanto o app está em primeiro plano (foreground)
    * e para quando o usuário abre o app clicando em uma notificação.
    */
   public initializeNotificationListeners(): () => void {
@@ -116,7 +116,7 @@ class NotificationService {
 
   /**
    * Exibe uma notificação local usando react-native-push-notification.
-   * Necessário para mostrar notificaçÃµes quando o app está em primeiro plano.
+   * Necessário para mostrar notificações quando o app está em primeiro plano.
    */
   private async displayLocalNotification(title: string, body: string): Promise<void> {
     try {

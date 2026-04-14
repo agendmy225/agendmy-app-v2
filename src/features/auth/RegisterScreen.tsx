@@ -85,7 +85,7 @@ const RegisterScreen: React.FC = () => {
               Agend<Text style={styles.logoAccent}>My</Text>
             </Text>
             <Text style={styles.clientTypeText}>
-              {userType === 'client' ? 'CLIENTE' : 'PROPRIETÃRIO'}
+              {userType === 'client' ? 'CLIENTE' : 'PROPRIETÁRIO'}
             </Text>
             <Text style={styles.welcomeText}>CADASTRO</Text>
             <Text style={styles.registerText}>Cadastre-se agora!</Text>

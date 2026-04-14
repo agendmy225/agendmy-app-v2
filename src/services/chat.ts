@@ -81,7 +81,7 @@ export const createOrGetChat = async (currentUserId: string, otherUserId: string
     updatedAt: serverTimestamp(),
   };
 
-  // Se temos informaçÃµes do negócio, adicionar aos dados
+  // Se temos informações do negócio, adicionar aos dados
   if (businessId) {
     chatData.businessId = businessId;
   }
@@ -89,7 +89,7 @@ export const createOrGetChat = async (currentUserId: string, otherUserId: string
     chatData.businessName = businessName;
   }
 
-  // Tentar identificar quem é client e quem é owner baseado nas coleçÃµes
+  // Tentar identificar quem é client e quem é owner baseado nas coleções
   try {
     // Verificar se currentUserId está na coleção clients
     const clientDoc = await getDocs(query(collection(firebaseDb, 'clients'), where('userId', '==', currentUserId)));

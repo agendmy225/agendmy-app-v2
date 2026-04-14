@@ -26,10 +26,10 @@ export interface Service {
   duration: string;
   category: string;
   active: boolean;
-  isPromotionActive?: boolean; // Adicionado para promoçÃµes
-  discountPercentage?: number; // Adicionado para promoçÃµes
-  promotionalPrice?: number; // Adicionado para promoçÃµes
-  numSessions?: number; // Número de sessÃµes para pacotes
+  isPromotionActive?: boolean; // Adicionado para promoções
+  discountPercentage?: number; // Adicionado para promoções
+  promotionalPrice?: number; // Adicionado para promoções
+  numSessions?: number; // Número de sessões para pacotes
   professionalIds?: string[]; // IDs dos profissionais que realizam o serviço
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
@@ -107,10 +107,10 @@ export const createService = async (businessId: string, serviceData: any): Promi
       throw new Error('Campos obrigatórios não preenchidos: name, price, duration, category');
     }
 
-    console.log('âœ… [createService] ValidaçÃµes básicas passaram');
+    console.log('âœ… [createService] Validações básicas passaram');
 
     const servicesRef = collection(firebaseDb, 'businesses', businessId, 'services');
-    console.log('ðŸ“‚ [createService] ReferÃªncia da coleção criada para:', `businesses/${businessId}/services`);
+    console.log('ðŸ“‚ [createService] Referência da coleção criada para:', `businesses/${businessId}/services`);
 
     const dataToSave: any = {
       name: serviceData.name,

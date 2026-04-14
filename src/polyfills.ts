@@ -1,7 +1,7 @@
 // Polyfill para variáveis globais necessárias para evitar crashes
 // Este arquivo deve ser importado antes de qualquer outro código
 
-// DeclaraçÃµes de tipos para variáveis globais
+// Declarações de tipos para variáveis globais
 declare global {
   var $: any;
   var hermes: any;

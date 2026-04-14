@@ -188,7 +188,7 @@ const ChatScreen: React.FC = () => {
               {otherUserName}
             </Text>
             <Text style={styles.headerSubtitle}>
-              {user?.uid === otherUserId ? 'VocÃª' : 'Outro usuário'}
+              {user?.uid === otherUserId ? 'Você' : 'Outro usuário'}
             </Text>
           </View>
           <TouchableOpacity style={styles.headerAction}>

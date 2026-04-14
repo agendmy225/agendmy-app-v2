@@ -118,7 +118,7 @@ class MapMarkerService {
     // Testa conexão primeiro
     const isConnected = await this.testStorageConnection();
     if (!isConnected) {
-      console.warn('âš ï¸ Retornando marcadores sem logos devido Ã  falha de conexão');
+      console.warn('âš ï¸ Retornando marcadores sem logos devido à falha de conexão');
       return businesses.map(business => ({ ...business, logoUrl: undefined }));
     }
 
@@ -147,7 +147,7 @@ class MapMarkerService {
 
     // Fallback para ícone padrão se não tiver logo
     console.log('ðŸŽ¯ Usando ícone padrão para marcador');
-    // Nota: VocÃª pode criar um ícone padrão ou usar um ícone do sistema
+    // Nota: Você pode criar um ícone padrão ou usar um ícone do sistema
     return { uri: 'https://via.placeholder.com/50x50/FF0000/FFFFFF?text=B' };
   }
 
@@ -183,6 +183,6 @@ class MapMarkerService {
   }
 }
 
-// Exporta instÃ¢ncia singleton
+// Exporta instância singleton
 export const mapMarkerService = new MapMarkerService();
 export default mapMarkerService;

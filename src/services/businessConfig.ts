@@ -3,7 +3,7 @@ import { doc, getDoc, updateDoc, firebaseDb } from '../config/firebase';
 
 /**
  * Atualiza a taxa de comissão padrão do estabelecimento
- * Esta função deve ser chamada quando o proprietário configurar a taxa nas configuraçÃµes
+ * Esta função deve ser chamada quando o proprietário configurar a taxa nas configurações
  */
 export const updateDefaultCommissionRate = async (
   businessId: string,
@@ -89,7 +89,7 @@ export const validateCommissionConfig = async (businessId: string): Promise<{
     if (!defaultRate || defaultRate <= 0) {
       return {
         hasValidConfig: false,
-        message: 'Taxa de comissão não configurada. Configure nas configuraçÃµes do negócio.',
+        message: 'Taxa de comissão não configurada. Configure nas configurações do negócio.',
       };
     }
 

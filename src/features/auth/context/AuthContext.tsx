@@ -292,7 +292,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           businessId: businessRef.id,
         });
 
-        // Criar documento na coleção 'owners' com referÃªncia ao negócio
+        // Criar documento na coleção 'owners' com referência ao negócio
         const ownerDocRef = doc(firebaseDb, 'owners', firebaseAuthUser.uid);
         await setDoc(ownerDocRef, {
           userId: firebaseAuthUser.uid,

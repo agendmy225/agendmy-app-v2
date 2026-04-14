@@ -42,7 +42,7 @@ const ForgotPasswordScreen: React.FC = () => {
 
       Alert.alert(
         'E-mail Enviado',
-        'Um e-mail da AGENDMY com instruçÃµes para redefinir sua senha foi enviado. Verifique sua caixa de entrada e spam. O link é válido por 1 hora.',
+        'Um e-mail da AGENDMY com instruções para redefinir sua senha foi enviado. Verifique sua caixa de entrada e spam. O link é válido por 1 hora.',
         [{ text: 'OK', onPress: () => navigation.goBack() }],
       );
     } catch (error: unknown) {
@@ -81,7 +81,7 @@ const ForgotPasswordScreen: React.FC = () => {
             </Text>
             <Text style={styles.titleText}>RECUPERAR SENHA</Text>
             <Text style={styles.subtitleText}>
-              Digite seu e-mail para receber as instruçÃµes de recuperação de senha.
+              Digite seu e-mail para receber as instruções de recuperação de senha.
             </Text>
           </View>
 

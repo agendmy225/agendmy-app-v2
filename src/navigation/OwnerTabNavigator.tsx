@@ -29,7 +29,7 @@ const renderAppointmentsIcon = ({ color, size }: { color: string; size: number }
 );
 
 const renderBusinessHubIcon = ({ color, size }: { color: string; size: number }) => (
-  <Icon name="business" size={size} color={color} /> // Ãcone para o Hub de Negócios
+  <Icon name="business" size={size} color={color} /> // Ícone para o Hub de Negócios
 );
 
 const OwnerTabNavigator: React.FC = () => {
@@ -50,7 +50,7 @@ const OwnerTabNavigator: React.FC = () => {
         }}
       >
         <Tab.Screen
-          name="OwnerHome" // Nova aba inicial idÃªntica ao CLIENT
+          name="OwnerHome" // Nova aba inicial idêntica ao CLIENT
           component={OwnerHomeScreen}
           options={{
             tabBarLabel: 'Início',

@@ -166,7 +166,7 @@ const PaymentScreen: React.FC = () => {
                 onPress={() => {
                   const Clipboard = require('@react-native-clipboard/clipboard').default;
                   Clipboard.setString(paymentResult.pixQrCode!);
-                  Alert.alert('Copiado!', 'Código Pix copiado para a área de transferÃªncia.');
+                  Alert.alert('Copiado!', 'Código Pix copiado para a área de transferência.');
                 }}
               >
                 <Icon name="content-copy" size={18} color={colors.white} />
@@ -186,7 +186,7 @@ const PaymentScreen: React.FC = () => {
 
           {isApproved && (
             <Text style={styles.approvedMsg}>
-              Seu agendamento está confirmado! VocÃª receberá uma notificação de lembrete.
+              Seu agendamento está confirmado! Você receberá uma notificação de lembrete.
             </Text>
           )}
 
@@ -246,7 +246,7 @@ const PaymentScreen: React.FC = () => {
                 Ao confirmar, um QR Code Pix será gerado. Escaneie com o app do seu banco para pagar instantaneamente.
               </Text>
               <View style={styles.pixBenefits}>
-                {['Aprovação instantÃ¢nea', 'Sem taxas adicionais', 'Disponível 24h'].map(t => (
+                {['Aprovação instantânea', 'Sem taxas adicionais', 'Disponível 24h'].map(t => (
                   <View key={t} style={styles.pixBenefit}>
                     <Icon name="check" size={16} color={colors.success} />
                     <Text style={styles.pixBenefitText}>{t}</Text>

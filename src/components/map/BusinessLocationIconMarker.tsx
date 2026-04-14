@@ -22,7 +22,7 @@ const MARKER_SIZE = 40;
 
 // Mapeamento de categorias para ícones do Material Icons
 const getCategoryIcon = (category?: string): string => {
-  if (!category) return 'store'; // Ãcone padrão se não tiver categoria
+  if (!category) return 'store'; // Ícone padrão se não tiver categoria
   
   switch (category) {
     case 'saloes-beleza':
@@ -46,7 +46,7 @@ const getCategoryIcon = (category?: string): string => {
     case 'manicure':
       return 'colorize'; // Colorir/manicure
     default:
-      return 'store'; // Ãcone padrão para loja
+      return 'store'; // Ícone padrão para loja
   }
 };
 
@@ -115,7 +115,7 @@ export const BusinessLocationIconMarker: React.FC<BusinessLocationIconMarkerProp
             color={colors.white} 
           />
         </View>
-        {/* Pequeno triÃ¢ngulo apontando para baixo */}
+        {/* Pequeno triângulo apontando para baixo */}
         <View style={[styles.markerTriangle, { borderTopColor: backgroundColor }]} />
       </View>
     </Marker>

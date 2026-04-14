@@ -199,7 +199,7 @@ const AppointmentsScreen: React.FC = () => {
             <Text style={styles.clientName}>Cliente: {item.clientName}</Text>
           )}
           <View style={styles.appointmentDetails}>
-            <Text style={styles.dateTime}>{`${item.date} Ã s ${item.time}`}</Text>
+            <Text style={styles.dateTime}>{`${item.date} às ${item.time}`}</Text>
             <Text style={[styles.status, { color: getStatusColor(item.status) }]}>
               {getStatusText(item.status)}
             </Text>
@@ -302,7 +302,7 @@ const AppointmentsScreen: React.FC = () => {
           />
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>VocÃª não tem agendamentos próximos.</Text>
+            <Text style={styles.emptyText}>Você não tem agendamentos próximos.</Text>
             <TouchableOpacity style={styles.bookButton}>
               <Text style={styles.bookButtonText}>Agendar Serviço</Text>
             </TouchableOpacity>
@@ -325,7 +325,7 @@ const AppointmentsScreen: React.FC = () => {
           />
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>VocÃª não tem agendamentos anteriores.</Text>
+            <Text style={styles.emptyText}>Você não tem agendamentos anteriores.</Text>
           </View>
         )
       )}

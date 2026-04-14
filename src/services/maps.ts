@@ -41,7 +41,7 @@ export const requestLocationPermission = async (): Promise<boolean> => {
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     }
-    return true; // iOS já lida com permissÃµes automaticamente
+    return true; // iOS já lida com permissões automaticamente
   } catch (error) {
     console.error('Erro ao solicitar permissão de localização:', error);
     return false;
@@ -254,7 +254,7 @@ export const getNearbyBusinesses = async (
       if (!locationSnapshot.empty) {
         const locationData = locationSnapshot.docs[0].data().location;
 
-        // Calcular distÃ¢ncia (fórmula de Haversine)
+        // Calcular distância (fórmula de Haversine)
         const distance = calculateDistance(
           latitude,
           longitude,
@@ -278,14 +278,14 @@ export const getNearbyBusinesses = async (
       }
     }
 
-    // Ordenar por distÃ¢ncia
+    // Ordenar por distância
     return businesses.sort((a, b) => (a.distance || 0) - (b.distance || 0));
   } catch (error) {
     return [];
   }
 };
 
-// Função auxiliar para calcular distÃ¢ncia entre duas coordenadas (fórmula de Haversine)
+// Função auxiliar para calcular distância entre duas coordenadas (fórmula de Haversine)
 const calculateDistance = (
   lat1: number,
   lon1: number,
@@ -300,7 +300,7 @@ const calculateDistance = (
     Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distance = R * c; // DistÃ¢ncia em km
+  const distance = R * c; // Distância em km
   return distance;
 };
 
@@ -308,7 +308,7 @@ const deg2rad = (deg: number): number => {
   return deg * (Math.PI / 180);
 };
 
-// Verificar se estabelecimentos tÃªm dados de localização (melhorado)
+// Verificar se estabelecimentos têm dados de localização (melhorado)
 export const checkBusinessesLocationData = async (): Promise<{
   total: number;
   withLocation: number;

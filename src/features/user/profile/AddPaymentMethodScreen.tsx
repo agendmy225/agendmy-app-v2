@@ -30,7 +30,7 @@ const AddPaymentMethodScreen: React.FC = () => {
           <Icon name="credit-card" size={64} color={colors.lightText} />
           <Text style={styles.comingSoonTitle}>Em Breve</Text>
           <Text style={styles.comingSoonText}>
-            A funcionalidade de adicionar cartÃµes estará disponível em breve.
+            A funcionalidade de adicionar cartões estará disponível em breve.
           </Text>
         </View>
       </View>

@@ -76,7 +76,7 @@ const PaymentMethodsScreen: React.FC = () => {
 
   const deletePaymentMethod = async (paymentMethodId: string) => {
     try {
-      // Aqui vocÃª faria a chamada para remover do Firebase/API
+      // Aqui você faria a chamada para remover do Firebase/API
       setPaymentMethods(prev => prev.filter(pm => pm.id !== paymentMethodId));
       Alert.alert('Sucesso', 'Cartão removido com sucesso!');
     } catch (error) {

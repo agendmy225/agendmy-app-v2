@@ -116,9 +116,9 @@ const minutesToTime = (minutes: number): string => {
 };
 
 /**
- * Converte nome do dia em portuguÃªs para chave em inglÃªs
- * @param dayName - Nome do dia em portuguÃªs
- * @returns Chave em inglÃªs do dia
+ * Converte nome do dia em português para chave em inglês
+ * @param dayName - Nome do dia em português
+ * @returns Chave em inglês do dia
  */
 const getDayKey = (dayName: string): string => {
     const dayMap: { [key: string]: string } = {

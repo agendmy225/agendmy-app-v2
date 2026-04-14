@@ -1,10 +1,10 @@
-// ConfiguraçÃµes para relatórios financeiros
+// Configurações para relatórios financeiros
 export const REPORT_CONFIG = {
   // IMPORTANTE: NÃƒO usar valor fixo - sempre usar configuração do usuário
   // Se não houver configuração, o sistema deve alertar o usuário para configurar
   DEFAULT_COMMISSION_RATE: null, // Removido valor fixo
   
-  // ConfiguraçÃµes de formatação
+  // Configurações de formatação
   CURRENCY_LOCALE: 'pt-BR',
   CURRENCY_CODE: 'BRL',
   
@@ -23,7 +23,7 @@ export const REPORT_CONFIG = {
   // Status de agendamentos cancelados
   CANCELED_STATUSES: ['canceled', 'cancelled'],
   
-  // ConfiguraçÃµes de cache
+  // Configurações de cache
   CACHE_DURATION_MS: 5 * 60 * 1000, // 5 minutos
 } as const;
 

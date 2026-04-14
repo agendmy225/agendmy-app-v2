@@ -36,7 +36,7 @@ const getCategoryIcon = (category: string): string => {
     case 'manicure':
       return 'colorize'; // Colorir/manicure
     default:
-      return 'store'; // Ãcone padrão para loja
+      return 'store'; // Ícone padrão para loja
   }
 };
 
@@ -108,7 +108,7 @@ export const CategoryIconMarker: React.FC<CategoryIconMarkerProps> = memo(({ bus
             color={colors.white} 
           />
         </View>
-        {/* Pequeno triÃ¢ngulo apontando para baixo */}
+        {/* Pequeno triângulo apontando para baixo */}
         <View style={[styles.markerTriangle, { borderTopColor: backgroundColor }]} />
       </View>
     </Marker>

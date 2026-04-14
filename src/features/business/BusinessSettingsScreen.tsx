@@ -208,18 +208,18 @@ const BusinessSettingsScreen: React.FC = () => {
 
   useEffect(() => {
     fetchBusinessId();
-  }, [fetchBusinessId]); // Adicionar fetchBusinessId como dependÃªncia
+  }, [fetchBusinessId]); // Adicionar fetchBusinessId como dependência
 
   const loadBusinessSettings = React.useCallback(async () => {
     if (!businessId) { return; }
 
     try {
-      setLoading(true);      // Buscar configuraçÃµes do estabelecimento
+      setLoading(true);      // Buscar configurações do estabelecimento
       const businessDoc = await getDoc(doc(firestore, 'businesses', businessId));
 
       if (businessDoc.exists()) {
         const businessData = businessDoc.data() as BusinessSettings;        // Garantir que todos os campos existam
-        // Usar uma cópia do estado 'settings' para evitar referÃªncias stale no merge
+        // Usar uma cópia do estado 'settings' para evitar referências stale no merge
         setSettings(prevSettings => ({
           id: businessDoc.id,
           name: businessData.name || prevSettings.name,
@@ -253,7 +253,7 @@ const BusinessSettingsScreen: React.FC = () => {
 
       setLoading(false);
     } catch (error) {
-      console.error("Erro ao carregar configuraçÃµes do negócio:", error);
+      console.error("Erro ao carregar configurações do negócio:", error);
       setLoading(false);
     }
   }, [businessId]); // Remover settings daqui, pois usamos prevSettings
@@ -269,7 +269,7 @@ const BusinessSettingsScreen: React.FC = () => {
     setRefreshing(true);
     await loadBusinessSettings();
     setRefreshing(false);
-  }, [loadBusinessSettings]); // Adicionar loadBusinessSettings como dependÃªncia
+  }, [loadBusinessSettings]); // Adicionar loadBusinessSettings como dependência
   const handleSaveSettings = async () => {
     if (!businessId) { return; }
 
@@ -325,17 +325,17 @@ const BusinessSettingsScreen: React.FC = () => {
             [{ text: 'OK' }],
           );
         }
-      }      // Atualizar configuraçÃµes no Firestore
+      }      // Atualizar configurações no Firestore
       const businessDocRef = doc(firestore, 'businesses', businessId);
       await updateDoc(businessDocRef, dataToSave);
 
       setHasChanges(false);
-      Alert.alert('Sucesso', 'ConfiguraçÃµes salvas com sucesso!');
+      Alert.alert('Sucesso', 'Configurações salvas com sucesso!');
 
       setSaving(false);
     } catch (error) {
-      console.error("Erro ao salvar configuraçÃµes:", error);
-      Alert.alert('Erro', 'Ocorreu um erro ao salvar as configuraçÃµes. Tente novamente.');
+      console.error("Erro ao salvar configurações:", error);
+      Alert.alert('Erro', 'Ocorreu um erro ao salvar as configurações. Tente novamente.');
       setSaving(false);
     }
   };
@@ -405,7 +405,7 @@ const BusinessSettingsScreen: React.FC = () => {
         await deleteImageFromFirebase(settings.logo);
       }
 
-      // Atualizar configuraçÃµes com nova URL
+      // Atualizar configurações com nova URL
       updateSettings('logo', result.storagePath);
 
       Alert.alert('Sucesso', 'Logo atualizado com sucesso!');
@@ -414,7 +414,7 @@ const BusinessSettingsScreen: React.FC = () => {
         console.error("Erro ao fazer upload do logo:", error);
         let errorMessage = 'Não foi possível fazer upload do logo.';
         if (error.message.includes('não autorizado')) {
-          errorMessage = 'Erro de autorização. Verifique as configuraçÃµes do Firebase Storage.';
+          errorMessage = 'Erro de autorização. Verifique as configurações do Firebase Storage.';
         } else if (error.message.includes('conexão')) {
           errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
         }
@@ -454,7 +454,7 @@ const BusinessSettingsScreen: React.FC = () => {
         await deleteImageFromFirebase(settings.coverImage);
       }
 
-      // Atualizar configuraçÃµes com nova URL
+      // Atualizar configurações com nova URL
       updateSettings('coverImage', result.storagePath);
 
       Alert.alert('Sucesso', 'Imagem de capa atualizada com sucesso!');
@@ -463,7 +463,7 @@ const BusinessSettingsScreen: React.FC = () => {
         console.error("Erro ao fazer upload da imagem de capa:", error);
         let errorMessage = 'Não foi possível fazer upload da imagem de capa.';
         if (error.message.includes('não autorizado')) {
-          errorMessage = 'Erro de autorização. Verifique as configuraçÃµes do Firebase Storage.';
+          errorMessage = 'Erro de autorização. Verifique as configurações do Firebase Storage.';
         } else if (error.message.includes('conexão')) {
           errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
         }
@@ -923,7 +923,7 @@ const BusinessSettingsScreen: React.FC = () => {
       </View>
 
       <View style={styles.switchContainer}>
-        <Text style={styles.switchLabel}>TransferÃªncia Bancária</Text>
+        <Text style={styles.switchLabel}>Transferência Bancária</Text>
         <Switch
           value={settings.paymentMethods.transfer}
           onValueChange={(value) => updateNestedSettings('paymentMethods', 'transfer', value)}
@@ -984,7 +984,7 @@ const BusinessSettingsScreen: React.FC = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Carregando configuraçÃµes...</Text>
+        <Text style={styles.loadingText}>Carregando configurações...</Text>
       </View>
     );
   }
@@ -992,7 +992,7 @@ const BusinessSettingsScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>ConfiguraçÃµes do Estabelecimento</Text>
+        <Text style={styles.headerTitle}>Configurações do Estabelecimento</Text>
       </View>
 
       <View style={styles.tabsContainer}>
@@ -1026,7 +1026,7 @@ const BusinessSettingsScreen: React.FC = () => {
             onPress={() => setActiveSection('notifications')}
           >
             <Text style={[styles.tabText, activeSection === 'notifications' && styles.activeTabText]}>
-              NotificaçÃµes
+              Notificações
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -1061,7 +1061,7 @@ const BusinessSettingsScreen: React.FC = () => {
             onPress={handleSaveSettings}
             disabled={saving}
           >
-            <Text style={styles.saveButtonText}>Salvar AlteraçÃµes</Text>
+            <Text style={styles.saveButtonText}>Salvar Alterações</Text>
           </TouchableOpacity>
         </View>
       )}

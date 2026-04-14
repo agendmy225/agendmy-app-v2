@@ -45,7 +45,7 @@ class BusinessLogosService {
         return cachedLogo;
       }
 
-      // Evita múltiplas requisiçÃµes simultÃ¢neas para o mesmo business
+      // Evita múltiplas requisições simultâneas para o mesmo business
       if (this.downloadingLogos.has(businessId)) {
         console.log(`â³ Aguardando download do logo do business ${businessId}...`);
         return null;
@@ -148,7 +148,7 @@ class BusinessLogosService {
   }
 }
 
-// InstÃ¢ncia singleton
+// Instância singleton
 export const businessLogosService = new BusinessLogosService();
 export default businessLogosService;
 export type { BusinessLogo };

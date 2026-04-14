@@ -20,7 +20,7 @@ const EditPaymentMethodScreen: React.FC = () => {
           <Icon name="credit-card" size={64} color={colors.lightText} />
           <Text style={styles.comingSoonTitle}>Em Breve</Text>
           <Text style={styles.comingSoonText}>
-            A edição de cartÃµes estará disponível após a integração com o gateway de pagamento.
+            A edição de cartões estará disponível após a integração com o gateway de pagamento.
           </Text>
         </View>
       </View>

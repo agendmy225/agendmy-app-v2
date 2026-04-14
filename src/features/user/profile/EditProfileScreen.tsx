@@ -110,7 +110,7 @@ const EditProfileScreen: React.FC = () => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.sectionTitle}>Alterar foto de perfil</Text>
-          <Text style={styles.modalSubtitle}>A nova foto aparecerá imediatamente. Lembre-se de salvar para confirmar as alteraçÃµes.</Text>
+          <Text style={styles.modalSubtitle}>A nova foto aparecerá imediatamente. Lembre-se de salvar para confirmar as alterações.</Text>
           <TouchableOpacity style={styles.selectPhotoButton} onPress={handleSelectProfileImage}>
             <Text style={styles.saveButtonText}>Escolher foto da galeria</Text>
           </TouchableOpacity>
@@ -177,7 +177,7 @@ const EditProfileScreen: React.FC = () => {
       {isUploading ? (
         <Text style={styles.saveButtonText}>Salvando...</Text>
       ) : (
-        <Text style={styles.saveButtonText}>Salvar AlteraçÃµes</Text>
+        <Text style={styles.saveButtonText}>Salvar Alterações</Text>
       )}
     </TouchableOpacity>
   </View>

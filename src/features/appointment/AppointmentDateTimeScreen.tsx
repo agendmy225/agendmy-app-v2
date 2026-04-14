@@ -161,7 +161,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
       // Para pacotes, permitir seleção múltipla mas não duplicar datas
       const alreadySelected = selectedSessions.some(session => session.date === date);
       if (alreadySelected) {
-        // Se já está selecionada, remover todas as sessÃµes desta data
+        // Se já está selecionada, remover todas as sessões desta data
         setSelectedSessions(prev => prev.filter(session => session.date !== date));
       }
       setSelectedDate(date);
@@ -202,7 +202,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
           businessId,
           serviceId,
           professionalId,
-          sessions: selectedSessions, // Múltiplas sessÃµes
+          sessions: selectedSessions, // Múltiplas sessões
         });
       }
     } else {
@@ -240,8 +240,8 @@ const AppointmentDateTimeScreen: React.FC = () => {
           {isPackage && (
             <>
               <Text style={styles.infoTitle}>Pacote:</Text>
-              <Text style={styles.infoValue}>{requiredSessions} sessÃµes</Text>
-              <Text style={styles.infoTitle}>SessÃµes selecionadas:</Text>
+              <Text style={styles.infoValue}>{requiredSessions} sessões</Text>
+              <Text style={styles.infoTitle}>Sessões selecionadas:</Text>
               <Text style={styles.infoValue}>{selectedSessions.length} de {requiredSessions}</Text>
             </>
           )}
@@ -249,7 +249,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
 
         {isPackage && selectedSessions.length > 0 && (
           <View style={styles.selectedSessionsSection}>
-            <Text style={styles.sectionTitle}>SessÃµes selecionadas</Text>
+            <Text style={styles.sectionTitle}>Sessões selecionadas</Text>
             {selectedSessions.map((session, index) => (
               <View key={index} style={styles.sessionItem}>
                 <View style={styles.sessionInfo}>

@@ -61,7 +61,7 @@ export const FastImageBusinessMarker: React.FC<BusinessMarkerProps> = memo(({ bu
       onPress={onPress}
       title={business.name}
       description={business.description}
-      // CRÃTICO: Para quando renderização estiver completa
+      // CRÍTICO: Para quando renderização estiver completa
       tracksViewChanges={!isRenderComplete}
     >
       <View style={styles.markerContainer}>

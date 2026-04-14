@@ -5,8 +5,8 @@ const colors = {  // Paleta Principal do App AGENDMY
   accent: '#000000',       // Cor de destaque (preto)
 
   // Gradiente de fundo (bem leve: off-white quase puro até um toque sutil de vermelho claro)
-  backgroundGradientStart: '#FCFCFC',   // â€œoff-whiteâ€ quase puro
-  backgroundGradientEnd: '#D3102720',   // â€œgelo avermelhadoâ€ muito transparente (~12% de opacidade)
+  backgroundGradientStart: '#FCFCFC',   // â€œoff-white” quase puro
+  backgroundGradientEnd: '#D3102720',   // â€œgelo avermelhado” muito transparente (~12% de opacidade)
   // Cores básicas e utilitárias
   text: '#333333',          // Texto escuro padrão
   lightText: '#777777',     // Texto claro para legendas, placeholders
@@ -27,8 +27,8 @@ const colors = {  // Paleta Principal do App AGENDMY
   logoGradientEnd: '#d31027',
 
   transparent: 'transparent',
-  // Cores Adicionais com base nas ReferÃªncias Visuais
-  brandRed: '#d31027', // Cor dos botÃµes e fundos nas telas de login de referÃªncia
+  // Cores Adicionais com base nas Referências Visuais
+  brandRed: '#d31027', // Cor dos botões e fundos nas telas de login de referência
   placeholderText: '#999999', // Texto placeholder em inputs
   welcomeText: '#FFFFFF',
   authButtonInactiveBackground: 'rgba(255, 255, 255, 0.3)',

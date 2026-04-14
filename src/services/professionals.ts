@@ -178,10 +178,10 @@ export const updateProfessionalSchedule = async (
   }
 };
 
-// Calcular e atualizar a média de avaliaçÃµes de um profissional
+// Calcular e atualizar a média de avaliações de um profissional
 export const updateProfessionalRating = async (professionalId: string): Promise<number> => {
   try {
-    // Buscar todas as avaliaçÃµes deste profissional
+    // Buscar todas as avaliações deste profissional
     const reviewsRef = collection(firebaseDb, 'reviews');
     const q = query(reviewsRef, where('professionalId', '==', professionalId));
     const reviewsSnapshot = await getDocs(q);

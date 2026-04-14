@@ -60,7 +60,7 @@ export const OptimizedBusinessMarker: React.FC<BusinessMarkerProps> = memo(({ bu
       onPress={onPress}
       title={business.name}
       description={business.description}
-      // CRÃTICO: Só para de rastrear mudanças quando tudo estiver renderizado
+      // CRÍTICO: Só para de rastrear mudanças quando tudo estiver renderizado
       tracksViewChanges={!isRenderComplete}
     >
       <View style={styles.markerContainer}>

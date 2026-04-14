@@ -31,7 +31,7 @@ export interface FavoriteItem {
 // Adicionar estabelecimento aos favoritos
 export const addToFavorites = async (business: Business): Promise<void> => {
   try {
-    const currentUser = firebaseAuth.currentUser; // Usar instÃ¢ncia firebaseAuth
+    const currentUser = firebaseAuth.currentUser; // Usar instância firebaseAuth
     if (!currentUser) {
       throw new Error('Usuário não autenticado');
     }
@@ -57,7 +57,7 @@ export const addToFavorites = async (business: Business): Promise<void> => {
 // Remover estabelecimento dos favoritos
 export const removeFromFavorites = async (businessId: string): Promise<void> => {
   try {
-    const currentUser = firebaseAuth.currentUser; // Usar instÃ¢ncia firebaseAuth
+    const currentUser = firebaseAuth.currentUser; // Usar instância firebaseAuth
     if (!currentUser) {
       throw new Error('Usuário não autenticado');
     }
@@ -73,7 +73,7 @@ export const removeFromFavorites = async (businessId: string): Promise<void> => 
 // Verificar se estabelecimento está nos favoritos
 export const isFavorite = async (businessId: string): Promise<boolean> => {
   try {
-    const currentUser = firebaseAuth.currentUser; // Usar instÃ¢ncia firebaseAuth
+    const currentUser = firebaseAuth.currentUser; // Usar instância firebaseAuth
     if (!currentUser) {
       return false;
     }
@@ -91,7 +91,7 @@ export const isFavorite = async (businessId: string): Promise<boolean> => {
 // Obter lista de favoritos do usuário
 export const getUserFavorites = async (): Promise<FavoriteItem[]> => {
   try {
-    const currentUser = firebaseAuth.currentUser; // Usar instÃ¢ncia firebaseAuth
+    const currentUser = firebaseAuth.currentUser; // Usar instância firebaseAuth
     if (!currentUser) {
       return [];
     }
@@ -131,7 +131,7 @@ export const getUserFavorites = async (): Promise<FavoriteItem[]> => {
 export const subscribeFavorites = (
   onFavoritesUpdate: (favorites: FavoriteItem[]) => void,
 ): (() => void) => {
-  const currentUser = firebaseAuth.currentUser; // Usar instÃ¢ncia firebaseAuth
+  const currentUser = firebaseAuth.currentUser; // Usar instância firebaseAuth
   if (!currentUser) {
     return () => { }; // Retorna uma função vazia para o unsubscribe
   }

@@ -144,7 +144,7 @@ export const cancelAppointment = async (appointmentId: string): Promise<void> =>
 
     const appointmentData = appointmentDocSnap.data();
     if (appointmentData?.clientId !== currentUser.uid) {
-      throw new Error('VocÃª não tem permissão para cancelar este agendamento');
+      throw new Error('Você não tem permissão para cancelar este agendamento');
     }
 
     // Atualizar o status do agendamento para 'cancelled'
@@ -444,7 +444,7 @@ export const getAppointmentStats = async (businessId: string, period: 'today' | 
 export const checkTimeSlotAvailability = async (
   professionalId: string,
   date: string,
-  time: string, // <-- O parÃ¢metro 'time' foi adicionado aqui (corrigindo um bug potencial)
+  time: string, // <-- O parâmetro 'time' foi adicionado aqui (corrigindo um bug potencial)
   duration: number = 60,
 ): Promise<boolean> => {
   try {
@@ -487,7 +487,7 @@ export const markNoShow = async (appointmentId: string): Promise<void> => {
   }
 };
 
-// Função para enviar lembrete (placeholder - implementar com notificaçÃµes push)
+// Função para enviar lembrete (placeholder - implementar com notificações push)
 export const sendReminder = async (appointmentId: string): Promise<void> => {
   try {
     await updateDoc(doc(firebaseDb, 'appointments', appointmentId), {

@@ -14,11 +14,11 @@ const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', screen: 'DashboardScreen' },
   { id: 'services', label: 'Gerenciar Serviços', icon: 'content-cut', screen: 'ServiceManagement' },
   { id: 'professionals', label: 'Gerenciar Profissionais', icon: 'group', screen: 'ProfessionalManagementScreen' },
-  { id: 'promotions', label: 'Gerenciar PromoçÃµes', icon: 'local-offer', screen: 'PromotionManagement' },
+  { id: 'promotions', label: 'Gerenciar Promoções', icon: 'local-offer', screen: 'PromotionManagement' },
   { id: 'chats', label: 'Mensagens', icon: 'chat', screen: 'ChatManagementScreen' },
   { id: 'reports', label: 'Relatórios Financeiros', icon: 'assessment', screen: 'FinancialReportsScreen' },
-  { id: 'reviews', label: 'Gerenciar AvaliaçÃµes', icon: 'star-rate', screen: 'ReviewsManagementScreen' },
-  { id: 'settings', label: 'ConfiguraçÃµes do Negócio', icon: 'settings', screen: 'BusinessSettingsScreen' },
+  { id: 'reviews', label: 'Gerenciar Avaliações', icon: 'star-rate', screen: 'ReviewsManagementScreen' },
+  { id: 'settings', label: 'Configurações do Negócio', icon: 'settings', screen: 'BusinessSettingsScreen' },
 ] as const;
 
 const BusinessHubScreen: React.FC = () => {

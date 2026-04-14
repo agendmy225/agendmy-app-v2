@@ -219,7 +219,7 @@ const AppointmentManagementScreen: React.FC = () => {
         </View>
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Data/Hora:</Text>
-          <Text style={styles.detailValue}>{item.date} Ã s {item.time}</Text>
+          <Text style={styles.detailValue}>{item.date} às {item.time}</Text>
         </View>
         {item.price !== undefined && (
           <View style={styles.detailRow}>

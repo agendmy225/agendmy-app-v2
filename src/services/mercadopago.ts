@@ -50,7 +50,7 @@ export interface SavedCard {
   customerId: string;
 }
 
-// â”€â”€â”€ FunçÃµes principais â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ Funções principais â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Cria um pagamento via Mercado Pago.
@@ -119,7 +119,7 @@ export const getPaymentStatus = async (paymentId: string): Promise<PaymentResult
 };
 
 /**
- * Busca os cartÃµes salvos do usuário no Mercado Pago.
+ * Busca os cartões salvos do usuário no Mercado Pago.
  */
 export const getSavedCards = async (): Promise<SavedCard[]> => {
   const currentUser = firebaseAuth.currentUser;

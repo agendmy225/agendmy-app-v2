@@ -1,6 +1,6 @@
 // Lista de categorias predefinidas para negócios
 export const BUSINESS_CATEGORIES = [
-  { id: 'saloes-beleza', name: 'SalÃµes de Beleza', icon: 'content-cut' },
+  { id: 'saloes-beleza', name: 'Salões de Beleza', icon: 'content-cut' },
   { id: 'barbearias', name: 'Barbearias', icon: 'storefront' },
   { id: 'estetica', name: 'Estética', icon: 'spa' },
   { id: 'pet-shops', name: 'Pet Shops', icon: 'pets' },

@@ -127,7 +127,7 @@ const AllBusinessesScreen: React.FC = () => {
       setBusinesses(data);
     } catch (error: any) {
       // Exibe alerta amigável ao usuário em caso de erro
-      // (convenção: mensagem em portuguÃªs)
+      // (convenção: mensagem em português)
       Alert.alert('Erro', 'Erro ao carregar estabelecimentos. Tente novamente mais tarde.');
       console.log('Erro ao carregar estabelecimentos:', error?.message || error);
     } finally {
@@ -195,7 +195,7 @@ const AllBusinessesScreen: React.FC = () => {
       case 'topRated':
         return 'Mais Bem Avaliados';
       case 'promotions':
-        return 'PromoçÃµes';
+        return 'Promoções';
       default:
         return 'Todos os Estabelecimentos';
     }
@@ -228,7 +228,7 @@ const AllBusinessesScreen: React.FC = () => {
           <View style={styles.ratingContainer}>
             <Icon name="star" size={16} color="#FFD700" />
             <Text style={styles.ratingText}>
-              {item.rating?.toFixed(1) || '0.0'} ({item.reviewCount} avaliaçÃµes)
+              {item.rating?.toFixed(1) || '0.0'} ({item.reviewCount} avaliações)
             </Text>
           </View>
         )}

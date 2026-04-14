@@ -60,7 +60,7 @@ export type AppStackParamList = {
     professionalId: string;
     date?: string;
     time?: string;
-    sessions?: { date: string; time: string }[]; // Para pacotes com múltiplas sessÃµes
+    sessions?: { date: string; time: string }[]; // Para pacotes com múltiplas sessões
   };
   Review: {
     businessId: string;
@@ -68,7 +68,7 @@ export type AppStackParamList = {
     serviceId: string | null; // Allow null for general business reviews
     professionalId?: string;
     professionalName?: string;
-    appointmentId?: string; // Tornar opcional para permitir avaliaçÃµes gerais
+    appointmentId?: string; // Tornar opcional para permitir avaliações gerais
   };
   Favorites: undefined; // Adicionar tela de Favoritos
   EditProfile: undefined; // Adicionar tela de Edição de Perfil
@@ -104,7 +104,7 @@ export type AppStackParamList = {
 
 // Tipos para navegação das abas do proprietário
 export type OwnerTabParamList = {
-  OwnerHome: undefined; // Nova aba inicial idÃªntica ao CLIENT
+  OwnerHome: undefined; // Nova aba inicial idêntica ao CLIENT
   AppointmentManagement: undefined; // Mantida
   BusinessHub: undefined; // Nova aba agregadora
   // As telas abaixo agora são acessadas via Stack a partir do BusinessHub,

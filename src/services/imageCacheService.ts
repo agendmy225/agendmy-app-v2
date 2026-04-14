@@ -66,7 +66,7 @@ class ImageCacheService {
   async cacheImage(storagePath: string): Promise<string | null> {
     try {
       const isLogo = storagePath.includes('/logo');
-      console.log(`ðŸ“¥ INÃCIO - Baixando ${isLogo ? 'LOGO (será redimensionado)' : 'COVER/CARD (qualidade original)'}:`, storagePath);
+      console.log(`ðŸ“¥ INÍCIO - Baixando ${isLogo ? 'LOGO (será redimensionado)' : 'COVER/CARD (qualidade original)'}:`, storagePath);
 
       // Obter URL de download do Firebase
       const storageRef = ref(firebaseStorage, storagePath);
@@ -129,18 +129,18 @@ class ImageCacheService {
         // CARDS/COVERS: Manter qualidade original, apenas comprimir levemente
         console.log('ðŸ“· COVER/CARD DETECTADO - Mantendo qualidade original com compressão leve...');
         
-        // Para covers, obter as dimensÃµes originais da imagem
+        // Para covers, obter as dimensões originais da imagem
         const getImageDimensions = (): Promise<{ width: number; height: number }> => {
           return new Promise((resolve) => {
             Image.getSize(
               `file://${tempPath}`,
               (width, height) => {
-                console.log('ðŸ“ DimensÃµes originais detectadas:', { width, height });
+                console.log('ðŸ“ Dimensões originais detectadas:', { width, height });
                 resolve({ width, height });
               },
               (error) => {
-                console.error('âŒ Erro ao obter dimensÃµes:', error);
-                // Fallback para dimensÃµes padrão se não conseguir ler
+                console.error('âŒ Erro ao obter dimensões:', error);
+                // Fallback para dimensões padrão se não conseguir ler
                 resolve({ width: 800, height: 600 });
               }
             );
@@ -149,7 +149,7 @@ class ImageCacheService {
 
         const originalDimensions = await getImageDimensions();
         
-        // Usar dimensÃµes reais da imagem original (igual ao expo-image-manipulator)
+        // Usar dimensões reais da imagem original (igual ao expo-image-manipulator)
         const compressedImage = await ImageResizer.createResizedImage(
           tempPath,
           originalDimensions.width,  // usar largura real
@@ -341,7 +341,7 @@ class ImageCacheService {
   }
 
   /**
-   * Obtém informaçÃµes do cache
+   * Obtém informações do cache
    */
   async getCacheInfo(): Promise<{ count: number; totalSize: number }> {
     try {

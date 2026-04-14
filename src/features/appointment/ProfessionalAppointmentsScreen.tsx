@@ -215,7 +215,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
     const handleDeleteAppointment = (appointment: Appointment) => {
         Alert.alert(
             'Confirmar Exclusão',
-            `Tem certeza que deseja cancelar o agendamento de ${appointment.clientName} em ${appointment.date} Ã s ${appointment.time}?`,
+            `Tem certeza que deseja cancelar o agendamento de ${appointment.clientName} em ${appointment.date} às ${appointment.time}?`,
             [
                 { text: 'Não', style: 'cancel' },
                 {
@@ -351,7 +351,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                 <View style={styles.appointmentInfo}>
                     <Text style={styles.clientName}>{appointment.clientName || 'Cliente não informado'}</Text>
                     <Text style={styles.serviceName}>{appointment.serviceName}</Text>
-                    <Text style={styles.dateTime}>{appointment.date} Ã s {appointment.time}</Text>
+                    <Text style={styles.dateTime}>{appointment.date} às {appointment.time}</Text>
                 </View>
                 <View style={[styles.statusBadge, { backgroundColor: getStatusColor(appointment.status) }]}>
                     <Text style={styles.statusText}>{getStatusText(appointment.status)}</Text>
@@ -553,12 +553,12 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                         </View>
 
                         <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>ObservaçÃµes</Text>
+                            <Text style={styles.inputLabel}>Observações</Text>
                             <TextInput
                                 style={[styles.input, styles.textArea]}
                                 value={notes}
                                 onChangeText={setNotes}
-                                placeholder="ObservaçÃµes sobre o agendamento (opcional)"
+                                placeholder="Observações sobre o agendamento (opcional)"
                                 multiline
                                 numberOfLines={3}
                             />

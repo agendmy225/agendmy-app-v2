@@ -71,7 +71,7 @@ const ReviewsManagementScreen: React.FC = () => {
     try {
       setLoading(true);
 
-      // Buscar avaliaçÃµes do estabelecimento - correção: usar subcoleção dentro do business
+      // Buscar avaliações do estabelecimento - correção: usar subcoleção dentro do business
       const reviewsQuery = query(
         collection(firestore, 'businesses', businessId, 'reviews'),
         orderBy('date', 'desc')
@@ -92,7 +92,7 @@ const ReviewsManagementScreen: React.FC = () => {
       // setFilteredReviews(reviewsData); // filterReviews fará isso
       setLoading(false);
     } catch (error) {
-      console.error('Erro ao carregar avaliaçÃµes:', error);
+      console.error('Erro ao carregar avaliações:', error);
       setReviews([]); // Define array vazio em caso de erro
       setLoading(false);
     }
@@ -199,7 +199,7 @@ const ReviewsManagementScreen: React.FC = () => {
             ...review,
             response: {
               text: responseText,
-              date: Timestamp.now(), // Usar Timestamp.now() para consistÃªncia local
+              date: Timestamp.now(), // Usar Timestamp.now() para consistência local
             },
             status: 'responded' as Review['status'], // Atualizar status localmente
           };
@@ -214,7 +214,7 @@ const ReviewsManagementScreen: React.FC = () => {
       setResponseText('');
 
       Alert.alert('Sucesso', 'Resposta enviada com sucesso!');
-      loadReviews(); // Recarregar as avaliaçÃµes para refletir a mudança
+      loadReviews(); // Recarregar as avaliações para refletir a mudança
       setSubmittingResponse(false);
     } catch {
       Alert.alert('Erro', 'Ocorreu um erro ao enviar a resposta. Tente novamente.');
@@ -371,7 +371,7 @@ const ReviewsManagementScreen: React.FC = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Carregando avaliaçÃµes...</Text>
+        <Text style={styles.loadingText}>Carregando avaliações...</Text>
       </View>
     );
   }
@@ -379,7 +379,7 @@ const ReviewsManagementScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Gerenciar AvaliaçÃµes</Text>
+        <Text style={styles.headerTitle}>Gerenciar Avaliações</Text>
       </View>
 
       <View style={styles.searchContainer}>

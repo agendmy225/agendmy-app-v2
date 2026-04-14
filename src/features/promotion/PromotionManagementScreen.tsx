@@ -71,7 +71,7 @@ const PromotionManagementScreen: React.FC = () => {
       const servicesData = await getServicesByBusiness(businessData.id);
       setServices(servicesData);
 
-      // Mapear serviços para promoçÃµes, carregando dados existentes
+      // Mapear serviços para promoções, carregando dados existentes
       const promotionsList: Promotion[] = servicesData.map(service => {
         const discountPercentage = service.discountPercentage ?? 0;
         const isActive = service.isPromotionActive ?? false;
@@ -186,11 +186,11 @@ const PromotionManagementScreen: React.FC = () => {
         hasActivePromotions,
       });
 
-      Alert.alert('Sucesso', 'PromoçÃµes salvas com sucesso!');
+      Alert.alert('Sucesso', 'Promoções salvas com sucesso!');
       navigation.goBack();
     } catch (error: any) {
       console.error('Error saving promotions:', error);
-      Alert.alert('Erro', 'Não foi possível salvar as promoçÃµes');
+      Alert.alert('Erro', 'Não foi possível salvar as promoções');
     } finally {
       setSaving(false);
     }
@@ -214,7 +214,7 @@ const PromotionManagementScreen: React.FC = () => {
         >
           <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Gerenciar PromoçÃµes</Text>
+        <Text style={styles.headerTitle}>Gerenciar Promoções</Text>
         <TouchableOpacity
           style={styles.saveButton}
           onPress={savePromotions}
@@ -232,7 +232,7 @@ const PromotionManagementScreen: React.FC = () => {
         <View style={styles.infoCard}>
           <Icon name="info" size={24} color={colors.primary} />
           <Text style={styles.infoText}>
-            Ative promoçÃµes para seus serviços e atraia mais clientes!
+            Ative promoções para seus serviços e atraia mais clientes!
             Os serviços em promoção aparecerão em destaque no app.
           </Text>
         </View>

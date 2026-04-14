@@ -47,7 +47,7 @@ export interface FinancialReport {
   createdAt?: Timestamp;
 }
 
-// Tipos para parÃ¢metros de geração de relatório
+// Tipos para parâmetros de geração de relatório
 export interface ReportParams {
   businessId: string;
   period: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom';
@@ -61,9 +61,9 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
     console.log('ðŸ”µ Iniciando geração de relatório financeiro:', params);
     const { businessId, period, startDate, endDate } = params;
 
-    // Validar parÃ¢metros
+    // Validar parâmetros
     if (!businessId || !period || !startDate || !endDate) {
-      throw new Error('ParÃ¢metros obrigatórios não fornecidos para gerar o relatório.');
+      throw new Error('Parâmetros obrigatórios não fornecidos para gerar o relatório.');
     }
 
     // Converter datas para Timestamp do firebaseDb
@@ -98,7 +98,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
     // Cache para taxas de comissão dos profissionais para evitar buscas repetidas
     const professionalRatesCache = new Map<string, number>();
 
-    // Buscar configuraçÃµes de comissão do estabelecimento
+    // Buscar configurações de comissão do estabelecimento
     const businessDocRef = doc(firebaseDb, 'businesses', businessId);
     const businessDoc = await getDoc(businessDocRef);
 
@@ -111,7 +111,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
     const defaultCommissionRate = businessData.defaultCommissionRate;
 
     if (!defaultCommissionRate || defaultCommissionRate <= 0) {
-      throw new Error('Taxa de comissão não configurada para este estabelecimento. Configure nas configuraçÃµes do negócio.');
+      throw new Error('Taxa de comissão não configurada para este estabelecimento. Configure nas configurações do negócio.');
     }
 
     // Processar cada agendamento
@@ -346,14 +346,14 @@ export const deleteFinancialReport = async (businessId: string, reportId: string
   }
 };
 
-// Calcular comissÃµes por período
+// Calcular comissões por período
 export const calculateCommissions = async (
   businessId: string,
   startDate: Date,
   endDate: Date,
 ): Promise<{ [professionalId: string]: { name: string; commission: number } }> => {
   try {
-    console.log('ðŸ”µ Calculando comissÃµes para período:', { businessId, startDate, endDate });
+    console.log('ðŸ”µ Calculando comissões para período:', { businessId, startDate, endDate });
 
     // Converter datas para Timestamp do firebaseDb
     const startTimestamp = Timestamp.fromDate(startDate);
@@ -370,7 +370,7 @@ export const calculateCommissions = async (
     const appointmentsSnapshot = await getDocs(appointmentsQuery);
     console.log('ðŸ“Š Agendamentos concluídos encontrados:', appointmentsSnapshot.size);
 
-    // Buscar configuraçÃµes de comissão do estabelecimento
+    // Buscar configurações de comissão do estabelecimento
     const businessDocRef = doc(firebaseDb, 'businesses', businessId);
     const businessDoc = await getDoc(businessDocRef);
 
@@ -379,10 +379,10 @@ export const calculateCommissions = async (
     const defaultCommissionRate = businessData.defaultCommissionRate;
 
     if (!defaultCommissionRate || defaultCommissionRate <= 0) {
-      throw new Error('Taxa de comissão não configurada para este estabelecimento. Configure nas configuraçÃµes do negócio.');
+      throw new Error('Taxa de comissão não configurada para este estabelecimento. Configure nas configurações do negócio.');
     }
 
-    // Calcular comissÃµes por profissional
+    // Calcular comissões por profissional
     const commissions: { [professionalId: string]: { name: string; commission: number } } = {};
     const professionalRatesCache = new Map<string, number>(); // Cache para taxas
 
@@ -450,10 +450,10 @@ export const calculateCommissions = async (
       }
     }
 
-    console.log('âœ… Cálculo de comissÃµes concluído:', Object.keys(commissions).length, 'profissionais');
+    console.log('âœ… Cálculo de comissões concluído:', Object.keys(commissions).length, 'profissionais');
     return commissions;
   } catch (error) {
-    console.error('âŒ Erro ao calcular comissÃµes:', error);
+    console.error('âŒ Erro ao calcular comissões:', error);
     throw error;
   }
 };
