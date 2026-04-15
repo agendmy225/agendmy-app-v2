@@ -547,7 +547,7 @@ const BusinessDetailsScreen: React.FC = () => {
                       <Text style={styles.serviceName}>{service.name}</Text>
                       <Text style={styles.serviceDescription}>{service.description}</Text>
                       <View style={styles.serviceDetails}>
-                        <Text style={styles.serviceDuration}>ÔÅ▒´©Å {service.duration}</Text>
+                        <Text style={styles.serviceDuration}>ԅ▒´©Å {service.duration}</Text>
                         <Text style={styles.servicePrice}>R$ {service.price.toFixed(2)}</Text>
                       </View>
                     </View>

@@ -38,7 +38,7 @@ class ImageCacheService {
       const cachedData = await this.safeAsyncStorageGet(cacheKey);
 
       if (!cachedData) {
-        console.log('࢝Œ Imagem não encontrada no cache:', storagePath);
+        console.log('ݒ Imagem não encontrada no cache:', storagePath);
         return null;
       }
 
@@ -55,7 +55,7 @@ class ImageCacheService {
       console.log('âœ… Imagem encontrada no cache:', storagePath);
       return cacheEntry.base64;
     } catch (error) {
-      console.error('࢝Œ Erro ao obter imagem do cache:', error);
+      console.error('ݒ Erro ao obter imagem do cache:', error);
       return null;
     }
   }
@@ -139,7 +139,7 @@ class ImageCacheService {
                 resolve({ width, height });
               },
               (error) => {
-                console.error('࢝Œ Erro ao obter dimensões:', error);
+                console.error('ݒ Erro ao obter dimensões:', error);
                 // Fallback para dimensões padrão se não conseguir ler
                 resolve({ width: 800, height: 600 });
               }
@@ -212,7 +212,7 @@ class ImageCacheService {
       return imageSource;
 
     } catch (error) {
-      console.error('࢝Œ Erro ao cachear imagem:', error);
+      console.error('ݒ Erro ao cachear imagem:', error);
       return null;
     }
   }
@@ -236,7 +236,7 @@ class ImageCacheService {
       // Se não tem cache, baixa e redimensiona
       return await this.cacheImage(storagePath);
     } catch (error) {
-      console.error('࢝Œ Erro ao obter imagem:', error);
+      console.error('ݒ Erro ao obter imagem:', error);
       return null;
     }
   }
@@ -249,7 +249,7 @@ class ImageCacheService {
       await AsyncStorage.setItem(key, data);
       return true;
     } catch (error: any) {
-      console.error('࢝Œ Erro ao salvar no AsyncStorage:', error?.message || error);
+      console.error('ݒ Erro ao salvar no AsyncStorage:', error?.message || error);
 
       if (error?.message?.includes('too big') || error?.message?.includes('CursorWindow')) {
         console.warn('âš ௸ Dados muito grandes para cache');
@@ -267,14 +267,14 @@ class ImageCacheService {
     try {
       return await AsyncStorage.getItem(key);
     } catch (error: any) {
-      console.error('࢝Œ Erro ao ler do AsyncStorage:', error?.message || error);
+      console.error('ݒ Erro ao ler do AsyncStorage:', error?.message || error);
 
       if (error?.message?.includes('CursorWindow')) {
         console.warn('âš ௸ Removendo entrada corrompida:', key);
         try {
           await AsyncStorage.removeItem(key);
         } catch (removeError) {
-          console.error('࢝Œ Erro ao remover entrada corrompida:', removeError);
+          console.error('ݒ Erro ao remover entrada corrompida:', removeError);
         }
       }
 
@@ -322,7 +322,7 @@ class ImageCacheService {
         }
       }
     } catch (error) {
-      console.error('࢝Œ Erro na limpeza do cache:', error);
+      console.error('ݒ Erro na limpeza do cache:', error);
     }
   }
 
@@ -336,7 +336,7 @@ class ImageCacheService {
       await AsyncStorage.multiRemove(cacheKeys);
       console.log('ðŸ§¹ Cache limpo completamente');
     } catch (error) {
-      console.error('࢝Œ Erro ao limpar cache:', error);
+      console.error('ݒ Erro ao limpar cache:', error);
     }
   }
 
@@ -362,7 +362,7 @@ class ImageCacheService {
         totalSize
       };
     } catch (error) {
-      console.error('࢝Œ Erro ao obter info do cache:', error);
+      console.error('ݒ Erro ao obter info do cache:', error);
       return { count: 0, totalSize: 0 };
     }
   }

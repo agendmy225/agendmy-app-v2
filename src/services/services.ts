@@ -92,13 +92,13 @@ export const createService = async (businessId: string, serviceData: any): Promi
     console.log('ðŸ“‹ [createService] ServiceData:', JSON.stringify(serviceData, null, 2));
 
     if (!businessId) {
-      console.log('࢝Œ [createService] BusinessId vazio');
+      console.log('ݒ [createService] BusinessId vazio');
       throw new Error('BusinessId é obrigatório para criar um serviço');
     }
 
     // Validar campos obrigatórios
     if (!serviceData.name || !serviceData.price || !serviceData.duration || !serviceData.category) {
-      console.log('࢝Œ [createService] Campos obrigatórios ausentes:', {
+      console.log('ݒ [createService] Campos obrigatórios ausentes:', {
         name: !!serviceData.name,
         price: !!serviceData.price,
         duration: !!serviceData.duration,
@@ -141,14 +141,14 @@ export const createService = async (businessId: string, serviceData: any): Promi
     console.log('ðŸ” [createService] Recuperando serviço criado...');
     const newService = await getServiceById(businessId, docRef.id);
     if (!newService) {
-      console.log('࢝Œ [createService] Falha ao recuperar serviço criado');
+      console.log('ݒ [createService] Falha ao recuperar serviço criado');
       throw new Error('Erro ao recuperar serviço criado');
     }
 
     console.log('ðŸŽ‰ [createService] Serviço criado com sucesso:', newService);
     return newService;
   } catch (error) {
-    console.error('࢝Œ [createService] Erro ao criar serviço:', error);
+    console.error('ݒ [createService] Erro ao criar serviço:', error);
     console.error('ðŸ” [createService] Tipo do erro:', typeof error);
     console.error('ðŸ“Š [createService] Stack trace:', (error as Error)?.stack);
 
@@ -195,7 +195,7 @@ export const updateService = async (businessId: string, serviceId: string, servi
     console.log('ðŸŽ‰ [updateService] Serviço atualizado:', updatedService);
     return updatedService;
   } catch (error) {
-    console.error('࢝Œ [updateService] Erro ao atualizar serviço:', error);
+    console.error('ݒ [updateService] Erro ao atualizar serviço:', error);
     throw error;
   }
 };

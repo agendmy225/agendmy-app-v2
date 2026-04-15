@@ -34,7 +34,7 @@ class MapMarkerService {
       return true;
     } catch (error) {
       this.isStorageConnected = false;
-      console.error('࢝Œ Falha na conexão com Firebase Storage:', error);
+      console.error('ݒ Falha na conexão com Firebase Storage:', error);
       console.error('ðŸ”§ Verifique as storage.rules e configuração do Firebase');
 
       return false;
@@ -87,7 +87,7 @@ class MapMarkerService {
       return logoUrl;
 
     } catch (error) {
-      console.error(`࢝Œ Erro ao buscar logo do business ${businessId}:`, error);
+      console.error(`ݒ Erro ao buscar logo do business ${businessId}:`, error);
       return null;
     }
   }
@@ -163,7 +163,7 @@ class MapMarkerService {
       await Promise.allSettled(promises);
       console.log('âœ… Pré-carregamento de logos concluído');
     } catch (error) {
-      console.error('࢝Œ Erro no pré-carregamento:', error);
+      console.error('ݒ Erro no pré-carregamento:', error);
     }
   }
 

@@ -66,7 +66,7 @@ export const BusinessLocationWithImageMarker: React.FC<BusinessLocationWithImage
               style={styles.markerImage}
               resizeMode={FastImage.resizeMode.cover}
               onLoad={() => console.log(`âœ… FastImage renderizada para ${business.name}`)}
-              onError={() => console.error(`࢝Œ Erro FastImage renderização ${business.name}`)}
+              onError={() => console.error(`ݒ Erro FastImage renderização ${business.name}`)}
             />
           ) : (
             <View style={styles.defaultMarker}>

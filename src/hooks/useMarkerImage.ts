@@ -63,7 +63,7 @@ export const useMarkerImage = (
         throw new Error(`Download falhou com status ${downloadResult.statusCode}`);
       }
     } catch (error) {
-      console.error(`࢝Œ Erro ao baixar imagem do marker ${id}:`, error);
+      console.error(`ݒ Erro ao baixar imagem do marker ${id}:`, error);
       throw error;
     }
   }, [enableCache]);
@@ -105,7 +105,7 @@ export const useMarkerImage = (
             resolve();
           },
           (error) => {
-            console.error(`࢝Œ Erro ao validar imagem do marker ${businessId}:`, error);
+            console.error(`ݒ Erro ao validar imagem do marker ${businessId}:`, error);
             reject(error);
           }
         );
@@ -125,7 +125,7 @@ export const useMarkerImage = (
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      console.error(`࢝Œ Erro ao carregar imagem do marker ${businessId}:`, errorMessage);
+      console.error(`ݒ Erro ao carregar imagem do marker ${businessId}:`, errorMessage);
 
       setState({
         isLoading: false,
@@ -143,7 +143,7 @@ export const useMarkerImage = (
         console.log(`ðŸ—‘௸ Cache da imagem do marker ${businessId} removido`);
       }
     } catch (error) {
-      console.error(`࢝Œ Erro ao limpar cache do marker ${businessId}:`, error);
+      console.error(`ݒ Erro ao limpar cache do marker ${businessId}:`, error);
     }
   };
 

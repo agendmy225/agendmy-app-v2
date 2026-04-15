@@ -332,7 +332,7 @@ const ServiceManagementScreen: React.FC = () => {
 
       setModalVisible(false);
     } catch (error) {
-      console.error('࢝Œ Erro detalhado ao salvar serviço:', error);
+      console.error('ݒ Erro detalhado ao salvar serviço:', error);
       console.error('ðŸ” Tipo do erro:', typeof error);
       console.error('ðŸ“Š Stack trace:', (error as Error)?.stack);
       console.error('ðŸ’¬ Mensagem do erro:', (error as Error)?.message);

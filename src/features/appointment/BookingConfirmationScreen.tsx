@@ -30,7 +30,7 @@ const checkIfUserIsOwner = async (): Promise<boolean> => {
     const business = await getBusinessByOwnerId(currentUser.uid);
     return business !== null;
   } catch (error) {
-    console.error('࢝Œ [checkIfUserIsOwner] Erro ao verificar tipo de usuário:', error);
+    console.error('ݒ [checkIfUserIsOwner] Erro ao verificar tipo de usuário:', error);
     return false;
   }
 };
@@ -43,14 +43,14 @@ const testFirestoreConnection = async (): Promise<boolean> => {
     // Verificar autenticação
     const currentUser = firebaseAuth.currentUser;
     if (!currentUser) {
-      console.error('࢝Œ [testFirestore] Usuário não autenticado');
+      console.error('ݒ [testFirestore] Usuário não autenticado');
       return false;
     }
 
     console.log('âœ… [testFirestore] Usuário autenticado, conectividade OK');
     return true;
   } catch (error) {
-    console.error('࢝Œ [testFirestore] Erro de conectividade:', error);
+    console.error('ݒ [testFirestore] Erro de conectividade:', error);
     return false;
   }
 };
@@ -90,7 +90,7 @@ const BookingConfirmationScreen: React.FC = () => {
         // Testar conectividade com Firestore
         const isConnected = await testFirestoreConnection();
         if (!isConnected) {
-          console.error('࢝Œ [BookingConfirmation] Sem conectividade com Firestore');
+          console.error('ݒ [BookingConfirmation] Sem conectividade com Firestore');
           clearTimeout(timeoutId);
           Alert.alert('Erro', 'Sem conexão com o Firestore. Verifique sua conexão e tente novamente.');
           // Set default empty data to prevent infinite loading
@@ -121,7 +121,7 @@ const BookingConfirmationScreen: React.FC = () => {
           console.log('âœ… [BookingConfirmation] Dados do estabelecimento carregados');
           setBusinessData(businessData);
         } else {
-          console.error('࢝Œ [BookingConfirmation] Documento do estabelecimento não encontrado');
+          console.error('ݒ [BookingConfirmation] Documento do estabelecimento não encontrado');
           setBusinessData({ id: businessId, name: 'Estabelecimento', address: 'Endereço indisponível', imageUrl: '' } as Business);
         }
 
@@ -129,7 +129,7 @@ const BookingConfirmationScreen: React.FC = () => {
           console.log('âœ… [BookingConfirmation] Dados do serviço carregados');
           setServiceData(serviceData);
         } else {
-          console.error('࢝Œ [BookingConfirmation] Documento do serviço não encontrado');
+          console.error('ݒ [BookingConfirmation] Documento do serviço não encontrado');
           setServiceData({ id: serviceId, name: 'Serviço', price: 0, duration: '60min' } as Service);
         }
 
@@ -137,13 +137,13 @@ const BookingConfirmationScreen: React.FC = () => {
           console.log('âœ… [BookingConfirmation] Dados do profissional carregados');
           setProfessionalData(professionalData);
         } else {
-          console.error('࢝Œ [BookingConfirmation] Documento do profissional não encontrado');
+          console.error('ݒ [BookingConfirmation] Documento do profissional não encontrado');
           setProfessionalData({ id: professionalId, name: 'Profissional' } as Professional);
         }
 
         console.log('âœ… [BookingConfirmation] Carregamento de dados concluído');
       } catch (error) {
-        console.error('࢝Œ [BookingConfirmation] Erro ao carregar dados:', error);
+        console.error('ݒ [BookingConfirmation] Erro ao carregar dados:', error);
 
         // Set default data to prevent infinite loading
         setBusinessData({ id: businessId, name: 'Estabelecimento', address: 'Endereço indisponível', imageUrl: '' } as Business);
@@ -308,7 +308,7 @@ const BookingConfirmationScreen: React.FC = () => {
       );
       }
     } catch (error) {
-      console.error('࢝Œ Erro ao confirmar agendamento:', error);
+      console.error('ݒ Erro ao confirmar agendamento:', error);
       console.error('ðŸ“Š Detalhes do erro:', {
         message: error instanceof Error ? error.message : 'Erro desconhecido',
         stack: error instanceof Error ? error.stack : undefined,

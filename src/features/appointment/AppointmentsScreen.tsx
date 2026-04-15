@@ -50,7 +50,7 @@ const AppointmentsScreen: React.FC = () => {
         return false;
       }
     } catch (error) {
-      console.error('࢝Œ [AppointmentsScreen] Erro ao verificar tipo de usuário:', error);
+      console.error('ݒ [AppointmentsScreen] Erro ao verificar tipo de usuário:', error);
       setIsOwner(false);
       setBusinessId(null);
       return false;
@@ -62,7 +62,7 @@ const AppointmentsScreen: React.FC = () => {
     try {
       const currentUser = firebaseAuth.currentUser;
       if (!currentUser) {
-        console.log('࢝Œ [AppointmentsScreen] Usuário não autenticado');
+        console.log('ݒ [AppointmentsScreen] Usuário não autenticado');
         return;
       }
 
@@ -119,7 +119,7 @@ const AppointmentsScreen: React.FC = () => {
 
       setAppointments(userAppointments);
     } catch (error) {
-      console.error('࢝Œ [AppointmentsScreen] Erro ao carregar agendamentos:', error);
+      console.error('ݒ [AppointmentsScreen] Erro ao carregar agendamentos:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);

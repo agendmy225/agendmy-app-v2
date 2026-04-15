@@ -28,7 +28,7 @@ class BusinessLogosService {
 
       return true;
     } catch (error) {
-      console.error('࢝Œ Erro ao conectar com Firebase Storage:', error);
+      console.error('ݒ Erro ao conectar com Firebase Storage:', error);
       return false;
     }
   }
@@ -88,7 +88,7 @@ class BusinessLogosService {
       return businessLogo;
 
     } catch (error) {
-      console.error(`࢝Œ Erro ao buscar logo do business ${businessId}:`, error);
+      console.error(`ݒ Erro ao buscar logo do business ${businessId}:`, error);
       this.downloadingLogos.delete(businessId);
 
       const errorLogo: BusinessLogo = {

@@ -167,7 +167,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
                 appointmentsCount: 0,
               };
             } catch (serviceError) {
-              console.error('࢝Œ Erro ao buscar dados do serviço:', serviceError);
+              console.error('ݒ Erro ao buscar dados do serviço:', serviceError);
               serviceRevenue[appointment.serviceId] = {
                 name: 'Serviço Desconhecido',
                 totalRevenue: 0,
@@ -229,7 +229,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
                 console.log('ðŸ‘¤ Profissional adicionado:', professionalName, 'Taxa:', rateForCalculation);
               }
             } catch (profError) {
-              console.error('࢝Œ Erro ao buscar dados do profissional:', profError);
+              console.error('ݒ Erro ao buscar dados do profissional:', profError);
               // IMPORTANTE: Se não conseguir buscar dados do profissional, pular
               // NÃƒO usar taxa mockada/padrão
               console.warn('âš ௸ Pulando profissional sem dados válidos:', profId);
@@ -245,7 +245,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
         }
       } else if (isCanceledStatus(appointment.status)) {
         canceledAppointments++;
-        console.log('࢝Œ Agendamento cancelado contabilizado');
+        console.log('ݒ Agendamento cancelado contabilizado');
       }
     }
 
@@ -283,7 +283,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
       id: reportRef.id,
     };
   } catch (error) {
-    console.error('࢝Œ Erro ao gerar relatório financeiro:', error);
+    console.error('ݒ Erro ao gerar relatório financeiro:', error);
     if (error instanceof Error) {
       throw error; // Re-throw se já é um Error com mensagem específica
     }
@@ -436,7 +436,7 @@ export const calculateCommissions = async (
               };
             }
           } catch (profError) {
-            console.error('࢝Œ Erro ao buscar profissional:', profError);
+            console.error('ݒ Erro ao buscar profissional:', profError);
             // IMPORTANTE: Se não conseguir buscar dados do profissional, pular
             // NÃƒO usar taxa mockada/padrão
             console.warn('âš ௸ Pulando profissional sem dados válidos:', profId);
@@ -453,7 +453,7 @@ export const calculateCommissions = async (
     console.log('âœ… Cálculo de comissões concluído:', Object.keys(commissions).length, 'profissionais');
     return commissions;
   } catch (error) {
-    console.error('࢝Œ Erro ao calcular comissões:', error);
+    console.error('ݒ Erro ao calcular comissões:', error);
     throw error;
   }
 };
