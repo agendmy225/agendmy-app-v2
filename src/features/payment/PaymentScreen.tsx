@@ -132,7 +132,7 @@ const PaymentScreen: React.FC = () => {
     }
   };
 
-  // â”€â”€ Tela de resultado â”€â”€
+  // ── Tela de resultado ──
   if (paymentResult) {
     const statusColor = getPaymentStatusColor(paymentResult.status);
     const statusLabel = getPaymentStatusLabel(paymentResult.status);
@@ -203,7 +203,7 @@ const PaymentScreen: React.FC = () => {
     );
   }
 
-  // â”€â”€ Formulário de pagamento â”€â”€
+  // ── Formulário de pagamento ──
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>

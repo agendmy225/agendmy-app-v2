@@ -33,12 +33,12 @@ class ImageCacheManager {
             // Pré-carregar a imagem
             Image.prefetch(uri)
                 .then(() => {
-                    console.log(`âœ… Imagem pré-carregada com sucesso: ${uri}`);
+                    console.log(`✅ Imagem pré-carregada com sucesso: ${uri}`);
                     this.cache.set(uri, { uri, loaded: true, error: false });
                     resolve(true);
                 })
                 .catch((error) => {
-                    console.error(`ݒ Erro ao pré-carregar imagem: ${uri}`, error);
+                    console.error(`❌ Erro ao pré-carregar imagem: ${uri}`, error);
                     this.cache.set(uri, { uri, loaded: false, error: true });
                     resolve(false);
                 });

@@ -11,7 +11,7 @@ export const useCachedFirebaseImage = (storagePath: string | null | undefined) =
 
     const loadImage = async () => {
       if (!storagePath || storagePath.includes('placeholder')) {
-        console.warn('âš ௸ StoragePath inválido ou placeholder:', storagePath);
+        console.warn('⚠️ StoragePath inválido ou placeholder:', storagePath);
         if (isMounted) {
           setImageSource(null);
           setLoading(false);
@@ -26,25 +26,25 @@ export const useCachedFirebaseImage = (storagePath: string | null | undefined) =
           setError(null);
         }
         
-        console.log('ðŸ”„ HOOK - Carregando imagem REDIMENSIONADA:', storagePath);
+        console.log('🔄 HOOK - Carregando imagem REDIMENSIONADA:', storagePath);
         
         // Usar o serviço de cache NOVO com redimensionamento real
         const cachedImageBase64 = await imageCacheService.getImage(storagePath);
         
         if (isMounted) {
           if (cachedImageBase64) {
-            console.log('âœ… Imagem 50x50px carregada:', storagePath);
+            console.log('✅ Imagem 50x50px carregada:', storagePath);
             setImageSource(cachedImageBase64);
             setError(null);
           } else {
-            console.error('ݒ Falha ao carregar/redimensionar imagem:', storagePath);
+            console.error('❌ Falha ao carregar/redimensionar imagem:', storagePath);
             setImageSource(null);
             setError('Erro ao carregar imagem');
           }
           setLoading(false);
         }
       } catch (err) {
-        console.error('ݒ Erro no useCachedFirebaseImage:', err);
+        console.error('❌ Erro no useCachedFirebaseImage:', err);
         if (isMounted) {
           setImageSource(null);
           setError(`Erro ao carregar imagem: ${err}`);

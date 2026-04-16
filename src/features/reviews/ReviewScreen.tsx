@@ -171,7 +171,7 @@ const ReviewScreen: React.FC = () => {
 
         {/* Dicas */}
         <View style={styles.tipsSection}>
-          <Text style={styles.tipsTitle}>ðŸ’¡ Dicas para uma boa avaliação:</Text>
+          <Text style={styles.tipsTitle}>💡 Dicas para uma boa avaliação:</Text>
           <Text style={styles.tip}>• Seja específico sobre o que gostou ou não gostou</Text>
           <Text style={styles.tip}>• Mencione a qualidade do atendimento</Text>
           <Text style={styles.tip}>• Comente sobre a pontualidade</Text>

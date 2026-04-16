@@ -39,7 +39,7 @@ export const BusinessLocationWithImageMarker: React.FC<BusinessLocationWithImage
     }
   }, [isReady, error]);
 
-  console.log(`ðŸ” Marker ${business.name}: loading=${isLoading}, ready=${isReady}, error=${error}, uri=${!!uri}`);
+  console.log(`🔍 Marker ${business.name}: loading=${isLoading}, ready=${isReady}, error=${error}, uri=${!!uri}`);
 
   return (
     <Marker
@@ -65,8 +65,8 @@ export const BusinessLocationWithImageMarker: React.FC<BusinessLocationWithImage
               }}
               style={styles.markerImage}
               resizeMode={FastImage.resizeMode.cover}
-              onLoad={() => console.log(`âœ… FastImage renderizada para ${business.name}`)}
-              onError={() => console.error(`ݒ Erro FastImage renderização ${business.name}`)}
+              onLoad={() => console.log(`✅ FastImage renderizada para ${business.name}`)}
+              onError={() => console.error(`❌ Erro FastImage renderização ${business.name}`)}
             />
           ) : (
             <View style={styles.defaultMarker}>

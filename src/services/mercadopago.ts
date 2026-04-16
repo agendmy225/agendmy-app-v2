@@ -4,7 +4,7 @@
 import { httpsCallable } from '@react-native-firebase/functions';
 import { firebaseFunctions, firebaseAuth } from '../config/firebase';
 
-// â”€â”€â”€ Tipos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export type PaymentMethod = 'pix' | 'credit_card' | 'debit_card';
 
@@ -50,7 +50,7 @@ export interface SavedCard {
   customerId: string;
 }
 
-// â”€â”€â”€ Funções principais â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Funções principais ───────────────────────────────────────────────────────
 
 /**
  * Cria um pagamento via Mercado Pago.
@@ -145,7 +145,7 @@ export const cancelPayment = async (paymentId: string): Promise<void> => {
   await cancelFn({ paymentId });
 };
 
-// â”€â”€â”€ Helpers de formatação â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers de formatação ────────────────────────────────────────────────────
 
 export const formatAmount = (amountInCents: number): string => {
   return (amountInCents / 100).toLocaleString('pt-BR', {

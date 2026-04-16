@@ -82,14 +82,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const subscriber = onAuthStateChanged(firebaseAuth, async (firebaseAuthUser: FirebaseAuthTypes.User | null) => {
       if (firebaseAuthUser) {
         try {
-          console.log('ðŸ” AuthContext: Buscando dados do usuário no Firestore para UID:', firebaseAuthUser.uid);
+          console.log('🔍 AuthContext: Buscando dados do usuário no Firestore para UID:', firebaseAuthUser.uid);
           const userDocRef = doc(firebaseDb, 'users', firebaseAuthUser.uid);
           const userDocSnap = await getDoc(userDocRef);
           let userDataFromDb: User | null = null;
 
           if (userDocSnap.exists()) {
             const dbData = userDocSnap.data();
-            console.log('âœ… AuthContext: Dados do usuário encontrados no Firestore:', { userType: dbData?.userType, businessId: dbData?.businessId });
+            console.log('✅ AuthContext: Dados do usuário encontrados no Firestore:', { userType: dbData?.userType, businessId: dbData?.businessId });
             userDataFromDb = {
               uid: firebaseAuthUser.uid,
               email: firebaseAuthUser.email,
@@ -100,7 +100,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             };
             setUser(userDataFromDb);
           } else {
-            console.log('âš ௸ AuthContext: Usuário não encontrado no Firestore, usando dados básicos do Auth');
+            console.log('⚠️ AuthContext: Usuário não encontrado no Firestore, usando dados básicos do Auth');
             userDataFromDb = {
               uid: firebaseAuthUser.uid,
               email: firebaseAuthUser.email,
@@ -111,16 +111,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
 
           if (userDataFromDb && userDataFromDb.userType === 'client') {
-            console.log('ðŸ”„ AuthContext: Carregando favoritos para cliente');
+            console.log('🔄 AuthContext: Carregando favoritos para cliente');
             await refreshFavoritesInternal();
           }
         } catch (error) {
-          console.error('ݒ AuthContext: Erro ao buscar dados do usuário no Firestore:', error);
+          console.error('❌ AuthContext: Erro ao buscar dados do usuário no Firestore:', error);
           setUser(null);
           setFavorites([]);
         }
       } else {
-        console.log('ðŸ”“ AuthContext: Usuário não autenticado');
+        console.log('🔓 AuthContext: Usuário não autenticado');
         setUser(null);
         setFavorites([]);
       }
@@ -132,12 +132,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshFavoritesInternal = async () => {
     try {
-      console.log('ðŸ”„ AuthContext: Carregando favoritos do usuário');
+      console.log('🔄 AuthContext: Carregando favoritos do usuário');
       const userFavorites = await getUserFavorites();
-      console.log('âœ… AuthContext: Favoritos carregados com sucesso:', userFavorites.length, 'items');
+      console.log('✅ AuthContext: Favoritos carregados com sucesso:', userFavorites.length, 'items');
       setFavorites(userFavorites);
     } catch (error) {
-      console.error('ݒ AuthContext: Erro ao carregar favoritos:', error);
+      console.error('❌ AuthContext: Erro ao carregar favoritos:', error);
       setFavorites([]);
     }
   };

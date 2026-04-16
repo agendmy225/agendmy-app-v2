@@ -16,7 +16,7 @@ type ProfessionalType = {
   specialty: string;
   rating: number;
   image: string;
-  services?: string[];
+  services?: string[]; // IDs dos serviços que o profissional realiza
 };
 
 type ServiceDetailsModalProps = {
@@ -46,13 +46,18 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
   const [filteredProfessionals, setFilteredProfessionals] = useState<ProfessionalType[]>([]);
 
   useEffect(() => {
+    // Filtrar profissionais que podem realizar este serviço
     const filtered = professionals.filter(professional => {
+      // Se o profissional não tem serviços definidos, ele pode realizar todos os serviços
       if (!professional.services || professional.services.length === 0) {
         return true;
       }
+      // Caso contrário, verificar se o serviço está na lista de serviços do profissional
       return professional.services.includes(service.id);
     });
     setFilteredProfessionals(filtered);
+
+    // Resetar seleção quando o modal abre ou o serviço muda
     setSelectedProfessional(null);
   }, [service.id, professionals]);
 

@@ -44,11 +44,11 @@ export const useMarkerImage = (
 
       // Verifica se já existe no cache
       if (enableCache && await RNFS.exists(cacheFilePath)) {
-        console.log(`ðŸ“¦ Imagem do marker ${id} encontrada no cache local`);
+        console.log(`📦 Imagem do marker ${id} encontrada no cache local`);
         return cacheFilePath;
       }
 
-      console.log(`ࢬ‡௸ Baixando imagem do marker ${id}...`);
+      console.log(`⬇️ Baixando imagem do marker ${id}...`);
 
       // Faz download da imagem
       const downloadResult = await RNFS.downloadFile({
@@ -57,13 +57,13 @@ export const useMarkerImage = (
       }).promise;
 
       if (downloadResult.statusCode === 200) {
-        console.log(`âœ… Imagem do marker ${id} baixada com sucesso`);
+        console.log(`✅ Imagem do marker ${id} baixada com sucesso`);
         return cacheFilePath;
       } else {
         throw new Error(`Download falhou com status ${downloadResult.statusCode}`);
       }
     } catch (error) {
-      console.error(`ݒ Erro ao baixar imagem do marker ${id}:`, error);
+      console.error(`❌ Erro ao baixar imagem do marker ${id}:`, error);
       throw error;
     }
   }, [enableCache]);
@@ -77,7 +77,7 @@ export const useMarkerImage = (
     setState(prev => ({ ...prev, isLoading: true, error: undefined }));
 
     try {
-      console.log(`ðŸŽ¯ Carregando imagem do marker para business ${businessId}`);
+      console.log(`🎯 Carregando imagem do marker para business ${businessId}`);
 
       // Busca o logo na pasta do business no Firebase Storage
       const businessFolderRef = ref(storage, `businesses/${businessId}`);
@@ -101,11 +101,11 @@ export const useMarkerImage = (
         Image.getSize(
           Platform.OS === 'android' ? `file://${localPath}` : localPath,
           (width, height) => {
-            console.log(`âœ… Imagem do marker ${businessId} validada: ${width}x${height}`);
+            console.log(`✅ Imagem do marker ${businessId} validada: ${width}x${height}`);
             resolve();
           },
           (error) => {
-            console.error(`ݒ Erro ao validar imagem do marker ${businessId}:`, error);
+            console.error(`❌ Erro ao validar imagem do marker ${businessId}:`, error);
             reject(error);
           }
         );
@@ -121,11 +121,11 @@ export const useMarkerImage = (
         isReady: true,
       });
 
-      console.log(`ðŸŽ¯ Marker image ready para business ${businessId}: ${finalUri}`);
+      console.log(`🎯 Marker image ready para business ${businessId}: ${finalUri}`);
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      console.error(`ݒ Erro ao carregar imagem do marker ${businessId}:`, errorMessage);
+      console.error(`❌ Erro ao carregar imagem do marker ${businessId}:`, errorMessage);
 
       setState({
         isLoading: false,
@@ -140,10 +140,10 @@ export const useMarkerImage = (
       const cacheFilePath = getCacheFilePath(businessId);
       if (await RNFS.exists(cacheFilePath)) {
         await RNFS.unlink(cacheFilePath);
-        console.log(`ðŸ—‘௸ Cache da imagem do marker ${businessId} removido`);
+        console.log(`🗑️ Cache da imagem do marker ${businessId} removido`);
       }
     } catch (error) {
-      console.error(`ݒ Erro ao limpar cache do marker ${businessId}:`, error);
+      console.error(`❌ Erro ao limpar cache do marker ${businessId}:`, error);
     }
   };
 
@@ -175,7 +175,7 @@ export const useMultipleMarkerImages = (
     if (businessIds.length === 0) return;
 
     setIsLoading(true);
-    console.log(`ðŸŽ¯ Carregando ${businessIds.length} imagens de marcadores...`);
+    console.log(`🎯 Carregando ${businessIds.length} imagens de marcadores...`);
 
     const newStates = new Map<string, MarkerImageState>();
 
@@ -235,7 +235,7 @@ export const useMultipleMarkerImages = (
     }
 
     setIsLoading(false);
-    console.log(`âœ… Carregamento de marcadores concluído`);
+    console.log(`✅ Carregamento de marcadores concluído`);
   }, [businessIds]);
 
   useEffect(() => {

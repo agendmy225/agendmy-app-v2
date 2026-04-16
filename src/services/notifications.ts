@@ -37,7 +37,7 @@ export const registerDeviceToken = async (userId: string): Promise<void> => {
 
     if (token) {
       // Salvar token no Firestore usando API modular
-      // Salva em users/{userId}/tokens/{token} â€” mesmo path usado pela Cloud Function
+      // Salva em users/{userId}/tokens/{token} — mesmo path usado pela Cloud Function
       await setDoc(doc(firestore, 'users', userId, 'tokens', token), {
         token,
         platform: Platform.OS,

@@ -11,7 +11,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity, Linking,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
@@ -20,7 +20,7 @@ import ProfessionalPortfolioModal from '../professional/ProfessionalPortfolioMod
 import ServiceDetailsModal from '../service/ServiceDetailsModal';
 import TimeSlotsModal from '../appointment/components/TimeSlotsModal';
 import { colors } from '../../constants/colors';
-import { useAuth } from '../auth/context/AuthContext'; // J├í importado
+import { useAuth } from '../auth/context/AuthContext'; // Já importado
 import { HomeStackParamList, AppStackParamList } from '../../types/types';
 import { hasCompletedAppointmentWithBusiness } from '../../services/appointments';
 import { Business, getBusinessById } from '../../services/businesses';
@@ -47,7 +47,7 @@ const BusinessDetailsScreen: React.FC = () => {
   const navigation = useNavigation<BusinessDetailsScreenNavigationProp>();
   const route = useRoute<BusinessDetailsScreenRouteProp>();
   const { businessId } = route.params;
-  const { favorites, toggleFavorite, user } = useAuth(); // Usar user ao invîs de currentUser
+  const { favorites, toggleFavorite, user } = useAuth(); // Usar user ao invés de currentUser
 
   const [business, setBusiness] = useState<Business | null>(null);
   const [services, setServices] = useState<Service[]>([]);
@@ -64,7 +64,7 @@ const BusinessDetailsScreen: React.FC = () => {
   const [isBookingAvailable, setIsBookingAvailable] = useState(false);
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
   const [isPortfolioModalVisible, setIsPortfolioModalVisible] = useState(false);
-  const [mapKey, setMapKey] = useState(0); // Forúa re-render do mapa
+  const [mapKey, setMapKey] = useState(0); // Força re-render do mapa
 
   // Hook para carregar imagem de capa do Firebase Storage
   const { imageSource: coverImageSource, loading: coverImageLoading } = useCachedFirebaseImage(business?.coverImage);
@@ -72,11 +72,11 @@ const BusinessDetailsScreen: React.FC = () => {
   const fullAddress = useMemo(() => {
     if (!business?.address) return '';
 
-    // Verificar se o n├║mero j├í est├í incluído no endereúo principal
+    // Verificar se o número já está incluído no endereço principal
     const address = business.address || '';
     const number = business.addressNumber || '';
 
-    // Se o n├║mero j├í estiver no endereúo, n├úo duplicar
+    // Se o número já estiver no endereço, não duplicar
     const addressWithNumber = number && !address.includes(number)
       ? `${address}, ${number}`
       : address;
@@ -92,11 +92,11 @@ const BusinessDetailsScreen: React.FC = () => {
   // useEffect(() => { // Change this to useFocusEffect
   useFocusEffect(
     useCallback(() => {
-      // Adicionado um "guarda" para garantir que o usu├írio exista antes de carregar os dados.
-      // Isso previne uma condiú├úo de corrida onde a tela tenta carregar dados
-      // antes que o contexto de autenticaú├úo esteja totalmente inicializado.
+      // Adicionado um "guarda" para garantir que o usuário exista antes de carregar os dados.
+      // Isso previne uma condição de corrida onde a tela tenta carregar dados
+      // antes que o contexto de autenticação esteja totalmente inicializado.
       if (!user) {
-        return; // Sai se o usu├írio ainda n├úo estiver carregado.
+        return; // Sai se o usuário ainda não estiver carregado.
       }
 
       const loadData = async () => {
@@ -117,14 +117,14 @@ const BusinessDetailsScreen: React.FC = () => {
           ]);
 
           if (businessData) {
-            console.log('BusinessDetailsScreen: Dados do neg├│cio carregados com sucesso:', businessData.name);
+            console.log('BusinessDetailsScreen: Dados do negócio carregados com sucesso:', businessData.name);
             console.log('BusinessDetailsScreen: Reviews carregadas:', reviewsData.length);
 
-            // Recalcular a contagem de avaliaú├Áes para este neg├│cio
+            // Recalcular a contagem de avaliações para este negócio
             try {
               await updateBusinessRating(businessId);
             } catch (error) {
-              console.error('Erro ao recalcular rating do neg├│cio:', error);
+              console.error('Erro ao recalcular rating do negócio:', error);
               // Silently handle the error - rating recalculation is not critical
             }
 
@@ -136,7 +136,7 @@ const BusinessDetailsScreen: React.FC = () => {
 
             console.log('BusinessDetailsScreen: Pode avaliar?', hasCompletedAppointment);
 
-            // Forúa re-render do mapa quando business muda
+            // Força re-render do mapa quando business muda
             setMapKey(prev => prev + 1);
 
             // Verificar disponibilidade dos profissionais
@@ -145,25 +145,25 @@ const BusinessDetailsScreen: React.FC = () => {
                 const availabilityMap = await checkMultipleProfessionalsAvailability(
                   professionalsData,
                   businessData,
-                  7, // Verificar pr├│ximos 7 dias
+                  7, // Verificar próximos 7 dias
                 );
                 setProfessionalAvailability(availabilityMap);
               } catch {
-                // Em caso de erro, marcar todos como disponíveis para n├úo bloquear funcionalidade
+                // Em caso de erro, marcar todos como disponíveis para não bloquear funcionalidade
                 const fallbackMap = new Map<string, boolean>();
                 professionalsData.forEach(prof => fallbackMap.set(prof.id, true));
                 setProfessionalAvailability(fallbackMap);
               }
             }
 
-            // Definir localizaú├úo (preferir dados da coleú├úo businessLocations)
-            // A localizaú├úo agora î gerenciada diretamente pela propriedade business.location
+            // Definir localização (preferir dados da coleção businessLocations)
+            // A localização agora é gerenciada diretamente pela propriedade business.location
 
             setIsBookingAvailable(businessData ? isBusinessOpen(businessData) : false);
           } else {
             Alert.alert(
               'Erro',
-              'N├úo foi possível carregar os dados do estabelecimento.',
+              'Não foi possível carregar os dados do estabelecimento.',
               [{ text: 'OK', onPress: () => navigation.goBack() }]
             );
           }
@@ -184,7 +184,7 @@ const BusinessDetailsScreen: React.FC = () => {
         // Optional: cleanup function if needed when screen goes out of focus
         // console.log('BusinessDetailsScreen unfocused');
       };
-    }, [businessId, navigation, user]), // Adicionado `user` ├ás dependìncias
+    }, [businessId, navigation, user]), // Adicionado `user` às dependências
   );
 
   useEffect(() => {
@@ -205,9 +205,9 @@ const BusinessDetailsScreen: React.FC = () => {
     if (!business) {
       return;
     }
-    // Os campos necess├írios para toggleFavorite no AuthContext s├úo:
+    // Os campos necessários para toggleFavorite no AuthContext são:
     // id, name, address, rating, imageUrl, coverImage
-    // O objeto 'business' j├í deve conter esses campos.
+    // O objeto 'business' já deve conter esses campos.
     try {
       await toggleFavorite({
         id: business.id, name: business.name,
@@ -216,7 +216,7 @@ const BusinessDetailsScreen: React.FC = () => {
         imageUrl: business.imageUrl,
         coverImage: business.coverImage,
       });
-      // O estado local isFavorite ser├í atualizado pelo useEffect acima quando 'favorites' mudar no contexto.
+      // O estado local isFavorite será atualizado pelo useEffect acima quando 'favorites' mudar no contexto.
     } catch {
       // Erro ao adicionar/remover favorito - ignora silenciosamente
     }
@@ -250,21 +250,21 @@ const BusinessDetailsScreen: React.FC = () => {
   };
 
   const handleBookNow = () => {
-    // Se houver apenas um serviúo, abre a seleú├úo de profissional diretamente
+    // Se houver apenas um serviço, abre a seleção de profissional diretamente
     if (filteredServices.length === 1) {
       handleServiceSelect(filteredServices[0]);
       return;
     }
 
-    // Se houver m├║ltiplos serviúos, mostra um alerta para o usu├írio escolher
+    // Se houver múltiplos serviços, mostra um alerta para o usuário escolher
     const serviceOptions = filteredServices.map((service) => ({
       text: service.name,
       onPress: () => handleServiceSelect(service),
     }));
 
     Alert.alert(
-      'Escolher Serviúo',
-      'Selecione o serviúo que deseja agendar:',
+      'Escolher Serviço',
+      'Selecione o serviço que deseja agendar:',
       [
         ...serviceOptions,
         { text: 'Cancelar', style: 'cancel' },
@@ -293,7 +293,7 @@ const BusinessDetailsScreen: React.FC = () => {
   const handleSendMessage = async () => {
     if (business && user && user.userType === 'client') {
       try {
-        // Criar ou obter o chat entre cliente e propriet├írio do estabelecimento
+        // Criar ou obter o chat entre cliente e proprietário do estabelecimento
         const chatId = await createOrGetChat(user.uid, business.ownerId, business.id, business.name);
 
         navigation.navigate('Chat', {
@@ -306,7 +306,7 @@ const BusinessDetailsScreen: React.FC = () => {
       } catch {
         Alert.alert(
           'Erro',
-          'N├úo foi possível iniciar a conversa. Tente novamente.',
+          'Não foi possível iniciar a conversa. Tente novamente.',
           [{ text: 'OK' }],
         );
       }
@@ -354,7 +354,7 @@ const BusinessDetailsScreen: React.FC = () => {
             styles.ratingIcon,
             !isAvailable && styles.professionalTextDisabled,
           ]}>
-            ԡÉ
+            ⭐
           </Text>
           <Text style={[
             styles.ratingText,
@@ -379,7 +379,7 @@ const BusinessDetailsScreen: React.FC = () => {
 
   const formatReviewDate = (date: any) => {
     try {
-      if (!date) return 'Data n├úo disponível';
+      if (!date) return 'Data não disponível';
 
       // Se for um Timestamp do Firebase
       if (date.seconds) {
@@ -396,10 +396,10 @@ const BusinessDetailsScreen: React.FC = () => {
         return new Date(date).toLocaleDateString('pt-BR');
       }
 
-      return 'Data n├úo disponível';
+      return 'Data não disponível';
     } catch (error) {
-      console.error('Erro ao formatar data da avaliaú├úo:', error);
-      return 'Data n├úo disponível';
+      console.error('Erro ao formatar data da avaliação:', error);
+      return 'Data não disponível';
     }
   };
 
@@ -436,7 +436,7 @@ const BusinessDetailsScreen: React.FC = () => {
       ) : business ? (
         <>
           <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Header com imagem e bot├Áes */}
+            {/* Header com imagem e botões */}
             <View style={styles.headerContainer}>
               <ImageBackground
                 source={{
@@ -461,22 +461,22 @@ const BusinessDetailsScreen: React.FC = () => {
                 </View>
               </ImageBackground>
             </View>
-            {/* Informaú├Áes do neg├│cio */}
+            {/* Informações do negócio */}
             <View style={styles.businessInfoContainer}>
-              <Text style={styles.businessName}>{business?.name || 'Nome n├úo disponível'}</Text>
+              <Text style={styles.businessName}>{business?.name || 'Nome não disponível'}</Text>
               <View style={styles.ratingRow}>
                 <Icon name="star" size={16} color={colors.primary} style={styles.ratingIcon} />
                 <Text style={styles.ratingValue}>{business.rating?.toFixed(1) || 'N/A'}</Text>
-                <Text style={styles.reviewCount}>({business.reviewCount || 0} avaliaú├Áes)</Text>
+                <Text style={styles.reviewCount}>({business.reviewCount || 0} avaliações)</Text>
               </View>
               <View style={styles.addressRow}>
                 <Icon name="location-on" size={16} color={colors.text} style={styles.addressIcon} />
-                <Text style={styles.addressText} numberOfLines={1}>{fullAddress || 'Endereúo n├úo disponível'}</Text>
+                <Text style={styles.addressText} numberOfLines={1}>{fullAddress || 'Endereço não disponível'}</Text>
               </View>
               <View style={styles.hoursRow}>
                 <Icon name="schedule" size={16} color={colors.text} style={styles.hoursIcon} />
-                {/* L├│gica para exibir hor├írio de funcionamento */}
-                <Text style={styles.hoursText}>Aberto ┬À {business.workingHours?.monday?.start || '09:00'} - {business.workingHours?.monday?.end || '18:00'}</Text>
+                {/* Lógica para exibir horário de funcionamento */}
+                <Text style={styles.hoursText}>Aberto · {business.workingHours?.monday?.start || '09:00'} - {business.workingHours?.monday?.end || '18:00'}</Text>
               </View>
               <TouchableOpacity style={styles.seeAllPhotosButton}>
                 <Text style={styles.seeAllPhotosText}>Ver todas as fotos</Text>
@@ -488,18 +488,18 @@ const BusinessDetailsScreen: React.FC = () => {
               <Text style={styles.description}>{business.description}</Text>
             </View>
 
-            {/* Seú├úo de Contatos */}
+            {/* Seção de Contatos */}
             <View style={styles.contactContainer}>
               <Text style={styles.sectionTitle}>Contato</Text>
               <View style={styles.contactRow}>
                 <Icon name="phone" size={16} color={colors.text} style={styles.contactIcon} />
-                <Text style={styles.contactText}>{business.phone || 'Telefone n├úo informado'}</Text>
+                <Text style={styles.contactText}>{business.phone || 'Telefone não informado'}</Text>
               </View>
               <View style={styles.contactRow}>
                 <Icon name="email" size={16} color={colors.text} style={styles.contactIcon} />
-                <Text style={styles.contactText}>{business.email || 'Email n├úo informado'}</Text>
+                <Text style={styles.contactText}>{business.email || 'Email não informado'}</Text>
               </View>
-              {/* Bot├úo de mensagem apenas para clientes */}
+              {/* Botão de mensagem apenas para clientes */}
               {user?.userType === 'client' && (
                 <TouchableOpacity style={styles.messageButton} onPress={handleSendMessage}>
                   <Icon name="chat" size={18} color={colors.white} style={styles.messageButtonIcon} />
@@ -508,7 +508,7 @@ const BusinessDetailsScreen: React.FC = () => {
               )}
             </View>
 
-            {/* Categorias de serviúos */}
+            {/* Categorias de serviços */}
             <View style={styles.categoriesContainer}>
               <ScrollView
                 horizontal
@@ -537,9 +537,9 @@ const BusinessDetailsScreen: React.FC = () => {
               </ScrollView>
             </View>
 
-            {/* Lista de serviúos */}
+            {/* Lista de serviços */}
             <View style={styles.servicesContainer}>
-              <Text style={styles.sectionTitle}>Serviúos</Text>
+              <Text style={styles.sectionTitle}>Serviços</Text>
               {filteredServices.length > 0 ? (
                 filteredServices.map((service) => (
                   <View key={service.id} style={styles.serviceCard}>
@@ -547,7 +547,7 @@ const BusinessDetailsScreen: React.FC = () => {
                       <Text style={styles.serviceName}>{service.name}</Text>
                       <Text style={styles.serviceDescription}>{service.description}</Text>
                       <View style={styles.serviceDetails}>
-                        <Text style={styles.serviceDuration}>ԅ▒´©Å {service.duration}</Text>
+                        <Text style={styles.serviceDuration}>⏱️ {service.duration}</Text>
                         <Text style={styles.servicePrice}>R$ {service.price.toFixed(2)}</Text>
                       </View>
                     </View>
@@ -572,15 +572,15 @@ const BusinessDetailsScreen: React.FC = () => {
                               } else {
                                 Alert.alert(
                                   'Erro',
-                                  'Dados do estabelecimento ou serviúo n├úo disponíveis.',
+                                  'Dados do estabelecimento ou serviço não disponíveis.',
                                   [{ text: 'OK' }],
                                 );
                               }
                             } catch (error) {
-                              console.error('Erro ao navegar para tela de avaliaú├úo de serviúo:', error);
+                              console.error('Erro ao navegar para tela de avaliação de serviço:', error);
                               Alert.alert(
                                 'Erro',
-                                'N├úo foi possível abrir a tela de avaliaú├úo. Tente novamente.',
+                                'Não foi possível abrir a tela de avaliação. Tente novamente.',
                                 [{ text: 'OK' }],
                               );
                             }
@@ -593,7 +593,7 @@ const BusinessDetailsScreen: React.FC = () => {
                   </View>
                 ))
               ) : (
-                <Text style={styles.noReviewsText}>Nenhum serviúo encontrado para esta categoria.</Text>
+                <Text style={styles.noReviewsText}>Nenhum serviço encontrado para esta categoria.</Text>
               )}
             </View>
 
@@ -610,10 +610,10 @@ const BusinessDetailsScreen: React.FC = () => {
               />
             </View>
 
-            {/* Avaliaú├Áes */}
+            {/* Avaliações */}
             <View style={styles.reviewsContainer}>
               <View style={styles.reviewsHeaderContainer}>
-                <Text style={styles.sectionTitle}>Avaliaú├Áes ({String(reviews.length)})</Text>
+                <Text style={styles.sectionTitle}>Avaliações ({String(reviews.length)})</Text>
                 <TouchableOpacity
                   style={[
                     styles.addReviewButton,
@@ -623,32 +623,32 @@ const BusinessDetailsScreen: React.FC = () => {
                     if (canReview) {
                       try {
                         if (business?.id && business?.name) {
-                          console.log('Navegando para tela de avaliaú├úo geral do business:', business.id);
+                          console.log('Navegando para tela de avaliação geral do business:', business.id);
                           navigation.navigate('Review', {
                             businessId: business.id,
                             businessName: business.name,
                             serviceId: null, // General business review, no specific service
-                            // appointmentId n├úo î necess├írio para avaliaú├úo geral do neg├│cio
+                            // appointmentId não é necessário para avaliação geral do negócio
                           });
                         } else {
                           Alert.alert(
                             'Erro',
-                            'Dados do estabelecimento n├úo disponíveis.',
+                            'Dados do estabelecimento não disponíveis.',
                             [{ text: 'OK' }],
                           );
                         }
                       } catch (error) {
-                        console.error('Erro ao navegar para tela de avaliaú├úo:', error);
+                        console.error('Erro ao navegar para tela de avaliação:', error);
                         Alert.alert(
                           'Erro',
-                          'N├úo foi possível abrir a tela de avaliaú├úo. Tente novamente.',
+                          'Não foi possível abrir a tela de avaliação. Tente novamente.',
                           [{ text: 'OK' }],
                         );
                       }
                     } else {
                       Alert.alert(
-                        'Avaliaú├úo n├úo disponível',
-                        'S├│ î possível avaliar ap├│s realizaú├úo de serviúo.',
+                        'Avaliação não disponível',
+                        'Só é possível avaliar após realização de serviço.',
                         [{ text: 'OK' }],
                       );
                     }
@@ -671,18 +671,18 @@ const BusinessDetailsScreen: React.FC = () => {
                   showsHorizontalScrollIndicator={false}
                 />
               ) : (
-                <Text style={styles.noReviewsText}>Ainda n├úo h├í avaliaú├Áes para este estabelecimento.</Text>
+                <Text style={styles.noReviewsText}>Ainda não há avaliações para este estabelecimento.</Text>
               )}
             </View>
 
-            {/* Localizaú├úo */}
+            {/* Localização */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Localizaú├úo</Text>
+              <Text style={styles.sectionTitle}>Localização</Text>
               {business?.location?.latitude && business?.location?.longitude ? (
                 <View style={styles.mapContainer}>
                   <MapView
                     key={`map-${mapKey}-${business.id}`}
-                    
+                    provider={PROVIDER_GOOGLE}
                     style={styles.map}
                     initialRegion={{
                       latitude: business.location.latitude,
@@ -719,19 +719,19 @@ const BusinessDetailsScreen: React.FC = () => {
                   <View style={styles.mapPlaceholder}>
                     <Icon name="location-on" size={48} color={colors.primary} />
                     <Text style={styles.mapPlaceholderText}>
-                      Localizando endereúo no mapa...
+                      Localizando endereço no mapa...
                     </Text>
                     <Text style={styles.addressText}>{business.address}</Text>
                   </View>
                 </View>
               ) : (
-                <Text style={styles.noReviewsText}>Localizaú├úo n├úo disponível.</Text>
+                <Text style={styles.noReviewsText}>Localização não disponível.</Text>
               )}
-              <Text style={styles.addressText}>{fullAddress || 'Endereúo n├úo informado'}</Text>
+              <Text style={styles.addressText}>{fullAddress || 'Endereço não informado'}</Text>
             </View>
           </ScrollView>
 
-          {/* Bot├úo de reserva */}
+          {/* Botão de reserva */}
           <View style={styles.bookingButtonContainer}>
             <TouchableOpacity
               style={[
@@ -750,18 +750,18 @@ const BusinessDetailsScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Modal de detalhes do serviúo */}
+          {/* Modal de detalhes do serviço */}
           {selectedService && (
             <ServiceDetailsModal
               visible={isModalVisible}
               onClose={handleCloseModal}
               onSchedule={handleScheduleService}
-              service={selectedService!} // Usar non-null assertion se temos certeza que selectedService n├úo î null aqui
+              service={selectedService!} // Usar non-null assertion se temos certeza que selectedService não é null aqui
               professionals={professionals}
             />
           )}
 
-          {/* Modal de seleú├úo de hor├írios */}
+          {/* Modal de seleção de horários */}
           {selectedService && business && (
             <TimeSlotsModal
               visible={isTimeSlotsModalVisible}
@@ -774,7 +774,7 @@ const BusinessDetailsScreen: React.FC = () => {
               )}
             />
           )}
-          {/* Modal de portf├│lio do profissional */}
+          {/* Modal de portfólio do profissional */}
           {isPortfolioModalVisible && selectedProfessional && (
             <ProfessionalPortfolioModal
               visible={isPortfolioModalVisible}
@@ -787,7 +787,7 @@ const BusinessDetailsScreen: React.FC = () => {
           )}
         </>) : (
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Estabelecimento n├úo encontrado</Text>
+          <Text style={styles.loadingText}>Estabelecimento não encontrado</Text>
         </View>
       )}
     </View>
@@ -1202,7 +1202,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 4,
   },
-  // Estilos para a seú├úo de contatos
+  // Estilos para a seção de contatos
   contactContainer: {
     padding: 16,
     borderBottomWidth: 1,
@@ -1254,5 +1254,3 @@ const styles = StyleSheet.create({
 });
 
 export default BusinessDetailsScreen;
-
-

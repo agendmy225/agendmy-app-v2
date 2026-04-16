@@ -263,15 +263,15 @@ const DashboardScreen: React.FC = () => {
       const profileUrl = `https://agendmy.app/professional/${professional.id}`;
       const appDownloadUrl = 'https://agendmy.app/download'; // Link para download do app
 
-      const message = `ðŸŽ¯ Conheça ${professional.name} - ${professional.specialty}
+      const message = `🎯 Conheça ${professional.name} - ${professional.specialty}
 
-ðŸ“‹ Especialista em ${professional.specialty}
-୐ Avaliação: ${professional.rating ? professional.rating.toFixed(1) : 'N/A'}/5
+📋 Especialista em ${professional.specialty}
+⭐ Avaliação: ${professional.rating ? professional.rating.toFixed(1) : 'N/A'}/5
 
-ðŸ‘‡ Veja o perfil completo e agende seu horário:
+👇 Veja o perfil completo e agende seu horário:
 ${profileUrl}
 
-ðŸ“± Baixe nosso app para uma experiência completa:
+📱 Baixe nosso app para uma experiência completa:
 ${appDownloadUrl}
 
 #Agendmy #${professional.specialty.replace(/\s+/g, '')}`;
@@ -363,7 +363,7 @@ ${appDownloadUrl}
           <View style={styles.starsContainer}>
             {[1, 2, 3, 4, 5].map((star) => (
               <Text key={star} style={styles.starIcon}>
-                {star <= Math.round(stats.averageRating) ? 'â˜…' : 'â˜†'}
+                {star <= Math.round(stats.averageRating) ? '★' : '☆'}
               </Text>
             ))}
           </View>

@@ -42,13 +42,13 @@ export const BusinessLocationMarker: React.FC<BusinessLocationMarkerProps> = mem
   }, [imageLoaded, imageError]);
 
   const handleImageLoad = () => {
-    console.log(`âœ… FastImage carregada para ${business.name}`);
+    console.log(`✅ FastImage carregada para ${business.name}`);
     setImageLoaded(true);
     setImageError(false);
   };
 
   const handleImageError = () => {
-    console.error(`ݒ Erro FastImage para ${business.name}`);
+    console.error(`❌ Erro FastImage para ${business.name}`);
     setImageError(true);
     setImageLoaded(false);
   };

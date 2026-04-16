@@ -235,7 +235,7 @@ const AllBusinessesScreen: React.FC = () => {
         {listType === 'promotions' && item.hasActivePromotions && (
           <View style={styles.promotionBadge}>
             <Text style={styles.promotionText}>
-              PROMOÃ‡ÃƒO
+              PROMOÇÃO
             </Text>
           </View>
         )}

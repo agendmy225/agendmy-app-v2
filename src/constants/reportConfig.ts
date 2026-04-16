@@ -1,6 +1,6 @@
 // Configurações para relatórios financeiros
 export const REPORT_CONFIG = {
-  // IMPORTANTE: NÃƒO usar valor fixo - sempre usar configuração do usuário
+  // IMPORTANTE: NÃO usar valor fixo - sempre usar configuração do usuário
   // Se não houver configuração, o sistema deve alertar o usuário para configurar
   DEFAULT_COMMISSION_RATE: null, // Removido valor fixo
   

@@ -5,8 +5,8 @@ const colors = {  // Paleta Principal do App AGENDMY
   accent: '#000000',       // Cor de destaque (preto)
 
   // Gradiente de fundo (bem leve: off-white quase puro até um toque sutil de vermelho claro)
-  backgroundGradientStart: '#FCFCFC',   // â€œoff-white” quase puro
-  backgroundGradientEnd: '#D3102720',   // â€œgelo avermelhado” muito transparente (~12% de opacidade)
+  backgroundGradientStart: '#FCFCFC',   // “off-white” quase puro
+  backgroundGradientEnd: '#D3102720',   // “gelo avermelhado” muito transparente (~12% de opacidade)
   // Cores básicas e utilitárias
   text: '#333333',          // Texto escuro padrão
   lightText: '#777777',     // Texto claro para legendas, placeholders

@@ -23,24 +23,24 @@ export const useFirebaseImage = (storagePath: string | null | undefined) => {
         setLoading(true);
         setError(null);
         
-        console.log('ðŸ”¥ Obtendo imagem base64 do Firebase para:', storagePath);
+        console.log('🔥 Obtendo imagem base64 do Firebase para:', storagePath);
         
         // Usar o serviço de cache para obter a imagem em base64
         const base64Image = await imageCacheService.getImage(storagePath);
         
         if (isMounted) {
           if (base64Image) {
-            console.log('âœ… Imagem base64 obtida com sucesso:', storagePath);
+            console.log('✅ Imagem base64 obtida com sucesso:', storagePath);
             setImageSource(base64Image);
           } else {
-            console.error('ݒ Falha ao obter imagem base64:', storagePath);
+            console.error('❌ Falha ao obter imagem base64:', storagePath);
             setImageSource(null);
             setError('Erro ao obter imagem do Firebase');
           }
         }
       } catch (err) {
         if (isMounted) {
-          console.error('ݒ Erro ao obter imagem base64 do Firebase:', err);
+          console.error('❌ Erro ao obter imagem base64 do Firebase:', err);
           setError('Erro ao obter imagem do Firebase');
           setImageSource(null);
         }

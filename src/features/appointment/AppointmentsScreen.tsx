@@ -41,16 +41,16 @@ const AppointmentsScreen: React.FC = () => {
       if (business) {
         setIsOwner(true);
         setBusinessId(business.id);
-        console.log('âœ… [AppointmentsScreen] Usuário é proprietário, businessId:', business.id);
+        console.log('✅ [AppointmentsScreen] Usuário é proprietário, businessId:', business.id);
         return true;
       } else {
         setIsOwner(false);
         setBusinessId(null);
-        console.log('âœ… [AppointmentsScreen] Usuário é cliente');
+        console.log('✅ [AppointmentsScreen] Usuário é cliente');
         return false;
       }
     } catch (error) {
-      console.error('ݒ [AppointmentsScreen] Erro ao verificar tipo de usuário:', error);
+      console.error('❌ [AppointmentsScreen] Erro ao verificar tipo de usuário:', error);
       setIsOwner(false);
       setBusinessId(null);
       return false;
@@ -62,11 +62,11 @@ const AppointmentsScreen: React.FC = () => {
     try {
       const currentUser = firebaseAuth.currentUser;
       if (!currentUser) {
-        console.log('ݒ [AppointmentsScreen] Usuário não autenticado');
+        console.log('❌ [AppointmentsScreen] Usuário não autenticado');
         return;
       }
 
-      console.log('ðŸ” [AppointmentsScreen] Carregando agendamentos...');
+      console.log('🔍 [AppointmentsScreen] Carregando agendamentos...');
       
       // Verificar tipo de usuário primeiro
       const userIsOwner = await checkUserType();
@@ -74,7 +74,7 @@ const AppointmentsScreen: React.FC = () => {
       let userAppointments: Appointment[] = [];
 
       if (userIsOwner) {
-        console.log('ðŸ‘‘ [AppointmentsScreen] Carregando agendamentos como proprietário...');
+        console.log('👑 [AppointmentsScreen] Carregando agendamentos como proprietário...');
         
         // Obter o businessId atualizado
         const business = await getBusinessByOwnerId(currentUser.uid);
@@ -84,11 +84,11 @@ const AppointmentsScreen: React.FC = () => {
           // Para proprietários: carregar TANTO agendamentos como cliente QUANTO agendamentos do negócio
           const [clientAppointments, businessAppointments] = await Promise.all([
             getClientAppointments().catch(err => {
-              console.warn('âš ௸ [AppointmentsScreen] Erro ao carregar agendamentos como cliente:', err);
+              console.warn('⚠️ [AppointmentsScreen] Erro ao carregar agendamentos como cliente:', err);
               return [];
             }),
             getBusinessAppointments(currentBusinessId).catch(err => {
-              console.warn('âš ௸ [AppointmentsScreen] Erro ao carregar agendamentos do negócio:', err);
+              console.warn('⚠️ [AppointmentsScreen] Erro ao carregar agendamentos do negócio:', err);
               return [];
             })
           ]);
@@ -100,26 +100,26 @@ const AppointmentsScreen: React.FC = () => {
           );
 
           userAppointments = uniqueAppointments;
-          console.log('âœ… [AppointmentsScreen] Agendamentos carregados para proprietário:', {
+          console.log('✅ [AppointmentsScreen] Agendamentos carregados para proprietário:', {
             clientAppointments: clientAppointments.length,
             businessAppointments: businessAppointments.length,
             total: userAppointments.length
           });
         } else {
-          console.log('âš ௸ [AppointmentsScreen] Proprietário sem negócio, carregando como cliente');
+          console.log('⚠️ [AppointmentsScreen] Proprietário sem negócio, carregando como cliente');
           userAppointments = await getClientAppointments();
         }
       } else {
-        console.log('ðŸ‘¤ [AppointmentsScreen] Carregando agendamentos como cliente...');
+        console.log('👤 [AppointmentsScreen] Carregando agendamentos como cliente...');
         
         // Para clientes: carregar apenas agendamentos como cliente
         userAppointments = await getClientAppointments();
-        console.log('âœ… [AppointmentsScreen] Agendamentos carregados para cliente:', userAppointments.length);
+        console.log('✅ [AppointmentsScreen] Agendamentos carregados para cliente:', userAppointments.length);
       }
 
       setAppointments(userAppointments);
     } catch (error) {
-      console.error('ݒ [AppointmentsScreen] Erro ao carregar agendamentos:', error);
+      console.error('❌ [AppointmentsScreen] Erro ao carregar agendamentos:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);

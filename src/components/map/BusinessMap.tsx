@@ -122,7 +122,7 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
         );
       }
     } catch (error) {
-      console.error('ݒ Erro no teste de conectividade:', error);
+      console.error('❌ Erro no teste de conectividade:', error);
       setStorageConnected(false);
 
       if (showTestButton) {
@@ -145,7 +145,7 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleMarkerPress = (business: BusinessLocation) => {
-    console.log(`ðŸ“ Marcador pressionado: ${business.name} (${business.businessId})`);
+    console.log(`📍 Marcador pressionado: ${business.name} (${business.businessId})`);
     onMarkerPress?.(business);
   };
 
@@ -158,9 +158,9 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
           {storageConnected === null ? (
             <Text style={styles.statusTesting}>Testando...</Text>
           ) : storageConnected ? (
-            <Text style={styles.statusConnected}>Conectado âœ…</Text>
+            <Text style={styles.statusConnected}>Conectado ✅</Text>
           ) : (
-            <Text style={styles.statusDisconnected}>Desconectado ݒ</Text>
+            <Text style={styles.statusDisconnected}>Desconectado ❌</Text>
           )}
         </Text>
 
@@ -199,7 +199,7 @@ const BusinessMap: React.FC<BusinessMapProps> = ({
       {__DEV__ && (
         <View style={styles.debugContainer}>
           <Text style={styles.debugText}>
-            Businesses: {businesses.length} | Storage: {storageConnected ? 'âœ…' : 'ݒ'}
+            Businesses: {businesses.length} | Storage: {storageConnected ? '✅' : '❌'}
           </Text>
         </View>
       )}

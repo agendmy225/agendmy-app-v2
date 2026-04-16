@@ -13,7 +13,7 @@ export const TestMarker: React.FC<TestMarkerProps> = ({ business, onPress }) => 
     return null;
   }
 
-  console.log(`ðŸ§ª TestMarker para ${business.name}:`, {
+  console.log(`🧪 TestMarker para ${business.name}:`, {
     logo: business.logo,
     coverImage: business.coverImage,
   });

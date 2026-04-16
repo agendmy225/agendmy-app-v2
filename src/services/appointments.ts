@@ -47,49 +47,49 @@ type AppointmentData = Omit<Appointment, 'id' | 'clientId' | 'clientEmail' | 'cr
 // Função para salvar um novo agendamento no Firestore
 export const saveAppointment = async (appointmentData: AppointmentData): Promise<string> => {
   try {
-    console.log('ðŸ”µ [saveAppointment] Iniciando...');
-    console.log('ðŸ“Š [saveAppointment] Dados recebidos:', appointmentData);
+    console.log('🔵 [saveAppointment] Iniciando...');
+    console.log('📊 [saveAppointment] Dados recebidos:', appointmentData);
 
     // Verificar se o usuário está autenticado
     const currentUser = firebaseAuth.currentUser;
-    console.log('ðŸ‘¤ [saveAppointment] Usuário atual:', {
+    console.log('👤 [saveAppointment] Usuário atual:', {
       uid: currentUser?.uid,
       email: currentUser?.email,
       emailVerified: currentUser?.emailVerified,
     });
 
     if (!currentUser) {
-      console.error('ݒ [saveAppointment] Usuário não autenticado');
+      console.error('❌ [saveAppointment] Usuário não autenticado');
       throw new Error('Usuário não autenticado. Por favor, faça login novamente.');
     }
 
     // Buscar dados do cliente para incluir o nome
     let clientName = appointmentData.clientName;
-    console.log('ðŸ‘¤ [saveAppointment] Nome do cliente inicial:', clientName);
+    console.log('👤 [saveAppointment] Nome do cliente inicial:', clientName);
 
     if (!clientName && currentUser.uid) {
       try {
-        console.log('ðŸ” [saveAppointment] Buscando dados do usuário no Firestore...');
+        console.log('🔍 [saveAppointment] Buscando dados do usuário no Firestore...');
         const userDoc = await getDoc(doc(firebaseDb, 'users', currentUser.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
           clientName = userData?.name || userData?.displayName || '';
-          console.log('âœ… [saveAppointment] Dados do usuário encontrados:', {
+          console.log('✅ [saveAppointment] Dados do usuário encontrados:', {
             name: userData?.name,
             displayName: userData?.displayName,
             clientNameFinal: clientName,
           });
         } else {
-          console.log('âš ௸ [saveAppointment] Documento do usuário não encontrado no Firestore');
+          console.log('⚠️ [saveAppointment] Documento do usuário não encontrado no Firestore');
         }
       } catch (userError) {
-        console.error('ݒ [saveAppointment] Erro ao buscar dados do usuário:', userError);
+        console.error('❌ [saveAppointment] Erro ao buscar dados do usuário:', userError);
         // Silently fail
       }
     }
 
     const finalClientName = clientName || currentUser.displayName || currentUser.email?.split('@')[0] || 'Cliente';
-    console.log('ðŸ‘¤ [saveAppointment] Nome final do cliente:', finalClientName);
+    console.log('👤 [saveAppointment] Nome final do cliente:', finalClientName);
 
     const appointmentToSave = {
       ...appointmentData,
@@ -100,17 +100,17 @@ export const saveAppointment = async (appointmentData: AppointmentData): Promise
       updatedAt: serverTimestamp(),
     };
 
-    console.log('ðŸ’¾ [saveAppointment] Dados finais para salvar:', appointmentToSave);
+    console.log('💾 [saveAppointment] Dados finais para salvar:', appointmentToSave);
 
     try {
-      console.log('ðŸ”¥ [saveAppointment] Salvando no Firestore...');
+      console.log('🔥 [saveAppointment] Salvando no Firestore...');
       // Criar um novo documento na coleção 'appointments'
       const appointmentRef = await addDoc(collection(firebaseDb, 'appointments'), appointmentToSave);
-      console.log('âœ… [saveAppointment] Agendamento salvo com sucesso! ID:', appointmentRef.id);
+      console.log('✅ [saveAppointment] Agendamento salvo com sucesso! ID:', appointmentRef.id);
       return appointmentRef.id;
     } catch (firestoreError) {
-      console.error('ݒ [saveAppointment] Erro do Firestore:', firestoreError);
-      console.error('ðŸ“Š [saveAppointment] Detalhes do erro do Firestore:', {
+      console.error('❌ [saveAppointment] Erro do Firestore:', firestoreError);
+      console.error('📊 [saveAppointment] Detalhes do erro do Firestore:', {
         code: (firestoreError as any)?.code,
         message: (firestoreError as any)?.message,
         details: (firestoreError as any)?.details,
@@ -118,8 +118,8 @@ export const saveAppointment = async (appointmentData: AppointmentData): Promise
       throw new Error(`Erro ao salvar no banco de dados: ${(firestoreError as any)?.message || 'Erro desconhecido'}`);
     }
   } catch (error) {
-    console.error('ݒ [saveAppointment] Erro geral:', error);
-    console.error('ðŸ“Š [saveAppointment] Stack trace:', (error as Error)?.stack);
+    console.error('❌ [saveAppointment] Erro geral:', error);
+    console.error('📊 [saveAppointment] Stack trace:', (error as Error)?.stack);
 
     // Não mostrar Alert aqui, deixar para a tela que chama
     throw error;

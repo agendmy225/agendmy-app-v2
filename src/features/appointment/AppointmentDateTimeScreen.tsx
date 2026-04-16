@@ -225,7 +225,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backButtonText}>â†</Text>
+          <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Escolha data e horário</Text>
         <View style={styles.placeholder} />
@@ -266,7 +266,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
                   style={styles.removeSessionButton}
                   onPress={() => removeSession(index)}
                 >
-                  <Text style={styles.removeSessionText}>Ã—</Text>
+                  <Text style={styles.removeSessionText}>×</Text>
                 </TouchableOpacity>
               </View>
             ))}

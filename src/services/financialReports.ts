@@ -58,7 +58,7 @@ export interface ReportParams {
 // Gerar relatório financeiro
 export const generateFinancialReport = async (params: ReportParams): Promise<FinancialReport> => {
   try {
-    console.log('ðŸ”µ Iniciando geração de relatório financeiro:', params);
+    console.log('🔵 Iniciando geração de relatório financeiro:', params);
     const { businessId, period, startDate, endDate } = params;
 
     // Validar parâmetros
@@ -69,7 +69,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
     // Converter datas para Timestamp do firebaseDb
     const startTimestamp = Timestamp.fromDate(startDate);
     const endTimestamp = Timestamp.fromDate(endDate);
-    console.log('ðŸ“… Período do relatório:', { start: startDate, end: endDate });
+    console.log('📅 Período do relatório:', { start: startDate, end: endDate });
 
     // Buscar agendamentos no período - CORRIGIDO: usar coleção raiz 'appointments'
     const appointmentsQuery = query(
@@ -79,7 +79,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
       where('date', '<=', endTimestamp)
     );
     const appointmentsSnapshot = await getDocs(appointmentsQuery);
-    console.log('ðŸ“Š Agendamentos encontrados:', appointmentsSnapshot.size);
+    console.log('📊 Agendamentos encontrados:', appointmentsSnapshot.size);
 
     // Verificar se existe ao menos uma collection de appointments
     if (!appointmentsSnapshot) {
@@ -117,7 +117,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
     // Processar cada agendamento
     for (const appointmentDoc of appointmentsSnapshot.docs) {
       const appointment = appointmentDoc.data();
-      console.log('ðŸ“‹ Processando agendamento:', {
+      console.log('📋 Processando agendamento:', {
         id: appointmentDoc.id,
         status: appointment.status,
         price: appointment.price,
@@ -132,7 +132,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
         const price = toValidPrice(appointment.price);
         if (price > 0) {
           totalRevenue += price;
-          console.log('ðŸ’° Receita adicionada:', price, 'Total:', totalRevenue);
+          console.log('💰 Receita adicionada:', price, 'Total:', totalRevenue);
         }
 
         // Processar receita por serviço
@@ -157,7 +157,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
                     serviceName = rootServiceData?.name || 'Serviço Desconhecido';
                   }
                 } catch {
-                  console.log('âš ௸ Serviço não encontrado em nenhuma coleção:', appointment.serviceId);
+                  console.log('⚠️ Serviço não encontrado em nenhuma coleção:', appointment.serviceId);
                 }
               }
 
@@ -167,7 +167,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
                 appointmentsCount: 0,
               };
             } catch (serviceError) {
-              console.error('ݒ Erro ao buscar dados do serviço:', serviceError);
+              console.error('❌ Erro ao buscar dados do serviço:', serviceError);
               serviceRevenue[appointment.serviceId] = {
                 name: 'Serviço Desconhecido',
                 totalRevenue: 0,
@@ -178,7 +178,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
 
           serviceRevenue[appointment.serviceId].totalRevenue += price;
           serviceRevenue[appointment.serviceId].appointmentsCount += 1;
-          console.log('ðŸ”§ Receita do serviço atualizada:', appointment.serviceId, serviceRevenue[appointment.serviceId]);
+          console.log('🔧 Receita do serviço atualizada:', appointment.serviceId, serviceRevenue[appointment.serviceId]);
         }
 
         // Processar comissão por profissional
@@ -211,7 +211,7 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
               rateForCalculation = professionalData?.commissionRate || defaultCommissionRate;
 
               if (!rateForCalculation || rateForCalculation <= 0) {
-                console.warn('âš ௸ Taxa de comissão não configurada para profissional:', profId);
+                console.warn('⚠️ Taxa de comissão não configurada para profissional:', profId);
                 // Pular este profissional se não tiver configuração válida
                 continue;
               }
@@ -226,13 +226,13 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
                   appointmentsCount: 0,
                   commission: 0,
                 };
-                console.log('ðŸ‘¤ Profissional adicionado:', professionalName, 'Taxa:', rateForCalculation);
+                console.log('👤 Profissional adicionado:', professionalName, 'Taxa:', rateForCalculation);
               }
             } catch (profError) {
-              console.error('ݒ Erro ao buscar dados do profissional:', profError);
+              console.error('❌ Erro ao buscar dados do profissional:', profError);
               // IMPORTANTE: Se não conseguir buscar dados do profissional, pular
-              // NÃƒO usar taxa mockada/padrão
-              console.warn('âš ௸ Pulando profissional sem dados válidos:', profId);
+              // NÃO usar taxa mockada/padrão
+              console.warn('⚠️ Pulando profissional sem dados válidos:', profId);
               continue;
             }
           }
@@ -241,15 +241,15 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
           professionalCommissions[profId].appointmentsCount += 1;
           const commissionAmount = price * rateForCalculation;
           professionalCommissions[profId].commission += commissionAmount;
-          console.log('ðŸ’¼ Comissão calculada para', professionalCommissions[profId].name, ':', commissionAmount, 'Taxa:', rateForCalculation);
+          console.log('💼 Comissão calculada para', professionalCommissions[profId].name, ':', commissionAmount, 'Taxa:', rateForCalculation);
         }
       } else if (isCanceledStatus(appointment.status)) {
         canceledAppointments++;
-        console.log('ݒ Agendamento cancelado contabilizado');
+        console.log('❌ Agendamento cancelado contabilizado');
       }
     }
 
-    console.log('ðŸ“Š Resumo do relatório:', {
+    console.log('📊 Resumo do relatório:', {
       totalRevenue,
       totalAppointments,
       completedAppointments,
@@ -276,14 +276,14 @@ export const generateFinancialReport = async (params: ReportParams): Promise<Fin
     // Salvar o relatório no firebaseDb
     const reportsCollectionRef = collection(firebaseDb, 'businesses', businessId, 'financialReports');
     const reportRef = await addDoc(reportsCollectionRef, report);
-    console.log('âœ… Relatório salvo com ID:', reportRef.id);
+    console.log('✅ Relatório salvo com ID:', reportRef.id);
 
     return {
       ...report,
       id: reportRef.id,
     };
   } catch (error) {
-    console.error('ݒ Erro ao gerar relatório financeiro:', error);
+    console.error('❌ Erro ao gerar relatório financeiro:', error);
     if (error instanceof Error) {
       throw error; // Re-throw se já é um Error com mensagem específica
     }
@@ -353,7 +353,7 @@ export const calculateCommissions = async (
   endDate: Date,
 ): Promise<{ [professionalId: string]: { name: string; commission: number } }> => {
   try {
-    console.log('ðŸ”µ Calculando comissões para período:', { businessId, startDate, endDate });
+    console.log('🔵 Calculando comissões para período:', { businessId, startDate, endDate });
 
     // Converter datas para Timestamp do firebaseDb
     const startTimestamp = Timestamp.fromDate(startDate);
@@ -368,7 +368,7 @@ export const calculateCommissions = async (
       where('status', '==', 'completed')
     );
     const appointmentsSnapshot = await getDocs(appointmentsQuery);
-    console.log('ðŸ“Š Agendamentos concluídos encontrados:', appointmentsSnapshot.size);
+    console.log('📊 Agendamentos concluídos encontrados:', appointmentsSnapshot.size);
 
     // Buscar configurações de comissão do estabelecimento
     const businessDocRef = doc(firebaseDb, 'businesses', businessId);
@@ -421,7 +421,7 @@ export const calculateCommissions = async (
             rateForCalculation = professionalData?.commissionRate || defaultCommissionRate;
 
             if (!rateForCalculation || rateForCalculation <= 0) {
-              console.warn('âš ௸ Taxa de comissão não configurada para profissional:', profId);
+              console.warn('⚠️ Taxa de comissão não configurada para profissional:', profId);
               // Pular este profissional se não tiver configuração válida
               continue;
             }
@@ -436,24 +436,24 @@ export const calculateCommissions = async (
               };
             }
           } catch (profError) {
-            console.error('ݒ Erro ao buscar profissional:', profError);
+            console.error('❌ Erro ao buscar profissional:', profError);
             // IMPORTANTE: Se não conseguir buscar dados do profissional, pular
-            // NÃƒO usar taxa mockada/padrão
-            console.warn('âš ௸ Pulando profissional sem dados válidos:', profId);
+            // NÃO usar taxa mockada/padrão
+            console.warn('⚠️ Pulando profissional sem dados válidos:', profId);
             continue;
           }
         }
 
         const commissionAmount = price * rateForCalculation;
         commissions[profId].commission += commissionAmount;
-        console.log('ðŸ’¼ Comissão calculada:', commissions[profId].name, commissionAmount);
+        console.log('💼 Comissão calculada:', commissions[profId].name, commissionAmount);
       }
     }
 
-    console.log('âœ… Cálculo de comissões concluído:', Object.keys(commissions).length, 'profissionais');
+    console.log('✅ Cálculo de comissões concluído:', Object.keys(commissions).length, 'profissionais');
     return commissions;
   } catch (error) {
-    console.error('ݒ Erro ao calcular comissões:', error);
+    console.error('❌ Erro ao calcular comissões:', error);
     throw error;
   }
 };

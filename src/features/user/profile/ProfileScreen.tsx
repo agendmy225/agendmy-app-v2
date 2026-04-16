@@ -78,7 +78,7 @@ const ProfileScreen: React.FC = () => {
         >
           <Icon name="edit" size={22} color={colors.text} style={styles.menuIcon} />
           <Text style={styles.menuText}>Editar Perfil</Text>
-          <Text style={styles.menuArrow}>â€º</Text>
+          <Text style={styles.menuArrow}>›</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -114,7 +114,7 @@ const ProfileScreen: React.FC = () => {
         >
           <Icon name="help-outline" size={22} color={colors.text} style={styles.menuIcon} />
           <Text style={styles.menuText}>Suporte</Text>
-          <Text style={styles.menuArrow}>â€º</Text>
+          <Text style={styles.menuArrow}>›</Text>
         </TouchableOpacity>
       </View>
 

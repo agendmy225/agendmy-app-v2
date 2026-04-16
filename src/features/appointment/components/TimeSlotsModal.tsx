@@ -211,7 +211,7 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Horários Disponíveis</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Ã—</Text>
+              <Text style={styles.closeButtonText}>×</Text>
             </TouchableOpacity>
           </View>
 

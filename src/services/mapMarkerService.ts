@@ -21,21 +21,21 @@ class MapMarkerService {
   // Testa conectividade com Firebase Storage
   async testStorageConnection(): Promise<boolean> {
     try {
-      console.log('ðŸ” Testando conectividade com Firebase Storage...');
+      console.log('🔍 Testando conectividade com Firebase Storage...');
 
       // Tenta listar arquivos na pasta businesses para testar conectividade
       const businessesRef = ref(storage, 'businesses');
       const listResult = await listAll(businessesRef);
 
       this.isStorageConnected = true;
-      console.log('âœ… Firebase Storage conectado com sucesso!');
-      console.log(`ðŸ“ Encontradas ${listResult.prefixes.length} pastas de businesses`);
+      console.log('✅ Firebase Storage conectado com sucesso!');
+      console.log(`📁 Encontradas ${listResult.prefixes.length} pastas de businesses`);
 
       return true;
     } catch (error) {
       this.isStorageConnected = false;
-      console.error('ݒ Falha na conexão com Firebase Storage:', error);
-      console.error('ðŸ”§ Verifique as storage.rules e configuração do Firebase');
+      console.error('❌ Falha na conexão com Firebase Storage:', error);
+      console.error('🔧 Verifique as storage.rules e configuração do Firebase');
 
       return false;
     }
@@ -45,7 +45,7 @@ class MapMarkerService {
   async getBusinessLogoUrl(businessId: string): Promise<string | null> {
     try {
       if (!this.isStorageConnected) {
-        console.warn('âš ௸ Storage não conectado. Tentando reconectar...');
+        console.warn('⚠️ Storage não conectado. Tentando reconectar...');
         const connected = await this.testStorageConnection();
         if (!connected) {
           return null;
@@ -55,11 +55,11 @@ class MapMarkerService {
       // Verifica cache primeiro
       const cacheKey = `business_${businessId}`;
       if (this.imageCache[cacheKey]) {
-        console.log(`ðŸ’¾ Logo encontrado no cache para business: ${businessId}`);
+        console.log(`💾 Logo encontrado no cache para business: ${businessId}`);
         return this.imageCache[cacheKey];
       }
 
-      console.log(`ðŸ” Buscando logo do business: ${businessId}`);
+      console.log(`🔍 Buscando logo do business: ${businessId}`);
 
       // Lista arquivos na pasta do business
       const businessRef = ref(storage, `businesses/${businessId}`);
@@ -72,7 +72,7 @@ class MapMarkerService {
       );
 
       if (!logoFile) {
-        console.log(`âš ௸ Logo não encontrado para business: ${businessId}`);
+        console.log(`⚠️ Logo não encontrado para business: ${businessId}`);
         return null;
       }
 
@@ -82,12 +82,12 @@ class MapMarkerService {
       // Armazena no cache
       this.imageCache[cacheKey] = logoUrl;
 
-      console.log(`âœ… Logo encontrado para business ${businessId}: ${logoFile.name}`);
-      console.log(`ðŸ”— URL: ${logoUrl}`);
+      console.log(`✅ Logo encontrado para business ${businessId}: ${logoFile.name}`);
+      console.log(`🔗 URL: ${logoUrl}`);
       return logoUrl;
 
     } catch (error) {
-      console.error(`ݒ Erro ao buscar logo do business ${businessId}:`, error);
+      console.error(`❌ Erro ao buscar logo do business ${businessId}:`, error);
       return null;
     }
   }
@@ -96,7 +96,7 @@ class MapMarkerService {
   async getMultipleBusinessLogos(businessIds: string[]): Promise<Map<string, string>> {
     const logoMap = new Map<string, string>();
 
-    console.log(`ðŸ”„ Buscando logos para ${businessIds.length} businesses...`);
+    console.log(`🔄 Buscando logos para ${businessIds.length} businesses...`);
 
     const promises = businessIds.map(async (businessId) => {
       const logoUrl = await this.getBusinessLogoUrl(businessId);
@@ -107,18 +107,18 @@ class MapMarkerService {
 
     await Promise.all(promises);
 
-    console.log(`âœ… Encontrados ${logoMap.size} logos de ${businessIds.length} businesses`);
+    console.log(`✅ Encontrados ${logoMap.size} logos de ${businessIds.length} businesses`);
     return logoMap;
   }
 
   // Prepara marcadores com logos para o mapa
   async prepareMarkersWithLogos(businesses: Omit<BusinessMarker, 'logoUrl'>[]): Promise<BusinessMarker[]> {
-    console.log(`ðŸ—º௸ Preparando ${businesses.length} marcadores com logos...`);
+    console.log(`🗺️ Preparando ${businesses.length} marcadores com logos...`);
 
     // Testa conexão primeiro
     const isConnected = await this.testStorageConnection();
     if (!isConnected) {
-      console.warn('âš ௸ Retornando marcadores sem logos devido à falha de conexão');
+      console.warn('⚠️ Retornando marcadores sem logos devido à falha de conexão');
       return businesses.map(business => ({ ...business, logoUrl: undefined }));
     }
 
@@ -133,7 +133,7 @@ class MapMarkerService {
     }));
 
     const markersWithLogosCount = markersWithLogos.filter(m => m.logoUrl).length;
-    console.log(`ðŸŽ¯ ${markersWithLogosCount} de ${businesses.length} marcadores preparados com logos`);
+    console.log(`🎯 ${markersWithLogosCount} de ${businesses.length} marcadores preparados com logos`);
 
     return markersWithLogos;
   }
@@ -141,19 +141,19 @@ class MapMarkerService {
   // Obtém ImageSource para marcador do mapa (usando URL direta - recomendado)
   getMarkerImageSource(logoUrl?: string): ImageURISource {
     if (logoUrl) {
-      console.log('ðŸŽ¯ Usando logo customizado para marcador');
+      console.log('🎯 Usando logo customizado para marcador');
       return { uri: logoUrl };
     }
 
     // Fallback para ícone padrão se não tiver logo
-    console.log('ðŸŽ¯ Usando ícone padrão para marcador');
+    console.log('🎯 Usando ícone padrão para marcador');
     // Nota: Você pode criar um ícone padrão ou usar um ícone do sistema
     return { uri: 'https://via.placeholder.com/50x50/FF0000/FFFFFF?text=B' };
   }
 
   // Pré-carrega imagens de múltiplos estabelecimentos
   async preloadBusinessLogos(businessIds: string[]): Promise<void> {
-    console.log('ðŸš€ Pré-carregando logos de', businessIds.length, 'estabelecimentos...');
+    console.log('🚀 Pré-carregando logos de', businessIds.length, 'estabelecimentos...');
 
     const promises = businessIds.map(businessId => {
       return this.getBusinessLogoUrl(businessId);
@@ -161,16 +161,16 @@ class MapMarkerService {
 
     try {
       await Promise.allSettled(promises);
-      console.log('âœ… Pré-carregamento de logos concluído');
+      console.log('✅ Pré-carregamento de logos concluído');
     } catch (error) {
-      console.error('ݒ Erro no pré-carregamento:', error);
+      console.error('❌ Erro no pré-carregamento:', error);
     }
   }
 
   // Limpa cache de imagens
   clearCache(): void {
     this.imageCache = {};
-    console.log('ðŸ—‘௸ Cache de logos limpo');
+    console.log('🗑️ Cache de logos limpo');
   }
 
   // Obtém estatísticas do cache
@@ -178,7 +178,7 @@ class MapMarkerService {
     const totalImages = Object.keys(this.imageCache).length;
     const cacheKeys = Object.keys(this.imageCache);
 
-    console.log(`ðŸ“Š Cache Stats: ${totalImages} logos em cache`);
+    console.log(`📊 Cache Stats: ${totalImages} logos em cache`);
     return { totalImages, cacheKeys };
   }
 }

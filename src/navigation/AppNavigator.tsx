@@ -48,7 +48,7 @@ import ServiceManagementScreen from '../features/service/ServiceManagementScreen
 import ReviewsManagementScreen from '../features/reviews/ReviewsManagementScreen';
 import BusinessSettingsScreen from '../features/business/BusinessSettingsScreen';
 
-// Loading Screen â€” exibida enquanto o estado de auth é verificado
+// Loading Screen — exibida enquanto o estado de auth é verificado
 const LoadingScreen: React.FC = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
     <ActivityIndicator size="large" color={colors.primary} />

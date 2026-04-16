@@ -17,18 +17,18 @@ class BusinessLogosService {
    */
   async testStorageConnection(): Promise<boolean> {
     try {
-      console.log('ðŸ”¥ Testando conexão com Firebase Storage...');
+      console.log('🔥 Testando conexão com Firebase Storage...');
 
       // Tenta listar uma pasta para verificar conectividade
       const businessesRef = storageRef(firebaseStorage, 'businesses');
       const listResult = await listAll(businessesRef);
 
-      console.log('âœ… Firebase Storage conectado com sucesso!');
-      console.log(`ðŸ“ Encontradas ${listResult.items.length} pastas de businesses`);
+      console.log('✅ Firebase Storage conectado com sucesso!');
+      console.log(`📁 Encontradas ${listResult.items.length} pastas de businesses`);
 
       return true;
     } catch (error) {
-      console.error('ݒ Erro ao conectar com Firebase Storage:', error);
+      console.error('❌ Erro ao conectar com Firebase Storage:', error);
       return false;
     }
   }
@@ -41,18 +41,18 @@ class BusinessLogosService {
       // Verifica cache primeiro
       if (this.logoCache.has(businessId)) {
         const cachedLogo = this.logoCache.get(businessId)!;
-        console.log(`ðŸ“¦ Logo do business ${businessId} encontrado no cache`);
+        console.log(`📦 Logo do business ${businessId} encontrado no cache`);
         return cachedLogo;
       }
 
       // Evita múltiplas requisições simultâneas para o mesmo business
       if (this.downloadingLogos.has(businessId)) {
-        console.log(`ϳ Aguardando download do logo do business ${businessId}...`);
+        console.log(`⏳ Aguardando download do logo do business ${businessId}...`);
         return null;
       }
 
       this.downloadingLogos.add(businessId);
-      console.log(`ðŸ” Buscando logo do business: ${businessId}`);
+      console.log(`🔍 Buscando logo do business: ${businessId}`);
 
       // Lista arquivos na pasta do business
       const businessRef = storageRef(firebaseStorage, `businesses/${businessId}`);
@@ -65,7 +65,7 @@ class BusinessLogosService {
       );
 
       if (logoFiles.length === 0) {
-        console.warn(`âš ௸ Nenhum logo encontrado para o business ${businessId}`);
+        console.warn(`⚠️ Nenhum logo encontrado para o business ${businessId}`);
         this.downloadingLogos.delete(businessId);
         return null;
       }
@@ -84,11 +84,11 @@ class BusinessLogosService {
       this.logoCache.set(businessId, businessLogo);
       this.downloadingLogos.delete(businessId);
 
-      console.log(`âœ… Logo encontrado para business ${businessId}: ${logoFile.name}`);
+      console.log(`✅ Logo encontrado para business ${businessId}: ${logoFile.name}`);
       return businessLogo;
 
     } catch (error) {
-      console.error(`ݒ Erro ao buscar logo do business ${businessId}:`, error);
+      console.error(`❌ Erro ao buscar logo do business ${businessId}:`, error);
       this.downloadingLogos.delete(businessId);
 
       const errorLogo: BusinessLogo = {
@@ -106,7 +106,7 @@ class BusinessLogosService {
    * Busca logos de múltiplos businesses
    */
   async getMultipleBusinessLogos(businessIds: string[]): Promise<Map<string, BusinessLogo>> {
-    console.log(`ðŸ” Buscando logos para ${businessIds.length} businesses...`);
+    console.log(`🔍 Buscando logos para ${businessIds.length} businesses...`);
 
     const results = new Map<string, BusinessLogo>();
 
@@ -125,7 +125,7 @@ class BusinessLogosService {
       await Promise.all(promises);
     }
 
-    console.log(`âœ… Processados ${results.size} logos de ${businessIds.length} businesses`);
+    console.log(`✅ Processados ${results.size} logos de ${businessIds.length} businesses`);
     return results;
   }
 
@@ -134,7 +134,7 @@ class BusinessLogosService {
    */
   clearCache(): void {
     this.logoCache.clear();
-    console.log('ðŸ—‘௸ Cache de logos limpo');
+    console.log('🗑️ Cache de logos limpo');
   }
 
   /**

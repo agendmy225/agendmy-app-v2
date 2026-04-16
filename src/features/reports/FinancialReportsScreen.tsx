@@ -288,7 +288,7 @@ const FinancialReportsScreen: React.FC = () => {
           style={styles.deleteIcon}
           onPress={() => report.id && handleDeleteReport(report.id)}
         >
-          <Text style={styles.deleteIconText}>ðŸ—‘௸</Text>
+          <Text style={styles.deleteIconText}>🗑️</Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.reportDate}>
@@ -325,7 +325,7 @@ const FinancialReportsScreen: React.FC = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Relatório Financeiro</Text>
               <TouchableOpacity style={styles.closeButton} onPress={() => setReportModalVisible(false)}>
-                <Text style={styles.closeButtonText}>âœ•</Text>
+                <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             </View>
 
@@ -441,7 +441,7 @@ const FinancialReportsScreen: React.FC = () => {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Gerar Relatório Financeiro</Text>
             <TouchableOpacity style={styles.closeButton} onPress={() => setGenerateModalVisible(false)}>
-              <Text style={styles.closeButtonText}>âœ•</Text>
+              <Text style={styles.closeButtonText}>✕</Text>
             </TouchableOpacity>
           </View>
 

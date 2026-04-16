@@ -274,8 +274,8 @@ const ServiceManagementScreen: React.FC = () => {
         return;
       }
 
-      console.log('ðŸ”§ Validações passaram, construindo serviceData...');
-      console.log('ðŸ“Š Dados do formulário:', {
+      console.log('🔧 Validações passaram, construindo serviceData...');
+      console.log('📊 Dados do formulário:', {
         name: serviceName,
         description: serviceDescription,
         price,
@@ -301,11 +301,11 @@ const ServiceManagementScreen: React.FC = () => {
         serviceData.numSessions = sessionsCount;
       }
 
-      console.log('ðŸ“¦ ServiceData final construído:', serviceData);
+      console.log('📦 ServiceData final construído:', serviceData);
 
       if (editingService) {
         // Editar serviço existente
-        console.log('âœ௸ Editando serviço existente:', editingService.id);
+        console.log('✏️ Editando serviço existente:', editingService.id);
         await updateService(businessId, editingService.id, serviceData);
 
         // Atualizar localmente
@@ -316,14 +316,14 @@ const ServiceManagementScreen: React.FC = () => {
         Alert.alert('Sucesso', 'Serviço atualizado com sucesso!');
       } else {
         // Adicionar novo serviço (profissionais já incluídos no serviceData)
-        console.log('ðŸ”„ Criando novo serviço com dados:', serviceData);
-        console.log('ðŸ“ BusinessID:', businessId);
+        console.log('🔄 Criando novo serviço com dados:', serviceData);
+        console.log('📍 BusinessID:', businessId);
 
         const newServiceData = { ...serviceData, businessId };
-        console.log('ðŸ¢ Dados completos para criação:', newServiceData);
+        console.log('🏢 Dados completos para criação:', newServiceData);
 
         const newService = await createService(businessId, newServiceData);
-        console.log('âœ… Serviço criado com sucesso:', newService);
+        console.log('✅ Serviço criado com sucesso:', newService);
 
         // Adicionar localmente
         setServices([...services, newService]);
@@ -332,10 +332,10 @@ const ServiceManagementScreen: React.FC = () => {
 
       setModalVisible(false);
     } catch (error) {
-      console.error('ݒ Erro detalhado ao salvar serviço:', error);
-      console.error('ðŸ” Tipo do erro:', typeof error);
-      console.error('ðŸ“Š Stack trace:', (error as Error)?.stack);
-      console.error('ðŸ’¬ Mensagem do erro:', (error as Error)?.message);
+      console.error('❌ Erro detalhado ao salvar serviço:', error);
+      console.error('🔍 Tipo do erro:', typeof error);
+      console.error('📊 Stack trace:', (error as Error)?.stack);
+      console.error('💬 Mensagem do erro:', (error as Error)?.message);
 
       let errorMessage = 'Ocorreu um erro ao salvar o serviço. Tente novamente.';
       if (error instanceof Error) {
@@ -563,7 +563,7 @@ const ServiceManagementScreen: React.FC = () => {
                 style={styles.closeButton}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.closeButtonText}>âœ•</Text>
+                <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             </View>
 
@@ -582,7 +582,7 @@ const ServiceManagementScreen: React.FC = () => {
               {parseInt(numSessions, 10) > 1 && (
                 <View style={styles.packageInfoContainer}>
                   <Text style={styles.packageInfoText}>
-                    ðŸ’¡ Modo Pacote Ativado: Selecione um serviço base abaixo para criar um pacote de {numSessions} sessões
+                    💡 Modo Pacote Ativado: Selecione um serviço base abaixo para criar um pacote de {numSessions} sessões
                   </Text>
                 </View>
               )}
@@ -591,7 +591,7 @@ const ServiceManagementScreen: React.FC = () => {
                 <View style={styles.packageCreationContainer}>
                   <Text style={styles.modalLabel}>Selecione o Serviço Base para o Pacote</Text>
                   {baseServiceId === '' && (
-                    <Text style={styles.warningText}>âš ௸ Selecione um serviço base para continuar</Text>
+                    <Text style={styles.warningText}>⚠️ Selecione um serviço base para continuar</Text>
                   )}
                   {services
                     .filter(s => !s.numSessions || s.numSessions <= 1)

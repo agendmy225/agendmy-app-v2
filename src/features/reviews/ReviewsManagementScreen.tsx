@@ -284,7 +284,7 @@ const ReviewsManagementScreen: React.FC = () => {
     for (let i = 1; i <= 5; i++) {
       stars.push(
         <Text key={i} style={[styles.starIcon, i <= rating && styles.filledStar]}>
-          {i <= rating ? 'â˜…' : 'â˜†'}
+          {i <= rating ? '★' : '☆'}
         </Text>,
       );
     }
@@ -460,7 +460,7 @@ const ReviewsManagementScreen: React.FC = () => {
                 style={styles.closeButton}
                 onPress={() => setResponseModalVisible(false)}
               >
-                <Text style={styles.closeButtonText}>âœ•</Text>
+                <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             </View>
 
