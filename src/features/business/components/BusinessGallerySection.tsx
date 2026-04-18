@@ -37,6 +37,7 @@ const BusinessGallerySection: React.FC<BusinessGallerySectionProps> = ({
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
   const handleAddPhoto = async () => {
+    console.log('[Gallery] handleAddPhoto called, businessId:', businessId);
     if (gallery.length >= MAX_PHOTOS) {
       Alert.alert('Limite atingido', `Você já tem ${MAX_PHOTOS} fotos na galeria.`);
       return;
@@ -44,14 +45,16 @@ const BusinessGallerySection: React.FC<BusinessGallerySectionProps> = ({
 
     try {
       setIsUploadingPhoto(true);
-      const result = await selectAndUploadImage({
-        storageKey: `businesses/${businessId}/gallery/photo_${Date.now()}.jpg`,
-      });
+      const storageKey = `businesses/${businessId}/gallery/photo_${Date.now()}.jpg`;
+      console.log('[Gallery] uploading to:', storageKey);
+      const result = await selectAndUploadImage({ storageKey });
+      console.log('[Gallery] upload success:', result.storagePath);
       onGalleryChange([...gallery, result.storagePath]);
       Alert.alert('Sucesso', 'Foto adicionada à galeria!');
     } catch (error) {
+      console.log('[Gallery] upload error:', error);
       if (error instanceof Error && !error.message.includes('cancelada')) {
-        Alert.alert('Erro', 'Não foi possível fazer upload da foto.');
+        Alert.alert('Erro no upload', error.message || 'Erro desconhecido');
       }
     } finally {
       setIsUploadingPhoto(false);
