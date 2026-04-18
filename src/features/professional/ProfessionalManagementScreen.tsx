@@ -175,6 +175,33 @@ const ProfessionalManagementScreen: React.FC = () => {
     setPortfolioImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleVideoSelection = async () => {
+    const storagePath = `professional_images/${user?.uid}/video_${Date.now()}.mp4`;
+    try {
+      setIsUploading(true);
+      const result = await selectAndUploadVideo(storagePath);
+      setPortfolioVideo(result.downloadURL);
+      Alert.alert('Sucesso', 'Vídeo adicionado ao portfólio!');
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('cancelada') && !error.message.includes('longo')) {
+        Alert.alert('Erro', 'Não foi possível fazer upload do vídeo.');
+      }
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveVideo = () => {
+    Alert.alert(
+      'Remover vídeo',
+      'Tem certeza que deseja remover o vídeo?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Remover', style: 'destructive', onPress: () => setPortfolioVideo('') },
+      ],
+    );
+  };
+
   const openAddModal = () => {
     setEditingProfessional(null);
     setProfessionalName('');
@@ -446,6 +473,24 @@ const ProfessionalManagementScreen: React.FC = () => {
                   </View>
                 ))}
               </ScrollView>
+
+              <Text style={styles.videoLabel}>Vídeo do Portfólio (máx. 20s)</Text>
+              {portfolioVideo ? (
+                <View style={styles.videoPreviewContainer}>
+                  <Text style={styles.videoPreviewText}>▶ Vídeo carregado</Text>
+                  <TouchableOpacity style={styles.removeVideoButton} onPress={handleRemoveVideo}>
+                    <Text style={styles.removeVideoButtonText}>Remover vídeo</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <Button
+                  title="Adicionar Vídeo (máx. 20s)"
+                  onPress={handleVideoSelection}
+                  disabled={isUploading}
+                />
+              )}
+
+              
 
               <TouchableOpacity style={[styles.saveButton, isUploading && styles.disabledButton]} onPress={saveProfessional} disabled={isUploading}>
                 {isUploading ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveButtonText}>Salvar</Text>}
