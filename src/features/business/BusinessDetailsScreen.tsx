@@ -1,6 +1,7 @@
 import { RouteProp, useFocusEffect, useNavigation, useRoute, CompositeNavigationProp } from '@react-navigation/native'; // Import useFocusEffect
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BusinessMarker } from './components/BusinessMarker';
+import GalleryViewerModal, { GalleryItem } from './components/GalleryViewerModal';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   ActivityIndicator,
@@ -64,6 +65,7 @@ const BusinessDetailsScreen: React.FC = () => {
   const [isBookingAvailable, setIsBookingAvailable] = useState(false);
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
   const [isPortfolioModalVisible, setIsPortfolioModalVisible] = useState(false);
+  const [isGalleryVisible, setIsGalleryVisible] = useState(false);
   const [mapKey, setMapKey] = useState(0); // Força re-render do mapa
 
   // Hook para carregar imagem de capa do Firebase Storage
@@ -478,7 +480,7 @@ const BusinessDetailsScreen: React.FC = () => {
                 {/* Lógica para exibir horário de funcionamento */}
                 <Text style={styles.hoursText}>Aberto · {business.workingHours?.monday?.start || '09:00'} - {business.workingHours?.monday?.end || '18:00'}</Text>
               </View>
-              <TouchableOpacity style={styles.seeAllPhotosButton}>
+              <TouchableOpacity style={styles.seeAllPhotosButton} onPress={() => setIsGalleryVisible(true)}>
                 <Text style={styles.seeAllPhotosText}>Ver todas as fotos</Text>
               </TouchableOpacity>
             </View>
@@ -774,6 +776,23 @@ const BusinessDetailsScreen: React.FC = () => {
               )}
             />
           )}
+          {/* Modal de galeria de fotos/video */}
+          {business && (
+            <GalleryViewerModal
+              visible={isGalleryVisible}
+              onClose={() => setIsGalleryVisible(false)}
+              businessName={business.name || ''}
+              items={[
+                ...(((business as any).gallery || []) as string[]).map(
+                  (path: string) => ({ type: 'photo', storagePath: path } as GalleryItem),
+                ),
+                ...((business as any).galleryVideo
+                  ? [{ type: 'video', storagePath: (business as any).galleryVideo } as GalleryItem]
+                  : []),
+              ]}
+            />
+          )}
+
           {/* Modal de portfólio do profissional */}
           {isPortfolioModalVisible && selectedProfessional && (
             <ProfessionalPortfolioModal

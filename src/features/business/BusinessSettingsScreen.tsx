@@ -22,6 +22,7 @@ import {
   selectAndUploadImage,
 } from '../../services/imageUpload';
 import StorageImage from '../../components/common/StorageImage';
+import BusinessGallerySection from './components/BusinessGallerySection';
 import Config from 'react-native-config';
 
 interface BusinessSettings {
@@ -66,6 +67,8 @@ interface BusinessSettings {
     inApp: boolean;
   };
   defaultCommissionRate: number; // taxa padrão de comissão (0-1)
+  gallery?: string[];
+  galleryVideo?: string;
 }
 
 const BusinessSettingsScreen: React.FC = () => {
@@ -118,6 +121,8 @@ const BusinessSettingsScreen: React.FC = () => {
       inApp: false,
     },
     defaultCommissionRate: 0.5,
+    gallery: [],
+    galleryVideo: '',
   });
   const [hasChanges, setHasChanges] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -245,6 +250,8 @@ const BusinessSettingsScreen: React.FC = () => {
             ...prevSettings.paymentMethods,
             ...(businessData.paymentMethods || {}),
           },
+          gallery: businessData.gallery || prevSettings.gallery || [],
+          galleryVideo: businessData.galleryVideo || prevSettings.galleryVideo || '',
           defaultCommissionRate: businessData.defaultCommissionRate !== undefined
             ? businessData.defaultCommissionRate
             : prevSettings.defaultCommissionRate,
@@ -692,7 +699,36 @@ const BusinessSettingsScreen: React.FC = () => {
           </View>)}
       </View>
 
+      {businessId && (
+
+
+        <BusinessGallerySection
+
+
+          businessId={businessId}
+
+
+          gallery={settings.gallery || []}
+
+
+          galleryVideo={settings.galleryVideo || ''}
+
+
+          onGalleryChange={(g) => updateSettings('gallery', g)}
+
+
+          onVideoChange={(v) => updateSettings('galleryVideo', v)}
+
+
+        />
+
+
+      )}
+
+
       <View style={styles.inputContainer}>
+
+
         <Text style={styles.inputLabel}>Categoria *</Text>
         <View style={styles.pickerContainer}>
           <Picker
