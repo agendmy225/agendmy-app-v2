@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Platform,
   Modal,
   View,
   Text,
@@ -76,7 +77,6 @@ const GalleryViewerModal: React.FC<GalleryViewerModalProps> = ({
   const handleOpenVideo = async () => {
     console.log('[Video] handleOpenVideo chamado');
     if (!currentItem || currentItem.type !== 'video') {
-      console.log('[Video] Nenhum item de video atual');
       return;
     }
     const url = urls[currentItem.storagePath];
@@ -86,8 +86,18 @@ const GalleryViewerModal: React.FC<GalleryViewerModalProps> = ({
       return;
     }
     try {
-      // Tenta abrir diretamente sem verificar canOpenURL
-      console.log('[Video] Tentando abrir URL:', url);
+      if (Platform.OS === 'android') {
+        // Tenta abrir direto no player de video usando intent Android
+        const intentUrl = `intent:${url}#Intent;action=android.intent.action.VIEW;type=video/mp4;end`;
+        try {
+          await Linking.openURL(intentUrl);
+          console.log('[Video] Aberto via intent');
+          return;
+        } catch (intentErr) {
+          console.log('[Video] Intent falhou, tentando URL direta:', intentErr);
+        }
+      }
+      // Fallback: abrir URL direta
       await Linking.openURL(url);
       console.log('[Video] URL aberta com sucesso');
     } catch (err) {
