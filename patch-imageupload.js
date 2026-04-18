@@ -1,4 +1,6 @@
-import { Alert } from 'react-native';
+const fs = require('fs');
+
+const content = `import { Alert } from 'react-native';
 import {
   ImagePickerResponse,
   launchImageLibrary,
@@ -210,3 +212,8 @@ export const showImagePickerDialog = (title: string, onConfirm: () => void): voi
     ],
   );
 };
+`;
+
+fs.writeFileSync('src/services/imageUpload.ts', content, 'utf8');
+console.log('Arquivo criado com', content.length, 'bytes');
+console.log('putFile included:', content.includes('putFile'));
