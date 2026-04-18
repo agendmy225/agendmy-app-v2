@@ -111,26 +111,16 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
     const handle = professional.instagram.replace('@', '').trim();
     if (!handle) return;
     
-    // Tenta abrir no app do Instagram primeiro (deep link)
-    const appUrl = `instagram://user?username=${handle}`;
-    const webUrl = `https://www.instagram.com/${handle}/`;
+    // Usar URL web direta que abre no Chrome/navegador nativo
+    // Sem usar canOpenURL pois ele pode retornar false negativo
+    const webUrl = `https://www.instagram.com/${handle}`;
     
-    try {
-      const canOpenApp = await Linking.canOpenURL(appUrl);
-      if (canOpenApp) {
-        await Linking.openURL(appUrl);
-        return;
-      }
-    } catch (err) {
-      console.log('[Instagram] App nao disponivel, tentando web:', err);
-    }
-    
-    // Fallback: abrir no navegador
     try {
       await Linking.openURL(webUrl);
+      console.log('[Instagram] Aberto:', webUrl);
     } catch (err) {
       console.log('[Instagram] Erro:', err);
-      Alert.alert('Erro', 'Não foi possível abrir o Instagram.');
+      Alert.alert('Erro', 'Não foi possível abrir o Instagram. Usuário: @' + handle);
     }
   };
 
@@ -312,7 +302,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   scrollContent: {
-    paddingBottom: 32,
+    paddingBottom: 80,
+    flexGrow: 1,
   },
   profileSection: {
     alignItems: 'center',
