@@ -74,21 +74,26 @@ const GalleryViewerModal: React.FC<GalleryViewerModalProps> = ({
   const currentItem = allItems[currentIndex];
 
   const handleOpenVideo = async () => {
-    if (!currentItem || currentItem.type !== 'video') return;
+    console.log('[Video] handleOpenVideo chamado');
+    if (!currentItem || currentItem.type !== 'video') {
+      console.log('[Video] Nenhum item de video atual');
+      return;
+    }
     const url = urls[currentItem.storagePath];
+    console.log('[Video] URL do video:', url);
     if (!url) {
-      Alert.alert('Erro', 'Vídeo ainda não carregado. Aguarde um momento.');
+      Alert.alert('Erro', 'Video ainda nao carregado. Aguarde um momento.');
       return;
     }
     try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        Alert.alert('Erro', 'Não foi possível abrir o vídeo.');
-      }
-    } catch {
-      Alert.alert('Erro', 'Não foi possível abrir o vídeo.');
+      // Tenta abrir diretamente sem verificar canOpenURL
+      console.log('[Video] Tentando abrir URL:', url);
+      await Linking.openURL(url);
+      console.log('[Video] URL aberta com sucesso');
+    } catch (err) {
+      console.log('[Video] Erro ao abrir video:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Erro desconhecido';
+      Alert.alert('Erro ao abrir video', errorMsg);
     }
   };
 
