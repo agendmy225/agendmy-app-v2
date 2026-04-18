@@ -13,8 +13,8 @@ import {
   Linking,
   Alert,
 } from 'react-native';
-import { colors } from '../../constants/colors';
-import { storage, ref, getDownloadURL } from '../../config/firebase';
+import { colors } from '../../../constants/colors';
+import { storage, ref, getDownloadURL } from '../../../config/firebase';
 
 const { width, height } = Dimensions.get('window');
 

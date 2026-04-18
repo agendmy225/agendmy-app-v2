@@ -8,13 +8,13 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { colors } from '../../constants/colors';
+import { colors } from '../../../constants/colors';
 import {
   selectAndUploadImage,
   selectAndUploadVideo,
   deleteImageFromFirebase,
-} from '../../services/imageUpload';
-import StorageImage from '../../components/common/StorageImage';
+} from '../../../services/imageUpload';
+import StorageImage from '../../../components/common/StorageImage';
 
 type BusinessGallerySectionProps = {
   businessId: string;
