@@ -47,10 +47,21 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
   ];
 
   useEffect(() => {
-    if (!visible) return;
+    // Resetar urls quando profissional muda (fix do bug de video compartilhado)
+    setUrls({});
+    setCurrentIndex(0);
+    if (!visible || !professional) return;
+    
+    const currentPhotos = professional?.portfolioImages || [];
+    const currentVideo = professional?.portfolioVideo || '';
+    const itemsToLoad = [
+      ...currentPhotos.map((p: string) => ({ type: 'photo' as const, storagePath: p })),
+      ...(currentVideo ? [{ type: 'video' as const, storagePath: currentVideo }] : []),
+    ];
+    
     const loadUrls = async () => {
       const newUrls: { [key: string]: string } = {};
-      for (const item of allItems) {
+      for (const item of itemsToLoad) {
         if (!item.storagePath) continue;
         try {
           if (item.storagePath.startsWith('http')) {
@@ -67,7 +78,7 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
       setUrls(newUrls);
     };
     loadUrls();
-  }, [visible, professional?.id]);
+  }, [visible, professional?.id, professional?.portfolioVideo, professional?.portfolioImages]);
 
   useEffect(() => {
     if (!visible) {
@@ -84,25 +95,42 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
     if (!currentItem || currentItem.type !== 'video') return;
     const url = urls[currentItem.storagePath];
     if (!url) {
-      Alert.alert('Erro', 'Video ainda nao carregado. Aguarde um momento.');
+      Alert.alert('Erro', 'Vídeo ainda não carregado. Aguarde um momento.');
       return;
     }
     try {
       await Linking.openURL(url);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Erro desconhecido';
-      Alert.alert('Erro ao abrir video', errorMsg);
+      Alert.alert('Erro ao abrir vídeo', errorMsg);
     }
   };
 
   const handleOpenInstagram = async () => {
     if (!professional.instagram) return;
-    const handle = professional.instagram.replace('@', '');
-    const instagramUrl = `https://instagram.com/${handle}`;
+    const handle = professional.instagram.replace('@', '').trim();
+    if (!handle) return;
+    
+    // Tenta abrir no app do Instagram primeiro (deep link)
+    const appUrl = `instagram://user?username=${handle}`;
+    const webUrl = `https://www.instagram.com/${handle}/`;
+    
     try {
-      await Linking.openURL(instagramUrl);
-    } catch {
-      Alert.alert('Erro', 'Nao foi possivel abrir o Instagram.');
+      const canOpenApp = await Linking.canOpenURL(appUrl);
+      if (canOpenApp) {
+        await Linking.openURL(appUrl);
+        return;
+      }
+    } catch (err) {
+      console.log('[Instagram] App nao disponivel, tentando web:', err);
+    }
+    
+    // Fallback: abrir no navegador
+    try {
+      await Linking.openURL(webUrl);
+    } catch (err) {
+      console.log('[Instagram] Erro:', err);
+      Alert.alert('Erro', 'Não foi possível abrir o Instagram.');
     }
   };
 
@@ -130,7 +158,7 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
               ) : (
                 <TouchableOpacity style={stylesFullscreen.videoContainer} onPress={handleOpenVideo}>
                   <Text style={stylesFullscreen.videoIcon}>▶</Text>
-                  <Text style={stylesFullscreen.videoLabel}>Video do profissional</Text>
+                  <Text style={stylesFullscreen.videoLabel}>Vídeo do profissional</Text>
                   <Text style={stylesFullscreen.videoHint}>Toque para reproduzir</Text>
                 </TouchableOpacity>
               )
@@ -234,7 +262,7 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
                   }}
                 >
                   <Text style={styles.videoCardIcon}>▶</Text>
-                  <Text style={styles.videoCardText}>Video de apresentacao</Text>
+                  <Text style={styles.videoCardText}>Vídeo de apresentação</Text>
                 </TouchableOpacity>
               </View>
             ) : null}
