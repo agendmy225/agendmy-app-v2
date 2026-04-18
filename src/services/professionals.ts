@@ -30,6 +30,7 @@ export interface Professional {
   active: boolean;
   instagram?: string;
   portfolioImages?: string[];
+  portfolioVideo?: string;
   services?: string[];
   schedule?: {
     [day: string]: {

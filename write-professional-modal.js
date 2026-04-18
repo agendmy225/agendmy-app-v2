@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+const fs = require('fs');
+const path = require('path');
+
+const content = `import React, { useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -98,7 +101,7 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
   const handleOpenInstagram = async () => {
     if (!professional.instagram) return;
     const handle = professional.instagram.replace('@', '');
-    const instagramUrl = `https://instagram.com/${handle}`;
+    const instagramUrl = \`https://instagram.com/\${handle}\`;
     try {
       await Linking.openURL(instagramUrl);
     } catch {
@@ -490,3 +493,7 @@ const stylesFullscreen = StyleSheet.create({
 });
 
 export default ProfessionalPortfolioModal;
+`;
+
+fs.writeFileSync('src/features/professional/ProfessionalPortfolioModal.tsx', content, 'utf8');
+console.log('ProfessionalPortfolioModal.tsx criado com', content.length, 'bytes');

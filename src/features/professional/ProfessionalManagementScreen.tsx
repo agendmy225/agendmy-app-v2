@@ -17,7 +17,7 @@ import {
 import { addDoc, collection, deleteDoc, doc, firestore, getDocs, limit, query, serverTimestamp, updateDoc, where, orderBy } from '../../config/firebase';
 import { colors } from '../../constants/colors';
 import { useAuth } from '../auth/context/AuthContext';
-import { selectAndUploadImage, showImagePickerDialog } from '../../services/imageUpload';
+import { selectAndUploadImage, selectAndUploadVideo, showImagePickerDialog } from '../../services/imageUpload';
 
 interface Professional {
   id: string;
@@ -48,6 +48,7 @@ const ProfessionalManagementScreen: React.FC = () => {
   const [professionalImage, setProfessionalImage] = useState('');
   const [professionalInstagram, setProfessionalInstagram] = useState('');
   const [portfolioImages, setPortfolioImages] = useState<string[]>([]);
+  const [portfolioVideo, setPortfolioVideo] = useState<string>('');
 
   // Estado para controlar o upload de imagens
   const [isUploading, setIsUploading] = useState(false);
@@ -217,6 +218,7 @@ const ProfessionalManagementScreen: React.FC = () => {
         image: professionalImage || null,
         instagram: professionalInstagram || null,
         portfolioImages: portfolioImages || [],
+        portfolioVideo: portfolioVideo || null,
         active: editingProfessional ? editingProfessional.active : true,
         rating: editingProfessional ? editingProfessional.rating : 0,
         updatedAt: serverTimestamp(),
