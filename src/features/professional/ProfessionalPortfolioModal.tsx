@@ -111,15 +111,33 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
     const handle = professional.instagram.replace('@', '').trim();
     if (!handle) return;
     
-    // Usar URL web direta que abre no Chrome/navegador nativo
-    // Sem usar canOpenURL pois ele pode retornar false negativo
-    const webUrl = `https://www.instagram.com/${handle}`;
+    console.log('[Instagram] Abrindo perfil:', handle);
     
+    // No Android, usar intent para forcar abrir no app do Instagram
+    if (Platform.OS === 'android') {
+      const intentUrl = `intent://instagram.com/_u/${handle}#Intent;package=com.instagram.android;scheme=https;end`;
+      try {
+        await Linking.openURL(intentUrl);
+        console.log('[Instagram] Aberto via intent Android');
+        return;
+      } catch (err) {
+        console.log('[Instagram] Intent falhou:', err);
+      }
+    }
+    
+    // Fallback: tentar deep link simples
     try {
-      await Linking.openURL(webUrl);
-      console.log('[Instagram] Aberto:', webUrl);
+      await Linking.openURL(`instagram://user?username=${handle}`);
+      console.log('[Instagram] Aberto via deep link');
+      return;
     } catch (err) {
-      console.log('[Instagram] Erro:', err);
+      console.log('[Instagram] Deep link falhou:', err);
+    }
+    
+    // Ultimo recurso: navegador web
+    try {
+      await Linking.openURL(`https://www.instagram.com/${handle}`);
+    } catch (err) {
       Alert.alert('Erro', 'Não foi possível abrir o Instagram. Usuário: @' + handle);
     }
   };
@@ -189,7 +207,7 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          <ScrollView contentContainerStyle={styles.scrollContent}>
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={true} bounces={true}>
             {/* Info do profissional */}
             <View style={styles.profileSection}>
               {professional.image ? (

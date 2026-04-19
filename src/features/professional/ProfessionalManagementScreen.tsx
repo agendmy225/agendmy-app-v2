@@ -150,6 +150,11 @@ const ProfessionalManagementScreen: React.FC = () => {
   };
 
   const handleImageSelection = async (type: 'profile' | 'portfolio') => {
+    if (type === 'portfolio' && portfolioImages.length >= 7) {
+      Alert.alert('Limite atingido', 'Você já tem 7 fotos no portfólio. Remova alguma antes de adicionar mais.');
+      return;
+    }
+
     const storagePath = `professional_images/${user?.uid}/${Date.now()}.jpg`;
 
     showImagePickerDialog(`Selecionar Imagem ${type === 'profile' ? 'de Perfil' : 'do Portfólio'}`, async () => {
