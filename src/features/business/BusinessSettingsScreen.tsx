@@ -396,14 +396,11 @@ const BusinessSettingsScreen: React.FC = () => {
 
     try {
       setIsUploadingLogo(true);
-
-
-      const result = await selectAndUploadImage(
+      const result = await selectCropAndUploadImage(
+        `businesses/${businessId}/logo_${Date.now()}.jpg`,
         {
-          storageKey: `businesses/${businessId}/logo_${Date.now()}.jpg`,
-        },
-        (progress) => {
-          setLogoUploadProgress(progress);
+          width: 512,
+          height: 512,
         },
       );
 
@@ -445,14 +442,11 @@ const BusinessSettingsScreen: React.FC = () => {
 
     try {
       setIsUploadingCover(true);
-
-
-      const result = await selectAndUploadImage(
+      const result = await selectCropAndUploadImage(
+        `businesses/${businessId}/cover_${Date.now()}.jpg`,
         {
-          storageKey: `businesses/${businessId}/cover_${Date.now()}.jpg`,
-        },
-        (progress) => {
-          setCoverUploadProgress(progress);
+          width: 1200,
+          height: 675,
         },
       );
 
