@@ -108,37 +108,22 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
 
   const handleOpenInstagram = async () => {
     if (!professional.instagram) return;
-    const handle = professional.instagram.replace('@', '').trim();
+    // Limpar o handle: remover @, espacos, e barras
+    let handle = professional.instagram.replace(/[@\s\/]/g, '').trim();
     if (!handle) return;
     
-    console.log('[Instagram] Abrindo perfil:', handle);
+    console.log('[Instagram] Handle limpo:', handle);
     
-    // No Android, usar intent para forcar abrir no app do Instagram
-    if (Platform.OS === 'android') {
-      const intentUrl = `intent://instagram.com/_u/${handle}#Intent;package=com.instagram.android;scheme=https;end`;
-      try {
-        await Linking.openURL(intentUrl);
-        console.log('[Instagram] Aberto via intent Android');
-        return;
-      } catch (err) {
-        console.log('[Instagram] Intent falhou:', err);
-      }
-    }
+    // Usar a URL web direta - e mais confiavel que deep links
+    // A URL abre no app do Instagram se instalado, ou no navegador
+    const url = `https://www.instagram.com/${handle}/`;
     
-    // Fallback: tentar deep link simples
     try {
-      await Linking.openURL(`instagram://user?username=${handle}`);
-      console.log('[Instagram] Aberto via deep link');
-      return;
+      await Linking.openURL(url);
+      console.log('[Instagram] Aberto com sucesso');
     } catch (err) {
-      console.log('[Instagram] Deep link falhou:', err);
-    }
-    
-    // Ultimo recurso: navegador web
-    try {
-      await Linking.openURL(`https://www.instagram.com/${handle}`);
-    } catch (err) {
-      Alert.alert('Erro', 'Não foi possível abrir o Instagram. Usuário: @' + handle);
+      console.log('[Instagram] Erro ao abrir:', err);
+      Alert.alert('Erro', 'Não foi possível abrir o Instagram de @' + handle);
     }
   };
 
@@ -258,19 +243,23 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
               )}
             </View>
 
-            {/* Video */}
+            {/* Video - thumbnail quadrado */}
             {video ? (
               <View style={styles.videoSection}>
-                <Text style={styles.sectionTitle}>Video</Text>
+                <Text style={styles.sectionTitle}>Vídeo</Text>
                 <TouchableOpacity
-                  style={styles.videoCard}
+                  style={styles.videoThumbnailBox}
                   onPress={() => {
                     setCurrentIndex(photos.length);
                     setViewMode('fullscreen');
                   }}
                 >
-                  <Text style={styles.videoCardIcon}>▶</Text>
-                  <Text style={styles.videoCardText}>Vídeo de apresentação</Text>
+                  <View style={styles.videoThumbnailInner}>
+                    <View style={styles.playIconCircle}>
+                      <Text style={styles.playIconText}>▶</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.videoThumbnailLabel}>Vídeo de apresentação</Text>
                 </TouchableOpacity>
               </View>
             ) : null}
@@ -428,6 +417,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
     fontWeight: 'bold',
+  },
+  videoThumbnailBox: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  videoThumbnailInner: {
+    width: 140,
+    height: 140,
+    borderRadius: 8,
+    backgroundColor: '#1a1a1a',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  playIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playIconText: {
+    fontSize: 24,
+    color: colors.primary,
+    marginLeft: 4,
+  },
+  videoThumbnailLabel: {
+    fontSize: 13,
+    color: colors.lightText,
+    textAlign: 'center',
   },
 });
 

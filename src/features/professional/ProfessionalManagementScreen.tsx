@@ -215,6 +215,7 @@ const ProfessionalManagementScreen: React.FC = () => {
     setProfessionalImage('');
     setProfessionalInstagram('');
     setPortfolioImages([]);
+    setPortfolioVideo('');
     setModalVisible(true);
   };
 
@@ -226,6 +227,7 @@ const ProfessionalManagementScreen: React.FC = () => {
     setProfessionalImage(professional.image);
     setProfessionalInstagram(professional.instagram || '');
     setPortfolioImages(professional.portfolioImages || []);
+    setPortfolioVideo(professional.portfolioVideo || '');
     setModalVisible(true);
   };
 
