@@ -22,6 +22,9 @@ import {
   selectAndUploadImage,
 } from '../../services/imageUpload';
 import StorageImage from '../../components/common/StorageImage';
+import ImageCropModal from '../../components/common/ImageCropModal';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { uploadImageToFirebase, deleteImageFromFirebase as deleteImg } from '../../services/imageUpload';
 import BusinessGallerySection from './components/BusinessGallerySection';
 import Config from 'react-native-config';
 
@@ -82,6 +85,16 @@ const BusinessSettingsScreen: React.FC = () => {
   const [coverUploadProgress, setCoverUploadProgress] = useState<number | null>(null);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [cropModalVisible, setCropModalVisible] = useState(false);
+  const [cropImageUri, setCropImageUri] = useState<string | null>(null);
+  const [cropConfig, setCropConfig] = useState<{
+    aspectRatio: number;
+    outputWidth: number;
+    outputHeight: number;
+    storageKey: string;
+    onSuccess: (url: string, path: string) => void;
+    title: string;
+  } | null>(null);
   const [settings, setSettings] = useState<BusinessSettings>({
     name: '',
     description: '',
@@ -383,6 +396,64 @@ const BusinessSettingsScreen: React.FC = () => {
     }));
     setHasChanges(true);
   };
+  const startImageCrop = async (
+    aspectRatio: number,
+    outputWidth: number,
+    outputHeight: number,
+    storageKey: string,
+    title: string,
+    onSuccess: (url: string, path: string) => void,
+  ) => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        includeBase64: false,
+        quality: 1,
+      },
+      (response) => {
+        if (response.didCancel || response.errorMessage) {
+          return;
+        }
+        const asset = response.assets?.[0];
+        if (!asset?.uri) return;
+
+        setCropConfig({
+          aspectRatio,
+          outputWidth,
+          outputHeight,
+          storageKey,
+          title,
+          onSuccess,
+        });
+        setCropImageUri(asset.uri);
+        setCropModalVisible(true);
+      },
+    );
+  };
+
+  const handleCropConfirm = async (croppedUri: string) => {
+    if (!cropConfig) return;
+    setCropModalVisible(false);
+    try {
+      const downloadURL = await uploadImageToFirebase(croppedUri, {
+        storageKey: cropConfig.storageKey,
+      });
+      cropConfig.onSuccess(downloadURL, cropConfig.storageKey);
+    } catch (err) {
+      Alert.alert('Erro', 'Nao foi possivel fazer upload da imagem.');
+      console.error('[Crop] Erro no upload:', err);
+    } finally {
+      setCropImageUri(null);
+      setCropConfig(null);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setCropModalVisible(false);
+    setCropImageUri(null);
+    setCropConfig(null);
+  };
+
   const handleUploadLogo = async () => {
     if (!businessId) {
       Alert.alert('Erro', 'ID do negócio não encontrado');
@@ -396,11 +467,12 @@ const BusinessSettingsScreen: React.FC = () => {
 
     try {
       setIsUploadingLogo(true);
-      const result = await selectCropAndUploadImage(
-        `businesses/${businessId}/logo_${Date.now()}.jpg`,
+      const result = await selectAndUploadImage(
         {
-          width: 512,
-          height: 512,
+          storageKey: `businesses/${businessId}/logo_${Date.now()}.jpg`,
+        },
+        (progress) => {
+          setLogoUploadProgress(progress);
         },
       );
 
@@ -442,11 +514,12 @@ const BusinessSettingsScreen: React.FC = () => {
 
     try {
       setIsUploadingCover(true);
-      const result = await selectCropAndUploadImage(
-        `businesses/${businessId}/cover_${Date.now()}.jpg`,
+      const result = await selectAndUploadImage(
         {
-          width: 1200,
-          height: 675,
+          storageKey: `businesses/${businessId}/cover_${Date.now()}.jpg`,
+        },
+        (progress) => {
+          setCoverUploadProgress(progress);
         },
       );
 
@@ -1099,6 +1172,20 @@ const BusinessSettingsScreen: React.FC = () => {
         <View style={styles.footer}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
+      )}
+    
+      {/* Modal de Crop de Imagem */}
+      {cropConfig && (
+        <ImageCropModal
+          visible={cropModalVisible}
+          imageUri={cropImageUri}
+          aspectRatio={cropConfig.aspectRatio}
+          outputWidth={cropConfig.outputWidth}
+          outputHeight={cropConfig.outputHeight}
+          title={cropConfig.title}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
       )}
     </View>
   );
