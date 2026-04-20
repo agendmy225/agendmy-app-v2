@@ -34,6 +34,7 @@ type ImageCropModalProps = {
   outputWidth: number;
   outputHeight: number;
   title?: string;
+  instruction?: string;
   onConfirm: (croppedUri: string) => void;
   onCancel: () => void;
 };
@@ -45,6 +46,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
   outputWidth,
   outputHeight,
   title = 'Ajustar imagem',
+  instruction,
   onConfirm,
   onCancel,
 }) => {
@@ -264,6 +266,9 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
         {/* Instrucoes */}
         <View style={styles.footer}>
+          {instruction ? (
+            <Text style={styles.footerInstruction}>{instruction}</Text>
+          ) : null}
           <Text style={styles.footerText}>
             Arraste para posicionar  |  Pince para ampliar
           </Text>
@@ -333,6 +338,14 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     backgroundColor: '#000',
+  },
+  footerInstruction: {
+    color: '#ffc107',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+    paddingHorizontal: 16,
   },
   footerText: {
     color: 'rgba(255,255,255,0.7)',

@@ -838,7 +838,7 @@ const styles = StyleSheet.create({
   logoOverlayContainer: {
     position: 'absolute',
     left: 16,
-    top: '20%',
+    bottom: -45, // metade da altura da logo (90/2) - faz ela sair pra fora da capa
     zIndex: 10,
   },
   logoOverlay: {
@@ -891,7 +891,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   businessInfoContainer: {
-    paddingTop: 50, // espaco para a logo sobreposta
+    paddingTop: 60,
+    // espaco para a logo sobreposta
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.lightGray,

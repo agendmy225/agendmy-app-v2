@@ -402,6 +402,7 @@ const BusinessSettingsScreen: React.FC = () => {
     outputHeight: number,
     storageKey: string,
     title: string,
+    instruction: string,
     onSuccess: (url: string, path: string) => void,
   ) => {
     launchImageLibrary(
@@ -423,6 +424,7 @@ const BusinessSettingsScreen: React.FC = () => {
           outputHeight,
           storageKey,
           title,
+          instruction,
           onSuccess,
         });
         setCropImageUri(asset.uri);
@@ -470,6 +472,7 @@ const BusinessSettingsScreen: React.FC = () => {
       512,
       storageKey,
       'Ajustar Logo',
+      '',
       async (_url, path) => {
         if (settings.logo && !settings.logo.includes('placeholder')) {
           await deleteImageFromFirebase(settings.logo);
@@ -1139,6 +1142,7 @@ const BusinessSettingsScreen: React.FC = () => {
           outputWidth={cropConfig.outputWidth}
           outputHeight={cropConfig.outputHeight}
           title={cropConfig.title}
+          instruction={cropConfig.instruction}
           onConfirm={handleCropConfirm}
           onCancel={handleCropCancel}
         />
