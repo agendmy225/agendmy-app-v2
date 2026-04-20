@@ -21,6 +21,7 @@ import ProfessionalPortfolioModal from '../professional/ProfessionalPortfolioMod
 import ServiceDetailsModal from '../service/ServiceDetailsModal';
 import TimeSlotsModal from '../appointment/components/TimeSlotsModal';
 import { colors } from '../../constants/colors';
+import StorageImage from '../../components/common/StorageImage';
 import { useAuth } from '../auth/context/AuthContext'; // Já importado
 import { HomeStackParamList, AppStackParamList } from '../../types/types';
 import { hasCompletedAppointmentWithBusiness } from '../../services/appointments';
@@ -859,6 +860,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   businessInfoContainer: {
+    paddingTop: 50, // espaco para a logo sobreposta
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.lightGray,
