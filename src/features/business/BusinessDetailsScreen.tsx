@@ -464,6 +464,18 @@ const BusinessDetailsScreen: React.FC = () => {
                 </View>
               </ImageBackground>
             </View>
+
+            {/* Logo sobreposta estilo Facebook */}
+            <View style={styles.logoOverlayContainer}>
+              {business?.logo ? (
+                <StorageImage storagePath={business.logo} style={styles.logoOverlay} />
+              ) : (
+                <View style={[styles.logoOverlay, styles.logoPlaceholder]}>
+                  <Icon name="business" size={36} color={colors.lightText} />
+                </View>
+              )}
+            </View>
+
             {/* Informações do negócio */}
             <View style={styles.businessInfoContainer}>
               <Text style={styles.businessName}>{business?.name || 'Nome não disponível'}</Text>
@@ -820,7 +832,26 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   headerContainer: {
-    height: 200,
+    width: '100%',
+    aspectRatio: 3,
+  },
+  logoOverlayContainer: {
+    position: 'absolute',
+    left: 16,
+    top: '20%',
+    zIndex: 10,
+  },
+  logoOverlay: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 4,
+    borderColor: '#fff',
+    backgroundColor: '#fff',
+  },
+  logoPlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerImage: {
     width: '100%',
