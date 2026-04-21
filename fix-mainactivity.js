@@ -1,4 +1,7 @@
-package com.anonymous.MapApp
+const fs = require('fs');
+
+const filePath = 'android/app/src/main/java/com/anonymous/MapApp/MainActivity.kt';
+const newContent = `package com.anonymous.MapApp
 
 import android.os.Bundle
 import com.facebook.react.ReactActivity
@@ -29,3 +32,7 @@ class MainActivity : ReactActivity() {
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
 }
+`;
+
+fs.writeFileSync(filePath, newContent, 'utf8');
+console.log('MainActivity.kt corrigido com onCreate(null)!');

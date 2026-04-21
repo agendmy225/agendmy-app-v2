@@ -57,35 +57,21 @@ const uploadFileNative = async (
     throw new Error('Usuario nao autenticado');
   }
 
+  console.log('[uploadFileNative] Iniciando upload:', { uri, storageKey, contentType });
   const storageRef = ref(storage, storageKey);
+  console.log('[uploadFileNative] storageRef criado, tem putFile:', typeof (storageRef as any).putFile);
 
+  // Firebase RN usa putFile para enviar arquivos locais
   try {
     // @ts-ignore - putFile is native Firebase RN method
-    if (typeof storageRef.putFile === 'function') {
-      // @ts-ignore
-      await storageRef.putFile(uri, { contentType });
-      const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL;
-    }
-  } catch (err) {
-    console.log('[ImageUpload] putFile failed, trying uploadBytes:', err);
-  }
-
-  try {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const metadata = {
-      contentType,
-      customMetadata: {
-        uploadedBy: currentUser.uid,
-        uploadedAt: new Date().toISOString(),
-      },
-    };
-    await uploadBytes(storageRef, blob, metadata);
+    await storageRef.putFile(uri, { contentType });
+    console.log('[uploadFileNative] putFile concluido');
     const downloadURL = await getDownloadURL(storageRef);
+    console.log('[uploadFileNative] downloadURL:', downloadURL);
     return downloadURL;
-  } catch (err) {
-    throw err;
+  } catch (err: any) {
+    console.error('[uploadFileNative] Erro no putFile:', err);
+    throw new Error(`Upload falhou: ${err.message || 'erro desconhecido'}`);
   }
 };
 
