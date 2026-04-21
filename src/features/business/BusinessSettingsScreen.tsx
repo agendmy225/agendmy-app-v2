@@ -20,11 +20,11 @@ import { getCoordinatesFromAddress } from '../../services/maps';
 import {
   deleteImageFromFirebase,
   selectAndUploadImage,
+  uploadImageToFirebase,
 } from '../../services/imageUpload';
 import StorageImage from '../../components/common/StorageImage';
 import ImageCropModal from '../../components/common/ImageCropModal';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { uploadImageToFirebase, deleteImageFromFirebase as deleteImg } from '../../services/imageUpload';
 import BusinessGallerySection from './components/BusinessGallerySection';
 import Config from 'react-native-config';
 
@@ -474,11 +474,19 @@ const BusinessSettingsScreen: React.FC = () => {
       'Ajustar Logo',
       '',
       async (_url, path) => {
-        if (settings.logo && !settings.logo.includes('placeholder')) {
-          await deleteImageFromFirebase(settings.logo);
+        console.log('[Logo] onSuccess callback iniciado, path:', path);
+        try {
+          if (settings.logo && !settings.logo.includes('placeholder')) {
+            console.log('[Logo] Tipo de deleteImageFromFirebase:', typeof deleteImageFromFirebase);
+            await deleteImageFromFirebase(settings.logo);
+          }
+          console.log('[Logo] Tipo de updateSettings:', typeof updateSettings);
+          updateSettings('logo', path);
+          Alert.alert('Sucesso', 'Logo atualizado com sucesso!');
+        } catch (err) {
+          console.error('[Logo] Erro no callback onSuccess:', err);
+          throw err;
         }
-        updateSettings('logo', path);
-        Alert.alert('Sucesso', 'Logo atualizado com sucesso!');
       },
     );
   };
@@ -493,17 +501,30 @@ const BusinessSettingsScreen: React.FC = () => {
     }
     const storageKey = `businesses/${businessId}/cover_${Date.now()}.jpg`;
     startImageCrop(
-      16 / 9,
+      3,
       1200,
-      675,
+      400,
       storageKey,
       'Ajustar Capa',
       async (_url, path) => {
-        if (settings.coverImage && !settings.coverImage.includes('placeholder')) {
-          await deleteImageFromFirebase(settings.coverImage);
+        console.log('[Cover] onSuccess callback iniciado, path:', path);
+        try {
+          console.log('[Cover] settings.coverImage:', settings.coverImage);
+          if (settings.coverImage && !settings.coverImage.includes('placeholder')) {
+            console.log('[Cover] Chamando deleteImageFromFirebase com:', settings.coverImage);
+            console.log('[Cover] Tipo de deleteImageFromFirebase:', typeof deleteImageFromFirebase);
+            await deleteImageFromFirebase(settings.coverImage);
+            console.log('[Cover] Imagem anterior deletada');
+          }
+          console.log('[Cover] Tipo de updateSettings:', typeof updateSettings);
+          console.log('[Cover] Chamando updateSettings com path:', path);
+          updateSettings('coverImage', path);
+          console.log('[Cover] updateSettings concluido');
+          Alert.alert('Sucesso', 'Imagem de capa atualizada com sucesso!');
+        } catch (err) {
+          console.error('[Cover] Erro no callback onSuccess:', err);
+          throw err;
         }
-        updateSettings('coverImage', path);
-        Alert.alert('Sucesso', 'Imagem de capa atualizada com sucesso!');
       },
     );
   };
