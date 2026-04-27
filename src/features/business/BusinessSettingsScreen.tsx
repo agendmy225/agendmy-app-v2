@@ -530,6 +530,7 @@ const BusinessSettingsScreen: React.FC = () => {
       400,
       storageKey,
       'Ajustar Capa',
+      '📸 Tire a foto com o celular na horizontal para enquadrar melhor a capa',
       async (_url, path) => {
         console.log('[Cover] onSuccess callback iniciado, path:', path);
         try {
