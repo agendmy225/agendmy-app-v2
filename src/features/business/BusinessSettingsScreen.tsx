@@ -434,13 +434,32 @@ const BusinessSettingsScreen: React.FC = () => {
   };
 
   const handleCropConfirm = async (croppedUri: string) => {
-    if (!cropConfig) return;
+    if (!cropConfig) {
+      console.error('[handleCropConfirm] cropConfig esta nulo no inicio');
+      return;
+    }
+    // Salvar referencias antes de limpar state (evita race condition)
+    const config = cropConfig;
+    const storageKey = config.storageKey;
+    const onSuccess = config.onSuccess;
+    
     setCropModalVisible(false);
+    
     try {
+      console.log('[handleCropConfirm] Iniciando upload, storageKey:', storageKey);
+      console.log('[handleCropConfirm] Tipo de uploadImageToFirebase:', typeof uploadImageToFirebase);
       const downloadURL = await uploadImageToFirebase(croppedUri, {
-        storageKey: cropConfig.storageKey,
+        storageKey: storageKey,
       });
-      cropConfig.onSuccess(downloadURL, cropConfig.storageKey);
+      console.log('[handleCropConfirm] Upload concluido, downloadURL:', downloadURL);
+      console.log('[handleCropConfirm] Tipo de onSuccess:', typeof onSuccess);
+      
+      if (typeof onSuccess === 'function') {
+        await onSuccess(downloadURL, storageKey);
+        console.log('[handleCropConfirm] onSuccess executado com sucesso');
+      } else {
+        console.error('[handleCropConfirm] onSuccess nao eh function:', onSuccess);
+      }
     } catch (err) {
       Alert.alert('Erro', 'Nao foi possivel fazer upload da imagem.');
       console.error('[Crop] Erro no upload:', err);
