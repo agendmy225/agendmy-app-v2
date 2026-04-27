@@ -94,6 +94,7 @@ const BusinessSettingsScreen: React.FC = () => {
     storageKey: string;
     onSuccess: (url: string, path: string) => void;
     title: string;
+    instruction?: string;
   } | null>(null);
   const [settings, setSettings] = useState<BusinessSettings>({
     name: '',
@@ -418,7 +419,8 @@ const BusinessSettingsScreen: React.FC = () => {
         const asset = response.assets?.[0];
         if (!asset?.uri) return;
 
-        setCropConfig({
+        console.log('[startImageCrop] Salvando cropConfig, tipo de onSuccess:', typeof onSuccess);
+        const configToSave = {
           aspectRatio,
           outputWidth,
           outputHeight,
@@ -426,7 +428,10 @@ const BusinessSettingsScreen: React.FC = () => {
           title,
           instruction,
           onSuccess,
-        });
+        };
+        console.log('[startImageCrop] configToSave keys:', Object.keys(configToSave));
+        console.log('[startImageCrop] onSuccess no objeto:', typeof configToSave.onSuccess);
+        setCropConfig(configToSave);
         setCropImageUri(asset.uri);
         setCropModalVisible(true);
       },
