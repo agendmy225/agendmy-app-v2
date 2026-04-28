@@ -471,9 +471,9 @@ const BusinessDetailsScreen: React.FC = () => {
                     <View style={[styles.logoOverlay, styles.logoPlaceholder]}>
                       <Icon name="business" size={36} color={colors.lightText} />
                     </View>
-              </ImageBackground>
+                  )}
             </View>
-              )}
+              </ImageBackground>
             </View>
 
             {/* Informações do negócio */}
