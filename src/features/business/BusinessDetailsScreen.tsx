@@ -580,7 +580,19 @@ const BusinessDetailsScreen: React.FC = () => {
                       <Text style={styles.serviceDescription}>{service.description}</Text>
                       <View style={styles.serviceDetails}>
                         <Text style={styles.serviceDuration}>⏱️ {service.duration}</Text>
-                        <Text style={styles.servicePrice}>R$ {service.price.toFixed(2)}</Text>
+                        {service.isPromotionActive && service.promotionalPrice ? (
+                          <View style={styles.promotionPriceContainer}>
+                            <Text style={styles.servicePriceOriginal}>R$ {service.price.toFixed(2)}</Text>
+                            <Text style={styles.servicePricePromotional}>R$ {service.promotionalPrice.toFixed(2)}</Text>
+                            {service.discountPercentage ? (
+                              <View style={styles.discountBadge}>
+                                <Text style={styles.discountBadgeText}>-{service.discountPercentage}%</Text>
+                              </View>
+                            ) : null}
+                          </View>
+                        ) : (
+                          <Text style={styles.servicePrice}>R$ {service.price.toFixed(2)}</Text>
+                        )}
                       </View>
                     </View>
                     <View style={styles.serviceActionsContainer}>
@@ -1059,6 +1071,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: colors.primary,
+  },
+  promotionPriceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  servicePriceOriginal: {
+    fontSize: 13,
+    color: '#999',
+    textDecorationLine: 'line-through',
+    marginRight: 8,
+  },
+  servicePricePromotional: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#d31027',
+    marginRight: 8,
+  },
+  discountBadge: {
+    backgroundColor: '#d31027',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  discountBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 'bold',
   },
   serviceActionsContainer: { // Styles for the new container
     flexDirection: 'column',
