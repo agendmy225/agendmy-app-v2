@@ -36,6 +36,7 @@ interface BusinessSettings {
   addressNumber: string;
   addressComplement?: string;
   phone: string;
+  instagram?: string;
   email: string;
   logo: string;
   coverImage: string;
@@ -103,6 +104,7 @@ const BusinessSettingsScreen: React.FC = () => {
     addressNumber: '',
     addressComplement: '',
     phone: '',
+          instagram: '',
     email: '',
     logo: 'https://via.placeholder.com/150',
     coverImage: 'https://via.placeholder.com/500x200',
@@ -176,6 +178,7 @@ const BusinessSettingsScreen: React.FC = () => {
           addressNumber: '',
           addressComplement: '',
           phone: '',
+          instagram: '',
           email: user.email || '',
           logo: 'https://via.placeholder.com/150',
           coverImage: 'https://via.placeholder.com/500x200',
@@ -247,6 +250,7 @@ const BusinessSettingsScreen: React.FC = () => {
           addressNumber: businessData.addressNumber || prevSettings.addressNumber,
           addressComplement: businessData.addressComplement || prevSettings.addressComplement,
           phone: businessData.phone || prevSettings.phone,
+          instagram: businessData.instagram || prevSettings.instagram || '',
           email: businessData.email || prevSettings.email,
           logo: businessData.logo || prevSettings.logo,
           coverImage: businessData.coverImage || prevSettings.coverImage,
@@ -670,6 +674,17 @@ const BusinessSettingsScreen: React.FC = () => {
           keyboardType="phone-pad"
         />
       </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>Instagram</Text>
+          <TextInput
+            style={styles.input}
+            value={settings.instagram || ''}
+            onChangeText={(value) => updateSettings('instagram', value)}
+            placeholder="@seu_instagram"
+            autoCapitalize="none"
+          />
+        </View>
 
       <View style={styles.inputContainer}>
         <Text style={styles.inputLabel}>E-mail</Text>

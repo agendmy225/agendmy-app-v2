@@ -14,7 +14,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
+, Linking} from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ProfessionalPortfolioModal from '../professional/ProfessionalPortfolioModal';
@@ -510,6 +510,23 @@ const BusinessDetailsScreen: React.FC = () => {
                 <Icon name="phone" size={16} color={colors.text} style={styles.contactIcon} />
                 <Text style={styles.contactText}>{business.phone || 'Telefone não informado'}</Text>
               </View>
+              {business.instagram ? (
+                <TouchableOpacity
+                  style={styles.contactRow}
+                  onPress={() => {
+                    const username = (business.instagram || '').replace('@', '').trim();
+                    if (!username) return;
+                    const appUrl = `instagram://user?username=${username}`;
+                    const webUrl = `https://instagram.com/${username}`;
+                    Linking.canOpenURL(appUrl).then((supported) => {
+                      Linking.openURL(supported ? appUrl : webUrl);
+                    });
+                  }}
+                >
+                  <Icon name="camera-alt" size={16} color={colors.text} style={styles.contactIcon} />
+                  <Text style={[styles.contactText, { color: '#d31027' }]}>{business.instagram}</Text>
+                </TouchableOpacity>
+              ) : null}
               <View style={styles.contactRow}>
                 <Icon name="email" size={16} color={colors.text} style={styles.contactIcon} />
                 <Text style={styles.contactText}>{business.email || 'Email não informado'}</Text>

@@ -32,6 +32,7 @@ export interface Business {
   state?: string;
   zipCode?: string;
   phone: string;
+  instagram?: string;
   email: string;
   imageUrl: string; // Deprecated, use logo
   coverImage: string;
