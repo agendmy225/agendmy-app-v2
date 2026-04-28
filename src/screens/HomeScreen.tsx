@@ -222,7 +222,7 @@ const HomeScreen: React.FC = () => {
         const coords = userCoordsRef.current;
         setBusinessesForMap(coords ? filterByRadius(biz, coords.lat, coords.lon, RADIUS_KM) : biz);
         setIsLoadingInitialData(false);
-        if (Date.now() - (cachedData.lastUpdate || 0) < 3 * 60 * 1000) { return; }
+        if (Date.now() - (cachedData.lastUpdate || 0) < 30 * 1000) { return; }
       }
 
       let allBiz: Business[] = [];
