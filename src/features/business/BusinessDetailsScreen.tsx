@@ -463,17 +463,16 @@ const BusinessDetailsScreen: React.FC = () => {
                     <Icon name={isFavorite ? 'favorite' : 'favorite-border'} size={24} color={colors.white} />
                   </TouchableOpacity>
                 </View>
+                {/* Logo sobreposta estilo Facebook */}
+                <View style={styles.logoOverlayContainer}>
+                  {business?.logo ? (
+                    <StorageImage storagePath={business.logo} style={styles.logoOverlay} />
+                  ) : (
+                    <View style={[styles.logoOverlay, styles.logoPlaceholder]}>
+                      <Icon name="business" size={36} color={colors.lightText} />
+                    </View>
               </ImageBackground>
             </View>
-
-            {/* Logo sobreposta estilo Facebook */}
-            <View style={styles.logoOverlayContainer}>
-              {business?.logo ? (
-                <StorageImage storagePath={business.logo} style={styles.logoOverlay} />
-              ) : (
-                <View style={[styles.logoOverlay, styles.logoPlaceholder]}>
-                  <Icon name="business" size={36} color={colors.lightText} />
-                </View>
               )}
             </View>
 
