@@ -170,7 +170,7 @@ const PromotionManagementScreen: React.FC = () => {
       setSaving(true);
 
       const promotionPromises = promotions.map(promo => {
-        const serviceRef = doc(firestore, 'services', promo.serviceId);
+        const serviceRef = doc(firestore, 'businesses', business.id, 'services', promo.serviceId);
         return updateDoc(serviceRef, {
           promotionalPrice: promo.promotionalPrice,
           isPromotionActive: promo.isActive,
