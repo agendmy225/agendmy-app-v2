@@ -14,7 +14,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-, Linking} from 'react-native';
+  Linking,
+} from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ProfessionalPortfolioModal from '../professional/ProfessionalPortfolioModal';
