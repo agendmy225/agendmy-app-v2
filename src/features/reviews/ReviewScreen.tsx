@@ -87,17 +87,20 @@ const ReviewScreen: React.FC = () => {
     try {
       setIsSubmitting(true);
 
-      await addReview({
+      // Construir objeto removendo campos undefined (Firestore nao aceita undefined)
+      const reviewData: any = {
         businessId,
         userId: user?.uid || 'anonymous',
         userName: user?.displayName || user?.email?.split('@')[0] || 'Usuário Anônimo',
-        serviceId: serviceId || undefined, // Allow undefined for general business reviews
-        professionalId,
-        professionalName,
-        appointmentId,
         rating,
         comment: comment.trim(),
-      });
+      };
+      if (serviceId) { reviewData.serviceId = serviceId; }
+      if (professionalId) { reviewData.professionalId = professionalId; }
+      if (professionalName) { reviewData.professionalName = professionalName; }
+      if (appointmentId) { reviewData.appointmentId = appointmentId; }
+      
+      await addReview(reviewData);
 
       Alert.alert(
         'Avaliação enviada!',
