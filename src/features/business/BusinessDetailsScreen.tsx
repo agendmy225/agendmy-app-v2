@@ -708,31 +708,33 @@ const BusinessDetailsScreen: React.FC = () => {
                 </TouchableOpacity>
               </View>
               {reviews.length > 0 ? (
-                <FlatList
-                  data={showAllReviews ? reviews : reviews.slice(0, 4)}
-                  renderItem={renderReviewItem}
-                  keyExtractor={(item) => item.id || item.comment} // Use comment as fallback key
-                  horizontal={false}
-                  showsHorizontalScrollIndicator={false}
-                />
-              {!showAllReviews && reviews.length > 4 && (
-                <TouchableOpacity
-                  style={styles.verMaisButton}
-                  onPress={() => setShowAllReviews(true)}
-                >
-                  <Text style={styles.verMaisButtonText}>
-                    Ver mais {reviews.length - 4} avaliações
-                  </Text>
-                </TouchableOpacity>
-              )}
-              {showAllReviews && reviews.length > 4 && (
-                <TouchableOpacity
-                  style={styles.verMaisButton}
-                  onPress={() => setShowAllReviews(false)}
-                >
-                  <Text style={styles.verMaisButtonText}>Ver menos</Text>
-                </TouchableOpacity>
-              )}
+                <>
+                  <FlatList
+                    data={showAllReviews ? reviews : reviews.slice(0, 4)}
+                    renderItem={renderReviewItem}
+                    keyExtractor={(item) => item.id || item.comment}
+                    horizontal={false}
+                    showsHorizontalScrollIndicator={false}
+                  />
+                  {!showAllReviews && reviews.length > 4 && (
+                    <TouchableOpacity
+                      style={styles.verMaisButton}
+                      onPress={() => setShowAllReviews(true)}
+                    >
+                      <Text style={styles.verMaisButtonText}>
+                        Ver mais {reviews.length - 4} avaliações
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  {showAllReviews && reviews.length > 4 && (
+                    <TouchableOpacity
+                      style={styles.verMaisButton}
+                      onPress={() => setShowAllReviews(false)}
+                    >
+                      <Text style={styles.verMaisButtonText}>Ver menos</Text>
+                    </TouchableOpacity>
+                  )}
+                </>
               ) : (
                 <Text style={styles.noReviewsText}>Ainda não há avaliações para este estabelecimento.</Text>
               )}
