@@ -57,6 +57,18 @@ const BusinessDetailsScreen: React.FC = () => {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [isMapMounted, setIsMapMounted] = useState(false);
+
+  // Mapa: montar apenas quando tela em foco para evitar crash NPE no MapView ao navegar
+  useFocusEffect(
+    useCallback(() => {
+      const timer = setTimeout(() => setIsMapMounted(true), 300);
+      return () => {
+        clearTimeout(timer);
+        setIsMapMounted(false);
+      };
+    }, [])
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('Todos');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -745,6 +757,7 @@ const BusinessDetailsScreen: React.FC = () => {
               <Text style={styles.sectionTitle}>Localização</Text>
               {business?.location?.latitude && business?.location?.longitude ? (
                 <View style={styles.mapContainer}>
+                  {isMapMounted ? (
                   <MapView
                     key={`map-${mapKey}-${business.id}`}
                     provider={PROVIDER_GOOGLE}
@@ -778,6 +791,11 @@ const BusinessDetailsScreen: React.FC = () => {
                       onPress={() => { }}
                     />
                   </MapView>
+                  ) : (
+                    <View style={[styles.map, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
+                      <ActivityIndicator color="#d31027" />
+                    </View>
+                  )}
                 </View>
               ) : business?.address ? (
                 <View style={styles.mapContainer}>

@@ -189,7 +189,7 @@ const ReviewsManagementScreen: React.FC = () => {
           text: responseText,
           date: serverTimestamp(),
         },
-        status: 'responded', // Opcional: atualizar status para indicar que foi respondido
+        // status mantido como approved para a avaliacao continuar visivel ao cliente
       });
 
       // Atualizar localmente após sucesso
@@ -201,7 +201,7 @@ const ReviewsManagementScreen: React.FC = () => {
               text: responseText,
               date: Timestamp.now(), // Usar Timestamp.now() para consistência local
             },
-            status: 'responded' as Review['status'], // Atualizar status localmente
+            // status mantido como approved para a avaliacao continuar visivel ao cliente
           };
         }
         return review;
