@@ -56,6 +56,7 @@ const BusinessDetailsScreen: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('Todos');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -421,7 +422,7 @@ const BusinessDetailsScreen: React.FC = () => {
             key={i}
             name={i < item.rating ? 'star' : 'star-border'}
             size={16}
-            color={colors.primary}
+            color="#FFD700"
             style={styles.ratingIcon}
           />
         ))}
@@ -708,12 +709,30 @@ const BusinessDetailsScreen: React.FC = () => {
               </View>
               {reviews.length > 0 ? (
                 <FlatList
-                  data={reviews}
+                  data={showAllReviews ? reviews : reviews.slice(0, 4)}
                   renderItem={renderReviewItem}
                   keyExtractor={(item) => item.id || item.comment} // Use comment as fallback key
                   horizontal={false}
                   showsHorizontalScrollIndicator={false}
                 />
+              {!showAllReviews && reviews.length > 4 && (
+                <TouchableOpacity
+                  style={styles.verMaisButton}
+                  onPress={() => setShowAllReviews(true)}
+                >
+                  <Text style={styles.verMaisButtonText}>
+                    Ver mais {reviews.length - 4} avaliações
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {showAllReviews && reviews.length > 4 && (
+                <TouchableOpacity
+                  style={styles.verMaisButton}
+                  onPress={() => setShowAllReviews(false)}
+                >
+                  <Text style={styles.verMaisButtonText}>Ver menos</Text>
+                </TouchableOpacity>
+              )}
               ) : (
                 <Text style={styles.noReviewsText}>Ainda não há avaliações para este estabelecimento.</Text>
               )}
@@ -1217,6 +1236,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
     marginTop: 4,
+  },
+  verMaisButton: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#d31027',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginVertical: 8,
+    alignItems: 'center',
+  },
+  verMaisButtonText: {
+    color: '#d31027',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   noReviewsText: {
     fontSize: 14,
