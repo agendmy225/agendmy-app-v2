@@ -13,7 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../constants/colors';
 import { useAuth } from '../auth/context/AuthContext';
-import { addReview } from '../../services/reviews';
+import { addReview, getUserReviews } from '../../services/reviews';
 
 interface ReviewScreenParams {
   businessId: string;
@@ -86,7 +86,22 @@ const ReviewScreen: React.FC = () => {
 
     try {
       setIsSubmitting(true);
-
+      
+      // Verificar se o usuario ja avaliou este estabelecimento (limite 1 por cliente)
+      if (user?.uid) {
+        const userReviews = await getUserReviews(user.uid, 100);
+        const alreadyReviewed = userReviews.some(r => r.businessId === businessId);
+        if (alreadyReviewed) {
+          setIsSubmitting(false);
+          Alert.alert(
+            'Avaliacao ja realizada',
+            'Voce ja avaliou este estabelecimento. Cada cliente pode fazer apenas uma avaliacao.',
+            [{ text: 'OK', onPress: () => navigation.goBack() }]
+          );
+          return;
+        }
+      }
+      
       // Construir objeto removendo campos undefined (Firestore nao aceita undefined)
       const reviewData: any = {
         businessId,
@@ -104,7 +119,7 @@ const ReviewScreen: React.FC = () => {
 
       Alert.alert(
         'Avaliação enviada!',
-        'Obrigado pelo seu feedback. Sua avaliação foi publicada com sucesso e já aparece na página do estabelecimento.',
+        'Avaliacao enviada! Aguardando aprovacao do estabelecimento. Apos aprovada, ela aparecera na pagina.',
         [
           {
             text: 'OK',

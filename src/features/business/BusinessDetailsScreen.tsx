@@ -440,6 +440,15 @@ const BusinessDetailsScreen: React.FC = () => {
         ))}
       </View>
       <Text style={styles.reviewComment}>{item.comment}</Text>
+      {item.response && item.response.text ? (
+        <View style={styles.ownerResponseContainer}>
+          <View style={styles.ownerResponseHeader}>
+            <Icon name="reply" size={14} color="#d31027" />
+            <Text style={styles.ownerResponseLabel}>Resposta do estabelecimento</Text>
+          </View>
+          <Text style={styles.ownerResponseText}>{item.response.text}</Text>
+        </View>
+      ) : null}
     </View>
   );
 
@@ -1256,6 +1265,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
     marginTop: 4,
+  },
+  ownerResponseContainer: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: '#f9f0f2',
+    borderLeftWidth: 3,
+    borderLeftColor: '#d31027',
+    borderRadius: 6,
+  },
+  ownerResponseHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  ownerResponseLabel: {
+    marginLeft: 6,
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#d31027',
+  },
+  ownerResponseText: {
+    fontSize: 13,
+    color: '#333',
+    lineHeight: 18,
   },
   verMaisButton: {
     backgroundColor: '#fff',

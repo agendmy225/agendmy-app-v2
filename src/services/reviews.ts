@@ -48,7 +48,7 @@ export const addReview = async (
     const reviewData = {
       ...review,
       date: serverTimestamp(),
-      status: 'approved', // Auto-approve reviews to avoid confusion
+      status: 'pending', // Avaliacoes vem como pendentes - precisam ser aprovadas pelo dono
     };
 
     const reviewsCollectionRef = collection(
