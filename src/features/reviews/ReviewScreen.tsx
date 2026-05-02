@@ -13,7 +13,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../constants/colors';
 import { useAuth } from '../auth/context/AuthContext';
-import { addReview, getUserReviews } from '../../services/reviews';
+import { addReview } from '../../services/reviews';
+import { firestore, collection, query, where, getDocs } from '../../config/firebase';
 
 interface ReviewScreenParams {
   businessId: string;
@@ -36,19 +37,19 @@ const ReviewScreen: React.FC = () => {
 
   const screenTitle = serviceId ? 'Avaliar Serviço' : 'Avaliar Estabelecimento';
 
-  const renderStars = () => {
+  const renderStars = (currentRating: number, setCurrentRating: (n: number) => void) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(
         <TouchableOpacity
           key={i}
-          onPress={() => setRating(i)}
+          onPress={() => setCurrentRating(i)}
           style={styles.starButton}
         >
           <Icon
-            name={i <= rating ? 'star' : 'star-border'}
+            name={i <= currentRating ? 'star' : 'star-border'}
             size={40}
-            color={i <= rating ? '#FFD700' : colors.lightText}
+            color={i <= currentRating ? '#FFD700' : colors.lightText}
           />
         </TouchableOpacity>,
       );
@@ -56,8 +57,8 @@ const ReviewScreen: React.FC = () => {
     return stars;
   };
 
-  const getRatingText = () => {
-    switch (rating) {
+  const getRatingText = (r: number) => {
+    switch (r) {
       case 1: return 'Muito Ruim';
       case 2: return 'Ruim';
       case 3: return 'Regular';
@@ -88,34 +89,68 @@ const ReviewScreen: React.FC = () => {
       setIsSubmitting(true);
       
       // Verificar se o usuario ja avaliou este estabelecimento (limite 1 por cliente)
+      // Buscamos direto na subcolecao do business para nao precisar de indice composto
       if (user?.uid) {
-        const userReviews = await getUserReviews(user.uid, 100);
-        const alreadyReviewed = userReviews.some(r => r.businessId === businessId);
-        if (alreadyReviewed) {
-          setIsSubmitting(false);
-          Alert.alert(
-            'Avaliacao ja realizada',
-            'Voce ja avaliou este estabelecimento. Cada cliente pode fazer apenas uma avaliacao.',
-            [{ text: 'OK', onPress: () => navigation.goBack() }]
-          );
-          return;
+        try {
+          const reviewsRef = collection(firestore, 'businesses', businessId, 'reviews');
+          const q = query(reviewsRef, where('userId', '==', user.uid));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            // Verificar se algum nao esta rejeitado (rejeitado pode reavaliar)
+            const hasActiveReview = snap.docs.some(d => {
+              const data = d.data();
+              return data.status !== 'rejected';
+            });
+            if (hasActiveReview) {
+              setIsSubmitting(false);
+              Alert.alert(
+                'Avaliacao ja realizada',
+                'Voce ja avaliou este estabelecimento. Cada cliente pode fazer apenas uma avaliacao.',
+                [{ text: 'OK', onPress: () => navigation.goBack() }]
+              );
+              return;
+            }
+          }
+        } catch (checkErr) {
+          console.warn('Erro ao verificar avaliacoes anteriores:', checkErr);
+          // Nao bloquear se falhar a verificacao
         }
       }
       
       // Construir objeto removendo campos undefined (Firestore nao aceita undefined)
-      const reviewData: any = {
+      // Avaliacao do estabelecimento (com comentario)
+      const businessReview: any = {
         businessId,
         userId: user?.uid || 'anonymous',
-        userName: user?.displayName || user?.email?.split('@')[0] || 'Usuário Anônimo',
+        userName: user?.displayName || user?.email?.split('@')[0] || 'Usuario Anonimo',
         rating,
         comment: comment.trim(),
       };
-      if (serviceId) { reviewData.serviceId = serviceId; }
-      if (professionalId) { reviewData.professionalId = professionalId; }
-      if (professionalName) { reviewData.professionalName = professionalName; }
-      if (appointmentId) { reviewData.appointmentId = appointmentId; }
+      if (serviceId) { businessReview.serviceId = serviceId; }
+      if (appointmentId) { businessReview.appointmentId = appointmentId; }
       
-      await addReview(reviewData);
+      await addReview(businessReview);
+      
+      // Avaliacao do profissional (apenas estrelas, comentario opcional vazio)
+      if (professionalId && professionalRating > 0) {
+        const professionalReview: any = {
+          businessId,
+          userId: user?.uid || 'anonymous',
+          userName: user?.displayName || user?.email?.split('@')[0] || 'Usuario Anonimo',
+          rating: professionalRating,
+          comment: '', // Avaliacao do profissional nao tem comentario separado
+          professionalId,
+          professionalName,
+        };
+        if (appointmentId) { professionalReview.appointmentId = appointmentId; }
+        
+        try {
+          await addReview(professionalReview);
+        } catch (profErr) {
+          console.warn('Erro ao salvar avaliacao do profissional:', profErr);
+          // Nao falhar tudo se o profissional der erro
+        }
+      }
 
       Alert.alert(
         'Avaliação enviada!',
@@ -163,14 +198,24 @@ const ReviewScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Avaliação por estrelas */}
+        {/* Avaliacao por estrelas - Estabelecimento */}
         <View style={styles.ratingSection}>
-          <Text style={styles.sectionTitle}>Como foi sua experiência?</Text>
+          <Text style={styles.sectionTitle}>Como foi sua experiencia no estabelecimento?</Text>
           <View style={styles.starsContainer}>
-            {renderStars()}
+            {renderStars(rating, setRating)}
           </View>
-          <Text style={styles.ratingText}>{getRatingText()}</Text>
+          <Text style={styles.ratingText}>{getRatingText(rating)}</Text>
         </View>
+        {/* Avaliacao do profissional */}
+        {professionalId && professionalName ? (
+          <View style={styles.ratingSection}>
+            <Text style={styles.sectionTitle}>Como foi o atendimento de {professionalName}?</Text>
+            <View style={styles.starsContainer}>
+              {renderStars(professionalRating, setProfessionalRating)}
+            </View>
+            <Text style={styles.ratingText}>{getRatingText(professionalRating)}</Text>
+          </View>
+        ) : null}
 
         {/* Comentário */}
         <View style={styles.commentSection}>
@@ -204,7 +249,7 @@ const ReviewScreen: React.FC = () => {
             isSubmitting && styles.submitButtonDisabled,
           ]}
           onPress={handleSubmitReview}
-          disabled={isSubmitting || rating === 0}
+          disabled={isSubmitting || rating === 0 || (!!professionalId && professionalRating === 0)}
         >
           <Text style={styles.submitButtonText}>
             {isSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
