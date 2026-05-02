@@ -27,7 +27,7 @@ import {
 } from '../../config/firebase';
 import { colors } from '../../constants/colors';
 import { useAuth } from '../auth/context/AuthContext';
-import { Review } from '../../services/reviews';
+import { Review, approveReview as approveReviewService, rejectReview as rejectReviewService } from '../../services/reviews';
 
 const ReviewsManagementScreen: React.FC = () => {
   const { user } = useAuth();
@@ -127,8 +127,8 @@ const ReviewsManagementScreen: React.FC = () => {
   const approveReview = async (reviewId: string) => {
     if (!businessId) return;
     try {
-      const reviewRef = doc(firestore, 'businesses', businessId, 'reviews', reviewId);
-      await updateDoc(reviewRef, { status: 'approved' });
+      // Usa funcao do service que ja atualiza ratings do business e profissional
+      await approveReviewService(businessId, reviewId);
 
       const updatedReviews = reviews.map(review => {
         if (review.id === reviewId) {
@@ -148,8 +148,8 @@ const ReviewsManagementScreen: React.FC = () => {
   const rejectReview = async (reviewId: string) => {
     if (!businessId) return;
     try {
-      const reviewRef = doc(firestore, 'businesses', businessId, 'reviews', reviewId);
-      await updateDoc(reviewRef, { status: 'rejected' });
+      // Usa funcao do service que ja atualiza ratings
+      await rejectReviewService(businessId, reviewId);
 
       const updatedReviews = reviews.map(review => {
         if (review.id === reviewId) {

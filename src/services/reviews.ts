@@ -240,9 +240,21 @@ export const rejectReview = async (
       'reviews',
       reviewId,
     );
+    // Buscar dados antes de rejeitar para saber o professionalId
+    const reviewDoc = await getDoc(reviewRef);
+    const reviewData = reviewDoc.exists() ? reviewDoc.data() as Review : null;
+    
     await updateDoc(reviewRef, {
       status: 'rejected',
     });
+    
+    // Atualizar medias removendo essa review do calculo
+    if (reviewData) {
+      await updateBusinessRating(reviewData.businessId);
+      if (reviewData.professionalId) {
+        await updateProfessionalRating(reviewData.professionalId);
+      }
+    }
   } catch (error) {
     throw error;
   }
