@@ -27,6 +27,7 @@ interface ReviewScreenParams {
 
 const ReviewScreen: React.FC = () => {
   const [rating, setRating] = useState(0);
+  const [professionalRating, setProfessionalRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const route = useRoute();
