@@ -59,16 +59,24 @@ const BusinessDetailsScreen: React.FC = () => {
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [isMapMounted, setIsMapMounted] = useState(false);
 
-  // Mapa: montar apenas quando tela em foco para evitar crash NPE no MapView ao navegar
+  // Mapa: montar apenas quando tela em foco
   useFocusEffect(
     useCallback(() => {
       const timer = setTimeout(() => setIsMapMounted(true), 300);
       return () => {
         clearTimeout(timer);
-        setIsMapMounted(false);
       };
     }, [])
   );
+  
+  // CRITICO: desmontar o mapa ANTES da navegacao acontecer para evitar crash NPE
+  // O beforeRemove dispara antes do React desmontar a tela, dando tempo do MapView limpar
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      setIsMapMounted(false);
+    });
+    return unsubscribe;
+  }, [navigation]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('Todos');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
