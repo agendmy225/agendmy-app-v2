@@ -29,6 +29,7 @@ export interface Review {
   professionalName?: string;
   appointmentId?: string;
   rating: number;
+  professionalRating?: number;
   comment: string;
   date: Timestamp; // Timestamp
   status: 'pending' | 'approved' | 'rejected';
@@ -349,8 +350,11 @@ export const updateProfessionalRating = async (
 
     reviewsSnapshot.forEach((docSnapshot: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
       const review = docSnapshot.data() as Review;
-      totalRating += review.rating;
-      count++;
+      // Usar professionalRating (nota especifica do profissional) - se nao tiver, ignora
+      if (review.professionalRating && review.professionalRating > 0) {
+        totalRating += review.professionalRating;
+        count++;
+      }
     });
 
     const averageRating = count > 0 ? totalRating / count : 0;

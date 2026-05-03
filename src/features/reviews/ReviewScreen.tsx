@@ -119,39 +119,26 @@ const ReviewScreen: React.FC = () => {
       }
       
       // Construir objeto removendo campos undefined (Firestore nao aceita undefined)
-      // Avaliacao do estabelecimento (com comentario)
-      const businessReview: any = {
+      // Avaliacao UNIFICADA: 1 review com nota do estabelecimento + nota do profissional + comentario
+      const reviewData: any = {
         businessId,
         userId: user?.uid || 'anonymous',
         userName: user?.displayName || user?.email?.split('@')[0] || 'Usuario Anonimo',
-        rating,
+        rating, // Nota do estabelecimento
         comment: comment.trim(),
       };
-      if (serviceId) { businessReview.serviceId = serviceId; }
-      if (appointmentId) { businessReview.appointmentId = appointmentId; }
-      
-      await addReview(businessReview);
-      
-      // Avaliacao do profissional (apenas estrelas, comentario opcional vazio)
-      if (professionalId && professionalRating > 0) {
-        const professionalReview: any = {
-          businessId,
-          userId: user?.uid || 'anonymous',
-          userName: user?.displayName || user?.email?.split('@')[0] || 'Usuario Anonimo',
-          rating: professionalRating,
-          comment: '', // Avaliacao do profissional nao tem comentario separado
-          professionalId,
-          professionalName,
-        };
-        if (appointmentId) { professionalReview.appointmentId = appointmentId; }
-        
-        try {
-          await addReview(professionalReview);
-        } catch (profErr) {
-          console.warn('Erro ao salvar avaliacao do profissional:', profErr);
-          // Nao falhar tudo se o profissional der erro
+      if (serviceId) { reviewData.serviceId = serviceId; }
+      if (appointmentId) { reviewData.appointmentId = appointmentId; }
+      // Adicionar dados do profissional se houver
+      if (professionalId) {
+        reviewData.professionalId = professionalId;
+        reviewData.professionalName = professionalName;
+        if (professionalRating > 0) {
+          reviewData.professionalRating = professionalRating;
         }
       }
+      
+      await addReview(reviewData);
 
       Alert.alert(
         'Avaliação enviada!',
