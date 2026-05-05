@@ -17,6 +17,8 @@ import {
   View,
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import LeafletMap from '../components/map/LeafletMap';
+import { useBusinessMarkers } from '../hooks/useBusinessMarkers';
 import { BusinessMarker } from '../features/business/components/BusinessMarker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useLocation } from '../context/LocationContext';
@@ -90,6 +92,7 @@ const HomeScreen: React.FC = () => {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [initialLoadError, setInitialLoadError] = useState<string | null>(null);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const leafletMarkers = useBusinessMarkers(businessesForMap);
   const mapViewRef = useRef<MapView>(null);
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { user } = useAuth();
@@ -444,20 +447,17 @@ const HomeScreen: React.FC = () => {
               <>
                 <View style={styles.mapContainer}>
                   {mapRegion ? (
-                    <MapView
-                      key={mapKey}
-                      ref={mapViewRef}
-                      provider={PROVIDER_GOOGLE}
+                    <LeafletMap
                       style={styles.map}
-                      initialRegion={mapRegion}
-                      showsUserLocation={true}
-                      showsMyLocationButton={true}
-                    >
-                      {businessesForMap.map(business => (
-                        <BusinessMarker key={business.id} business={business}
-                          onPress={() => navigation.navigate('BusinessDetails', { businessId: business.id })} />
-                      ))}
-                    </MapView>
+                      initialRegion={{
+                        latitude: mapRegion.latitude,
+                        longitude: mapRegion.longitude,
+                        zoom: 13,
+                      }}
+                      markers={leafletMarkers}
+                      showUserLocation
+                      onMarkerPress={(m) => navigation.navigate('BusinessDetails', { businessId: m.id })}
+                    />
                   ) : (
                     <View style={[styles.map, styles.loadingContainer]}>
                       <ActivityIndicator size="large" color={colors.primary} />

@@ -18,6 +18,8 @@ import {
   View,
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import LeafletMap from '../components/map/LeafletMap';
+import { useBusinessMarkers } from '../hooks/useBusinessMarkers';
 import { BusinessMarker } from '../features/business/components/BusinessMarker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useLocation } from '../context/LocationContext';
@@ -82,6 +84,7 @@ const OwnerHomeScreen: React.FC = () => {
   const [activeFilters, setActiveFilters] = useState<{ sortBy: 'rating' | 'recent' | 'name'; minRating: number }>({ sortBy: 'rating', minRating: 0 });
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
   const [locationSet, setLocationSet] = useState(false);
+  const leafletMarkers = useBusinessMarkers(businessesForMap);
 
   const mapRef = useRef<MapView>(null);
   const isInitialMount = useRef(true);
@@ -592,22 +595,17 @@ const OwnerHomeScreen: React.FC = () => {
           ) : (
             <>
               <View style={styles.mapContainer}>
-                <MapView
-                  ref={mapRef}
-                  provider={PROVIDER_GOOGLE}
+                <LeafletMap
                   style={styles.map}
-                  initialRegion={mapRegion}
-                  showsUserLocation={true}
-                  showsMyLocationButton={true}
-                >
-                  {businessesForMap.map(business => (
-                    <BusinessMarker
-                      key={business.id}
-                      business={business}
-                      onPress={() => navigation.navigate('BusinessDetails', { businessId: business.id })}
-                    />
-                  ))}
-                </MapView>
+                  initialRegion={{
+                    latitude: mapRegion.latitude,
+                    longitude: mapRegion.longitude,
+                    zoom: 13,
+                  }}
+                  markers={leafletMarkers}
+                  showUserLocation
+                  onMarkerPress={(m) => navigation.navigate('BusinessDetails', { businessId: m.id })}
+                />
               </View>
 
               <Text style={styles.sectionTitle}>Categorias</Text>

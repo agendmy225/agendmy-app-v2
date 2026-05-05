@@ -2,6 +2,7 @@ import { RouteProp, useFocusEffect, useNavigation, useRoute, CompositeNavigation
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BusinessMarker } from './components/BusinessMarker';
 import LeafletMap from '../../components/map/LeafletMap';
+import { useResolvedFirebaseUrl } from '../../hooks/useResolvedFirebaseUrl';
 import GalleryViewerModal, { GalleryItem } from './components/GalleryViewerModal';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
@@ -53,6 +54,7 @@ const BusinessDetailsScreen: React.FC = () => {
   const { favorites, toggleFavorite, user } = useAuth(); // Usar user ao invés de currentUser
 
   const [business, setBusiness] = useState<Business | null>(null);
+  const resolvedLogoUrl = useResolvedFirebaseUrl(business?.logo || business?.coverImage);
   const [services, setServices] = useState<Service[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -786,7 +788,7 @@ const BusinessDetailsScreen: React.FC = () => {
                       id: business.id,
                       latitude: business.location.latitude,
                       longitude: business.location.longitude,
-                      logoUrl: business.logo || business.coverImage,
+                      logoUrl: resolvedLogoUrl || undefined,
                       name: business.name,
                       category: business.category,
                     }]}
