@@ -1,6 +1,7 @@
 import { RouteProp, useFocusEffect, useNavigation, useRoute, CompositeNavigationProp } from '@react-navigation/native'; // Import useFocusEffect
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BusinessMarker } from './components/BusinessMarker';
+import LeafletMap from '../../components/map/LeafletMap';
 import GalleryViewerModal, { GalleryItem } from './components/GalleryViewerModal';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
@@ -16,7 +17,6 @@ import {
   View,
   Linking,
 } from 'react-native';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ProfessionalPortfolioModal from '../professional/ProfessionalPortfolioModal';
 import ServiceDetailsModal from '../service/ServiceDetailsModal';
@@ -775,39 +775,23 @@ const BusinessDetailsScreen: React.FC = () => {
               {business?.location?.latitude && business?.location?.longitude ? (
                 <View style={styles.mapContainer}>
                   {isMapMounted ? (
-                  <MapView
-                    key={`map-${mapKey}-${business.id}`}
-                    provider={PROVIDER_GOOGLE}
+                  <LeafletMap
                     style={styles.map}
                     initialRegion={{
                       latitude: business.location.latitude,
                       longitude: business.location.longitude,
-                      latitudeDelta: 0.01,
-                      longitudeDelta: 0.01,
-                    }}
-                    camera={{
-                      center: {
-                        latitude: business.location.latitude,
-                        longitude: business.location.longitude,
-                      },
-                      pitch: 0,
-                      heading: 0,
-                      altitude: 1000,
                       zoom: 16,
                     }}
-                    scrollEnabled={true}
-                    zoomEnabled={true}
-                    showsUserLocation={true}
-                    showsMyLocationButton={true}
-                    onMapReady={() => {
-                      console.log('Mapa pronto para:', business.name, 'em', business.location);
-                    }}
-                  >
-                    <BusinessMarker
-                      business={business}
-                      onPress={() => { }}
-                    />
-                  </MapView>
+                    markers={[{
+                      id: business.id,
+                      latitude: business.location.latitude,
+                      longitude: business.location.longitude,
+                      logoUrl: business.logo || business.coverImage,
+                      name: business.name,
+                      category: business.category,
+                    }]}
+                    showUserLocation={true}
+                  />
                   ) : (
                     <View style={[styles.map, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
                       <ActivityIndicator color="#d31027" />
