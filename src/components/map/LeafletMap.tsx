@@ -182,6 +182,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         cacheEnabled
         // Visual
         androidLayerType="hardware"
+        nestedScrollEnabled
       />
     </View>
   );

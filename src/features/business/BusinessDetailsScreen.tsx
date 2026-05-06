@@ -2,6 +2,7 @@ import { RouteProp, useFocusEffect, useNavigation, useRoute, CompositeNavigation
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BusinessMarker } from './components/BusinessMarker';
 import LeafletMap from '../../components/map/LeafletMap';
+import { useUserLocation } from '../../hooks/useUserLocation';
 import { useResolvedFirebaseUrl } from '../../hooks/useResolvedFirebaseUrl';
 import GalleryViewerModal, { GalleryItem } from './components/GalleryViewerModal';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
@@ -55,6 +56,7 @@ const BusinessDetailsScreen: React.FC = () => {
 
   const [business, setBusiness] = useState<Business | null>(null);
   const resolvedLogoUrl = useResolvedFirebaseUrl(business?.logo || business?.coverImage);
+  const userLocation = useUserLocation();
   const [services, setServices] = useState<Service[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -792,7 +794,13 @@ const BusinessDetailsScreen: React.FC = () => {
                       name: business.name,
                       category: business.category,
                     }]}
+                    userLocation={userLocation}
                     showUserLocation={true}
+                    onMarkerPress={(m) =>
+                      Linking.openURL(
+                        `https://www.google.com/maps/dir/?api=1&destination=${m.latitude},${m.longitude}`
+                      )
+                    }
                   />
                   ) : (
                     <View style={[styles.map, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>

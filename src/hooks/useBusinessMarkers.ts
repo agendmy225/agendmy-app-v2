@@ -12,7 +12,8 @@ import type { LeafletMarker } from '../components/map/LeafletMap';
  *   e o LeafletMap mostra o fallback (inicial do nome em vermelho).
  */
 export function useBusinessMarkers(
-  businesses?: Business[] | null
+  businesses?: Business[] | null,
+  refreshKey?: any
 ): LeafletMarker[] {
   const businessIds = useMemo(() => {
     if (!businesses) return [];
@@ -23,7 +24,7 @@ export function useBusinessMarkers(
       .map((b) => b.id);
   }, [businesses]);
 
-  const { states } = useMultipleMarkerImages(businessIds);
+  const { states } = useMultipleMarkerImages(businessIds, refreshKey);
 
   return useMemo(() => {
     if (!businesses) return [];

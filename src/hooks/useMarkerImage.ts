@@ -164,12 +164,13 @@ export const useMarkerImage = (
  * Hook para carregar múltiplas imagens de marcadores
  */
 export const useMultipleMarkerImages = (
-  businessIds: string[]
+  businessIds: string[],
+  refreshKey?: any
 ) => {
   const [states, setStates] = useState<Map<string, MarkerImageState>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
 
-  const businessIdsKey = businessIds.join(',');
+  const businessIdsKey = businessIds.join(',') + ':' + (refreshKey ?? '');
 
   const loadAllImages = useCallback(async () => {
     if (businessIds.length === 0) return;

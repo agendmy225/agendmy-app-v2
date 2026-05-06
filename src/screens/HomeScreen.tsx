@@ -19,6 +19,7 @@ import {
 import MapView, { PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import LeafletMap from '../components/map/LeafletMap';
 import { useBusinessMarkers } from '../hooks/useBusinessMarkers';
+import { useUserLocation } from '../hooks/useUserLocation';
 import { BusinessMarker } from '../features/business/components/BusinessMarker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useLocation } from '../context/LocationContext';
@@ -92,7 +93,14 @@ const HomeScreen: React.FC = () => {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [initialLoadError, setInitialLoadError] = useState<string | null>(null);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-  const leafletMarkers = useBusinessMarkers(businessesForMap);
+  const userLocation = useUserLocation();
+  const [markersRefreshKey, setMarkersRefreshKey] = useState(0);
+  useFocusEffect(
+    useCallback(() => {
+      setMarkersRefreshKey((k) => k + 1);
+    }, [])
+  );
+  const leafletMarkers = useBusinessMarkers(businessesForMap, markersRefreshKey);
   const mapViewRef = useRef<MapView>(null);
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { user } = useAuth();
@@ -456,6 +464,7 @@ const HomeScreen: React.FC = () => {
                       }}
                       markers={leafletMarkers}
                       showUserLocation
+                      userLocation={userLocation}
                       onMarkerPress={(m) => navigation.navigate('BusinessDetails', { businessId: m.id })}
                     />
                   ) : (
