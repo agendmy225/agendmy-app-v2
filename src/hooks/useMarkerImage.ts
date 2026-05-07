@@ -84,7 +84,9 @@ export const useMarkerImage = (
       const files = await listAll(businessFolderRef);
 
       // Procura por arquivos que começam com 'logo_'
-      const logoFile = files.items.find(item => item.name.startsWith('logo_'));
+      const logoFile = files.items
+              .filter(item => item.name.startsWith('logo_'))
+              .sort((a, b) => b.name.localeCompare(a.name))[0];
 
       if (!logoFile) {
         throw new Error('Logo não encontrado');
@@ -199,7 +201,9 @@ export const useMultipleMarkerImages = (
             const files = await listAll(businessFolderRef);
 
             // Procura por arquivos que começam com 'logo_'
-            const logoFile = files.items.find(item => item.name.startsWith('logo_'));
+            const logoFile = files.items
+              .filter(item => item.name.startsWith('logo_'))
+              .sort((a, b) => b.name.localeCompare(a.name))[0];
 
             if (!logoFile) {
               throw new Error('Logo não encontrado');

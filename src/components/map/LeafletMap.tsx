@@ -9,6 +9,7 @@ export interface LeafletMarker {
   logoUrl?: string;
   name: string;
   category?: string;
+  rating?: number;
 }
 
 export interface LeafletMapProps {
@@ -71,6 +72,24 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     font-weight: bold; font-size: 14px;
     width: 100%; height: 100%;
     display: flex; align-items: center; justify-content: center;
+  }
+  .business-marker-wrapper {
+    position: relative;
+    width: 44px; height: 60px;
+  }
+  .business-rating-badge {
+    position: absolute;
+    top: 40px; left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    color: #d31027;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 1px 6px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    white-space: nowrap;
+    line-height: 14px;
   }
   .user-marker {
     width: 18px; height: 18px; border-radius: 50%;

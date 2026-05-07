@@ -39,6 +39,7 @@ export function useBusinessMarkers(
         logoUrl: states.get(b.id)?.uri,
         name: b.name,
         category: b.category,
+        rating: b.rating,
       }));
   }, [businesses, states]);
 }

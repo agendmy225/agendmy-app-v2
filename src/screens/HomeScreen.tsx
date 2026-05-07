@@ -100,7 +100,7 @@ const HomeScreen: React.FC = () => {
       setMarkersRefreshKey((k) => k + 1);
     }, [])
   );
-  const leafletMarkers = useBusinessMarkers(businessesForMap, markersRefreshKey);
+  const leafletMarkers = useBusinessMarkers(allBusinessesLoaded, markersRefreshKey);
   const mapViewRef = useRef<MapView>(null);
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { user } = useAuth();

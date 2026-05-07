@@ -92,7 +92,7 @@ const OwnerHomeScreen: React.FC = () => {
       setMarkersRefreshKey((k) => k + 1);
     }, [])
   );
-  const leafletMarkers = useBusinessMarkers(businessesForMap, markersRefreshKey);
+  const leafletMarkers = useBusinessMarkers(allBusinessesLoaded, markersRefreshKey);
 
   const mapRef = useRef<MapView>(null);
   const isInitialMount = useRef(true);
