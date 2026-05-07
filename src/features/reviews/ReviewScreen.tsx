@@ -1,5 +1,5 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Alert,
   SafeAreaView,
@@ -14,7 +14,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../constants/colors';
 import { useAuth } from '../auth/context/AuthContext';
 import { addReview } from '../../services/reviews';
+import { getProfessionalById, Professional } from '../../services/professionals';
 import { firestore, collection, query, where, getDocs } from '../../config/firebase';
+import { useResolvedFirebaseUrl } from '../../hooks/useResolvedFirebaseUrl';
 
 interface ReviewScreenParams {
   businessId: string;
@@ -28,6 +30,18 @@ interface ReviewScreenParams {
 const ReviewScreen: React.FC = () => {
   const [rating, setRating] = useState(0);
   const [professionalRating, setProfessionalRating] = useState(0);
+  const [professional, setProfessional] = useState<Professional | null>(null);
+  const professionalImageUrl = useResolvedFirebaseUrl(professional?.image);
+  useEffect(() => {
+    let mounted = true;
+    if (route.params && (route.params as ReviewScreenParams).professionalId) {
+      const pid = (route.params as ReviewScreenParams).professionalId!;
+      getProfessionalById(pid)
+        .then((p) => { if (mounted) setProfessional(p); })
+        .catch((err) => console.warn('[ReviewScreen] erro ao buscar profissional:', err?.message));
+    }
+    return () => { mounted = false; };
+  }, [route.params]);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const route = useRoute();
@@ -197,6 +211,20 @@ const ReviewScreen: React.FC = () => {
         {/* Avaliacao do profissional */}
         {professionalId && professionalName ? (
           <View style={styles.ratingSection}>
+            <View style={styles.professionalAvatarContainer}>
+              {professionalImageUrl ? (
+                <Image
+                  source={{ uri: professionalImageUrl }}
+                  style={styles.professionalAvatar}
+                />
+              ) : (
+                <View style={styles.professionalAvatarFallback}>
+                  <Text style={styles.professionalAvatarFallbackText}>
+                    {(professionalName || '?').charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+              )}
+            </View>
             <Text style={styles.sectionTitle}>Como foi o atendimento de {professionalName}?</Text>
             <View style={styles.starsContainer}>
               {renderStars(professionalRating, setProfessionalRating)}
@@ -307,6 +335,32 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: 16,
     textAlign: 'center',
+  },
+  professionalAvatarContainer: {
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  professionalAvatar: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 3,
+    borderColor: colors.primary,
+  },
+  professionalAvatarFallback: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: colors.primary,
+  },
+  professionalAvatarFallbackText: {
+    color: colors.white,
+    fontSize: 28,
+    fontWeight: 'bold',
   },
   starsContainer: {
     flexDirection: 'row',
