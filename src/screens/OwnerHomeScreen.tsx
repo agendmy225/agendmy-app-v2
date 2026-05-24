@@ -341,13 +341,9 @@ const OwnerHomeScreen: React.FC = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (isInitialMount.current) {
-        isInitialMount.current = false;
-        loadInitialData();
-      } else {
-        const hasRecentData = topRated.length > 0 && promotions.length > 0;
-        if (!hasRecentData) { loadInitialData(); }
-      }
+      // CORRIGIDO: sempre recarrega ao ganhar foco para pegar dados frescos
+      if (isInitialMount.current) { isInitialMount.current = false; }
+      loadInitialData();
 
       // CORRIGIDO: sempre re-centraliza ao voltar para a tela
       if (realTimeLocation) {

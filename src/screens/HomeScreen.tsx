@@ -298,10 +298,11 @@ const HomeScreen: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       setSearchQuery(''); setSelectedCategoryFilter(null); setSearchResults([]);
+      loadInitialData(); // CORRIGIDO: recarrega businesses ao ganhar foco
       if (realTimeLocation) {
         applyLocationAndFilter(realTimeLocation.latitude, realTimeLocation.longitude);
       }
-    }, [realTimeLocation, applyLocationAndFilter]),
+    }, [realTimeLocation, applyLocationAndFilter, loadInitialData]),
   );
 
   const performSearch = useCallback(async () => {
