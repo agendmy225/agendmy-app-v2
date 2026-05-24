@@ -32,16 +32,6 @@ const ReviewScreen: React.FC = () => {
   const [professionalRating, setProfessionalRating] = useState(0);
   const [professional, setProfessional] = useState<Professional | null>(null);
   const professionalImageUrl = useResolvedFirebaseUrl(professional?.image);
-  useEffect(() => {
-    let mounted = true;
-    if (route.params && (route.params as ReviewScreenParams).professionalId) {
-      const pid = (route.params as ReviewScreenParams).professionalId!;
-      getProfessionalById(pid)
-        .then((p) => { if (mounted) setProfessional(p); })
-        .catch((err) => console.warn('[ReviewScreen] erro ao buscar profissional:', err?.message));
-    }
-    return () => { mounted = false; };
-  }, [route.params]);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const route = useRoute();
@@ -49,6 +39,17 @@ const ReviewScreen: React.FC = () => {
   const { user } = useAuth();
   const { businessId, businessName, serviceId, professionalId, professionalName, appointmentId } =
     route.params as ReviewScreenParams;
+
+  // Busca dados do profissional para mostrar foto na avaliacao
+  useEffect(() => {
+    let mounted = true;
+    if (professionalId) {
+      getProfessionalById(professionalId)
+        .then((p) => { if (mounted) setProfessional(p); })
+        .catch((err) => console.warn('[ReviewScreen] erro:', err && err.message));
+    }
+    return () => { mounted = false; };
+  }, [professionalId]);
 
   const screenTitle = serviceId ? 'Avaliar Serviço' : 'Avaliar Estabelecimento';
 
@@ -103,6 +104,9 @@ const ReviewScreen: React.FC = () => {
     try {
       setIsSubmitting(true);
       
+      // FLAG TEMPORARIA: setar para true bloqueia novamente. Para testes deixar false.
+      const ENFORCE_ONE_REVIEW_PER_CLIENT = false;
+      if (ENFORCE_ONE_REVIEW_PER_CLIENT) {
       // Verificar se o usuario ja avaliou este estabelecimento (limite 1 por cliente)
       // Buscamos direto na subcolecao do business para nao precisar de indice composto
       if (user?.uid) {
@@ -130,6 +134,7 @@ const ReviewScreen: React.FC = () => {
           console.warn('Erro ao verificar avaliacoes anteriores:', checkErr);
           // Nao bloquear se falhar a verificacao
         }
+      }
       }
       
       // Construir objeto removendo campos undefined (Firestore nao aceita undefined)
