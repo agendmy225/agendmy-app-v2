@@ -2,6 +2,12 @@ import { firestore, serverTimestamp, collection, doc, query, where, limit, getDo
 import { Platform, Alert, PermissionsAndroid } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 
+// ============================================================
+// Geocoding via Nominatim (OpenStreetMap) - gratis, sem chave
+// Nominatim exige User-Agent valido. Veja: https://operations.osmfoundation.org/policies/nominatim/
+// ============================================================
+const NOMINATIM_USER_AGENT = 'AgendMy/1.0';
+
 
 // Tipos
 export interface LocationData {
@@ -98,61 +104,63 @@ export const getCurrentLocation = async (options?: {
   });
 };
 
-// Obter endereço a partir de coordenadas (usando Google Geocoding API)
+// Obter endereco a partir de coordenadas (Nominatim/OpenStreetMap)
+// Segundo parametro mantido por retrocompatibilidade, ignorado.
 export const getAddressFromCoordinates = async (
   latitude: number,
   longitude: number,
-  apiKey: string,
+  _apiKey?: string,
 ): Promise<string | null> => {
-  if (!apiKey) {
-    console.warn('Google Maps API Key is missing for geocoding.');
-    return null;
-  }
   try {
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
-
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.status === 'OK' && data.results.length > 0) {
-      const address = data.results[0].formatted_address;
-      return address;
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=pt-BR`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': NOMINATIM_USER_AGENT },
+    });
+    if (!response.ok) {
+      console.warn('[Nominatim reverse] HTTP', response.status);
+      return null;
     }
-
-    return null;
+    const data = await response.json();
+    return data?.display_name || null;
   } catch (error) {
+    console.warn('[Nominatim reverse] erro:', error);
     return null;
   }
 };
 
-// Obter coordenadas a partir de um endereço (usando Google Geocoding API)
+// Obter coordenadas a partir de um endereco (Nominatim/OpenStreetMap)
+// Segundo parametro mantido por retrocompatibilidade, ignorado.
 export const getCoordinatesFromAddress = async (
   address: string,
-  apiKey: string,
+  _apiKey?: string,
 ): Promise<LocationData | null> => {
-  if (!apiKey) {
-    console.warn('Google Maps API Key is missing for geocoding.');
+  if (!address || !address.trim()) {
     return null;
   }
   try {
-    const encodedAddress = encodeURIComponent(address);
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`;
-
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.status === 'OK' && data.results.length > 0) {
-      const { lat, lng } = data.results[0].geometry.location;
-      const locationData = {
-        latitude: lat,
-        longitude: lng,
-        address: data.results[0].formatted_address, // Optionally include formatted address
-      };
-      return locationData;
+    const q = encodeURIComponent(address.trim());
+    // countrycodes=br restringe a resultados no Brasil
+    const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=br&accept-language=pt-BR`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': NOMINATIM_USER_AGENT },
+    });
+    if (!response.ok) {
+      console.warn('[Nominatim search] HTTP', response.status);
+      return null;
     }
-
-    return null;
+    const data = await response.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      console.warn('[Nominatim search] sem resultados para:', address);
+      return null;
+    }
+    const first = data[0];
+    return {
+      latitude: parseFloat(first.lat),
+      longitude: parseFloat(first.lon),
+      address: first.display_name || address,
+    };
   } catch (error) {
+    console.warn('[Nominatim search] erro:', error);
     return null;
   }
 };

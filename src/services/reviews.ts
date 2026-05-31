@@ -62,13 +62,9 @@ export const addReview = async (
 
     console.log('Avaliação adicionada com sucesso, ID:', docRef.id);
 
-    // Atualizar média de avaliações do estabelecimento
-    await updateBusinessRating(review.businessId);
-
-    // Atualizar média de avaliações do profissional, se aplicável
-    if (review.professionalId) {
-      await updateProfessionalRating(review.professionalId);
-    }
+    // Rating do business e do profissional sao recalculados apenas ao
+    // aprovar a review (em approveReview). Cliente nao tem permissao
+    // de escrita em professionals/{id} e a review ainda esta pending.
 
     return docRef.id;
   } catch (error) {
