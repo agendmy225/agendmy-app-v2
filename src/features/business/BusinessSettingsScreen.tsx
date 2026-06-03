@@ -331,6 +331,7 @@ const BusinessSettingsScreen: React.FC = () => {
           console.log('[BusinessSettings] geocoding endereco:', fullAddress);
           const coordinates = await getCoordinatesFromAddress(fullAddress);
           console.log('[BusinessSettings] coordinates recebidas:', coordinates);
+          Alert.alert('DEBUG Geocoding', 'Endereco enviado:\n' + fullAddress + '\n\nResultado do Nominatim:\n' + (coordinates ? ('lat ' + coordinates.latitude + '\nlon ' + coordinates.longitude) : 'NULO - nao retornou coordenadas'));
 
           if (coordinates) {
             dataToSave.location = {
