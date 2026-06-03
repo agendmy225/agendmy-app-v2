@@ -332,6 +332,9 @@ const HomeScreen: React.FC = () => {
       <CachedImage storagePath={item.coverImage || item.logo || null} style={styles.infoCardImage} defaultSource={require('../assets/images/banner-home.png')} />
       <Text style={styles.infoCardTitle} numberOfLines={1}>{item.name || 'Nome nao disponivel'}</Text>
       <Text style={styles.infoCardSubtitle} numberOfLines={1}>{getCategoryById(item.category)?.name || item.category || 'Servicos'}</Text>
+      {item.rating ? (
+        <Text style={{ fontSize: 12, color: colors.primary, fontWeight: 'bold', marginTop: 2 }}>{'\u2605 ' + Number(item.rating).toFixed(1)}</Text>
+      ) : null}
     </TouchableOpacity>
   );
 

@@ -136,10 +136,12 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     } else {
       html = '<div class="business-marker"><div class="business-marker-fallback">' + (m.name ? m.name.charAt(0).toUpperCase() : '?') + '</div></div>';
     }
+    var badge = (m.rating && m.rating > 0) ? '<div class="business-rating-badge">' + Number(m.rating).toFixed(1) + '</div>' : '';
+    html = '<div class="business-marker-wrapper">' + html + badge + '</div>';
     var icon = L.divIcon({
       html: html,
       className: '',
-      iconSize: [44, 44],
+      iconSize: [44, 60],
       iconAnchor: [22, 22]
     });
     var marker = L.marker([m.latitude, m.longitude], { icon: icon }).addTo(map);
