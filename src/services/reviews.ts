@@ -346,49 +346,52 @@ export const updateBusinessRating = async (
 };
 
 // Atualizar média de avaliações do profissional
+// Reescrito para NAO usar collectionGroup (evita indice composto no Firestore).
+// Descobre o businessId do profissional e consulta as reviews approved daquele
+// business com 1 filtro (status), filtrando o profissional em memoria.
 export const updateProfessionalRating = async (
   professionalId: string,
 ): Promise<number> => {
   try {
-    console.log('Atualizando rating do profissional:', professionalId);
-
-    // Buscar todas as avaliações aprovadas deste profissional em todos os negócios
-    const q = query(
-      collectionGroup(firebaseDb, 'reviews'), // Use collectionGroup
-      where('professionalId', '==', professionalId),
-      where('status', '==', 'approved'),
-    );
+    // Descobrir o businessId do profissional
+    const professionalRef = doc(firebaseDb, 'professionals', professionalId);
+    const professionalSnap = await getDoc(professionalRef);
+    if (!professionalSnap.exists()) {
+      console.warn('[updateProfessionalRating] profissional nao encontrado:', professionalId);
+      return 0;
+    }
+    const businessId = (professionalSnap.data() as any)?.businessId;
+    if (!businessId) {
+      console.warn('[updateProfessionalRating] profissional sem businessId:', professionalId);
+      return 0;
+    }
+    // Buscar reviews aprovadas do business (1 filtro: status). Sem collectionGroup.
+    const reviewsRef = collection(firebaseDb, 'businesses', businessId, 'reviews');
+    const q = query(reviewsRef, where('status', '==', 'approved'));
     const reviewsSnapshot = await getDocs(q);
-
     let totalRating = 0;
     let count = 0;
-
     reviewsSnapshot.forEach((docSnapshot: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
       const review = docSnapshot.data() as Review;
-      // Usar professionalRating (nota especifica do profissional) - se nao tiver, ignora
-      if (review.professionalRating && review.professionalRating > 0) {
+      // Apenas reviews deste profissional com nota especifica valida
+      if (
+        review.professionalId === professionalId &&
+        review.professionalRating &&
+        review.professionalRating > 0
+      ) {
         totalRating += review.professionalRating;
         count++;
       }
     });
-
     const averageRating = count > 0 ? totalRating / count : 0;
-
-    console.log(`Profissional ${professionalId}: ${count} avaliações, média ${averageRating.toFixed(1)}`);
-
-    // Atualizar a média no documento do profissional
-    const professionalRef = doc(firebaseDb, 'professionals', professionalId);
     await updateDoc(professionalRef, {
       rating: averageRating,
       reviewsCount: count,
     });
-
     return averageRating;
   } catch (error) {
-    console.error('Erro ao atualizar rating do profissional:', error);
-    // DETAILED_LOG_ADDED
-    console.warn('[updateProfessionalRating] code:', (error as any)?.code, 'message:', (error as any)?.message);
-    throw error;
+    console.warn('[updateProfessionalRating] erro:', (error as any)?.code, (error as any)?.message);
+    return 0; // nao re-lanca: nao deve quebrar a aprovacao
   }
 };
 
