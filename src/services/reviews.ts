@@ -211,12 +211,21 @@ export const approveReview = async (
     if (reviewDoc.exists()) {
       const reviewData = reviewDoc.data() as Review;
 
-      // Atualizar média de avaliações do estabelecimento
-      await updateBusinessRating(reviewData.businessId);
+      // TRY_WRAPPED
+      try {
+        await updateBusinessRating(reviewData.businessId);
+      } catch (innerErr) {
+        console.warn('[approveReview] updateBusinessRating falhou:', innerErr);
+      }
 
       // Atualizar média de avaliações do profissional, se aplicável
       if (reviewData.professionalId) {
-        await updateProfessionalRating(reviewData.professionalId);
+        // TRY_WRAPPED
+        try {
+          await updateProfessionalRating(reviewData.professionalId);
+        } catch (innerErr) {
+          console.warn('[approveReview] updateProfessionalRating falhou:', innerErr);
+        }
       }
     }
   } catch (error) {
@@ -247,9 +256,19 @@ export const rejectReview = async (
     
     // Atualizar medias removendo essa review do calculo
     if (reviewData) {
-      await updateBusinessRating(reviewData.businessId);
+      // TRY_WRAPPED
+      try {
+        await updateBusinessRating(reviewData.businessId);
+      } catch (innerErr) {
+        console.warn('[rejectReview] updateBusinessRating falhou:', innerErr);
+      }
       if (reviewData.professionalId) {
-        await updateProfessionalRating(reviewData.professionalId);
+        // TRY_WRAPPED
+        try {
+          await updateProfessionalRating(reviewData.professionalId);
+        } catch (innerErr) {
+          console.warn('[rejectReview] updateProfessionalRating falhou:', innerErr);
+        }
       }
     }
   } catch (error) {
@@ -367,6 +386,8 @@ export const updateProfessionalRating = async (
     return averageRating;
   } catch (error) {
     console.error('Erro ao atualizar rating do profissional:', error);
+    // DETAILED_LOG_ADDED
+    console.warn('[updateProfessionalRating] code:', (error as any)?.code, 'message:', (error as any)?.message);
     throw error;
   }
 };

@@ -328,7 +328,9 @@ const BusinessSettingsScreen: React.FC = () => {
             fullAddress += `, ${settings.addressComplement.trim()}`;
           }
 
-          const coordinates = await getCoordinatesFromAddress(fullAddress, Config.GOOGLE_MAPS_API_KEY || '');
+          console.log('[BusinessSettings] geocoding endereco:', fullAddress);
+          const coordinates = await getCoordinatesFromAddress(fullAddress);
+          console.log('[BusinessSettings] coordinates recebidas:', coordinates);
 
           if (coordinates) {
             dataToSave.location = {

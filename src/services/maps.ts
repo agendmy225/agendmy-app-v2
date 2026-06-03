@@ -141,6 +141,7 @@ export const getCoordinatesFromAddress = async (
     const q = encodeURIComponent(address.trim());
     // countrycodes=br restringe a resultados no Brasil
     const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=br&accept-language=pt-BR`;
+    console.log('[Nominatim search] buscando:', address, '->', url);
     const response = await fetch(url, {
       headers: { 'User-Agent': NOMINATIM_USER_AGENT },
     });
@@ -154,6 +155,7 @@ export const getCoordinatesFromAddress = async (
       return null;
     }
     const first = data[0];
+    console.log('[Nominatim search] resultado lat/lon:', first?.lat, first?.lon);
     return {
       latitude: parseFloat(first.lat),
       longitude: parseFloat(first.lon),
