@@ -82,7 +82,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     top: 40px; left: 50%;
     transform: translateX(-50%);
     background: #fff;
-    color: #d31027;
+    color: #33001b;
     font-size: 10px;
     font-weight: bold;
     padding: 1px 6px;
@@ -136,7 +136,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     } else {
       html = '<div class="business-marker"><div class="business-marker-fallback">' + (m.name ? m.name.charAt(0).toUpperCase() : '?') + '</div></div>';
     }
-    var badge = (m.rating && m.rating > 0) ? '<div class="business-rating-badge">' + Number(m.rating).toFixed(1) + '</div>' : '';
+    var badge = (m.rating && m.rating > 0) ? '<div class="business-rating-badge"><span style="color:#FFC107;">&#9733;</span> ' + Number(m.rating).toFixed(1) + '</div>' : '';
     html = '<div class="business-marker-wrapper">' + html + badge + '</div>';
     var icon = L.divIcon({
       html: html,

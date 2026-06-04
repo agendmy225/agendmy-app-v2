@@ -331,7 +331,15 @@ const BusinessSettingsScreen: React.FC = () => {
           console.log('[BusinessSettings] geocoding endereco:', fullAddress);
           const coordinates = await getCoordinatesFromAddress(fullAddress);
           console.log('[BusinessSettings] coordinates recebidas:', coordinates);
-          Alert.alert('DEBUG Geocoding', 'Endereco enviado:\n' + fullAddress + '\n\nResultado do Nominatim:\n' + (coordinates ? ('lat ' + coordinates.latitude + '\nlon ' + coordinates.longitude) : 'NULO - nao retornou coordenadas'));
+          // DEBUG: testar Nominatim diretamente e mostrar status + resposta crua
+          try {
+            const _testUrl = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(fullAddress) + '&format=json&limit=1&countrycodes=br&accept-language=pt-BR';
+            const _testResp = await fetch(_testUrl, { headers: { 'User-Agent': 'AgendMy/1.0' } });
+            const _testText = await _testResp.text();
+            Alert.alert('DEBUG Nominatim', 'Status HTTP: ' + _testResp.status + '\n\nResposta (300 chars):\n' + _testText.substring(0, 300));
+          } catch (_e) {
+            Alert.alert('DEBUG Nominatim ERRO', 'Excecao de rede:\n' + String(_e));
+          }
 
           if (coordinates) {
             dataToSave.location = {
