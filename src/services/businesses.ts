@@ -394,15 +394,20 @@ export const debugAllBusinesses = async (): Promise<void> => {
 export const getTopRatedBusinesses = async (limitNum: number = 10): Promise<Business[]> => {
   try {
     const businessesCollectionRef = collection(firebaseDb, 'businesses');
+    // Evita indice composto (active + rating + reviewCount): busca ativos
+    // e ordena por rating em memoria.
     const q = query(
       businessesCollectionRef,
       where('active', '==', true),
-      orderBy('rating', 'desc'),
-      orderBy('reviewCount', 'desc'),
-      limit(limitNum),
+      limit(50),
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(mapDocumentToBusiness);
+    const businesses = querySnapshot.docs.map(mapDocumentToBusiness);
+    businesses.sort((a, b) =>
+      ((b.rating || 0) - (a.rating || 0)) ||
+      ((b.reviewCount || 0) - (a.reviewCount || 0))
+    );
+    return businesses.slice(0, limitNum);
   } catch (error) {
     throw error;
   }

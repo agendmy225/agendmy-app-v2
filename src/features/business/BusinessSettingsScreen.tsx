@@ -17,6 +17,7 @@ import { BUSINESS_CATEGORIES } from '../../services/categories';
 import { colors } from '../../constants/colors';
 import { useAuth } from '../auth/context/AuthContext';
 import { getCoordinatesFromAddress } from '../../services/maps';
+import { getAddressFromCep, formatCep } from '../../services/cep';
 import {
   deleteImageFromFirebase,
   selectAndUploadImage,
@@ -35,6 +36,10 @@ interface BusinessSettings {
   address: string;
   addressNumber: string;
   addressComplement?: string;
+  zipCode?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
   phone: string;
   instagram?: string;
   email: string;
@@ -103,6 +108,10 @@ const BusinessSettingsScreen: React.FC = () => {
     address: '',
     addressNumber: '',
     addressComplement: '',
+    zipCode: '',
+    neighborhood: '',
+    city: '',
+    state: '',
     phone: '',
           instagram: '',
     email: '',
@@ -249,6 +258,10 @@ const BusinessSettingsScreen: React.FC = () => {
           address: businessData.address || prevSettings.address,
           addressNumber: businessData.addressNumber || prevSettings.addressNumber,
           addressComplement: businessData.addressComplement || prevSettings.addressComplement,
+          zipCode: businessData.zipCode || prevSettings.zipCode || '',
+          neighborhood: businessData.neighborhood || prevSettings.neighborhood || '',
+          city: businessData.city || prevSettings.city || '',
+          state: businessData.state || prevSettings.state || '',
           phone: businessData.phone || prevSettings.phone,
           instagram: businessData.instagram || prevSettings.instagram || '',
           email: businessData.email || prevSettings.email,
@@ -324,8 +337,14 @@ const BusinessSettingsScreen: React.FC = () => {
           if (settings.addressNumber && settings.addressNumber.trim()) {
             fullAddress += `, ${settings.addressNumber.trim()}`;
           }
-          if (settings.addressComplement && settings.addressComplement.trim()) {
-            fullAddress += `, ${settings.addressComplement.trim()}`;
+          if (settings.neighborhood && settings.neighborhood.trim()) {
+            fullAddress += `, ${settings.neighborhood.trim()}`;
+          }
+          if (settings.city && settings.city.trim()) {
+            fullAddress += `, ${settings.city.trim()}`;
+          }
+          if (settings.state && settings.state.trim()) {
+            fullAddress += ` - ${settings.state.trim()}`;
           }
 
           console.log('[BusinessSettings] geocoding endereco:', fullAddress);
@@ -621,6 +640,28 @@ const BusinessSettingsScreen: React.FC = () => {
     );
   };
 
+  // Busca endereco pelo CEP via ViaCEP e preenche os campos automaticamente
+  const buscarCep = async (cepValue: string) => {
+    const cleaned = (cepValue || '').replace(/\D/g, '');
+    if (cleaned.length !== 8) { return; }
+    try {
+      const result = await getAddressFromCep(cleaned);
+      if (result) {
+        setSettings((prev) => ({
+          ...prev,
+          address: result.street || prev.address,
+          neighborhood: result.neighborhood || prev.neighborhood,
+          city: result.city || prev.city,
+          state: result.state || prev.state,
+        }));
+      } else {
+        Alert.alert('CEP nao encontrado', 'Verifique o CEP ou preencha o endereco manualmente.');
+      }
+    } catch (e) {
+      console.warn('[buscarCep] erro:', e);
+    }
+  };
+
   const renderGeneralSettings = () => (
     <View style={styles.sectionContent}>
       <View style={styles.inputContainer}>
@@ -642,6 +683,23 @@ const BusinessSettingsScreen: React.FC = () => {
           placeholder="Descreva seu estabelecimento"
           multiline
           numberOfLines={4} />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.inputLabel}>CEP</Text>
+        <TextInput
+          style={styles.input}
+          value={settings.zipCode || ''}
+          onChangeText={(value) => {
+            const formatted = formatCep(value);
+            updateSettings('zipCode', formatted);
+            const cleaned = value.replace(/\D/g, '');
+            if (cleaned.length === 8) { buscarCep(cleaned); }
+          }}
+          placeholder="00000-000"
+          keyboardType="numeric"
+          maxLength={9}
+        />
       </View>
 
       <View style={styles.inputContainer}>
@@ -672,6 +730,38 @@ const BusinessSettingsScreen: React.FC = () => {
           value={settings.addressComplement || ''}
           onChangeText={(value) => updateSettings('addressComplement', value)}
           placeholder="Apto, sala, andar, etc."
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.inputLabel}>Bairro</Text>
+        <TextInput
+          style={styles.input}
+          value={settings.neighborhood || ''}
+          onChangeText={(value) => updateSettings('neighborhood', value)}
+          placeholder="Bairro"
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.inputLabel}>Cidade</Text>
+        <TextInput
+          style={styles.input}
+          value={settings.city || ''}
+          onChangeText={(value) => updateSettings('city', value)}
+          placeholder="Cidade"
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.inputLabel}>Estado (UF)</Text>
+        <TextInput
+          style={styles.input}
+          value={settings.state || ''}
+          onChangeText={(value) => updateSettings('state', value.toUpperCase())}
+          placeholder="SP"
+          maxLength={2}
+          autoCapitalize="characters"
         />
       </View>
 
