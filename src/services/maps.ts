@@ -137,34 +137,83 @@ export const getCoordinatesFromAddress = async (
   if (!address || !address.trim()) {
     return null;
   }
-  try {
-    const q = encodeURIComponent(address.trim());
-    // countrycodes=br restringe a resultados no Brasil
-    const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=br&accept-language=pt-BR`;
-    console.log('[Nominatim search] buscando:', address, '->', url);
-    const response = await fetch(url, {
-      headers: { 'User-Agent': NOMINATIM_USER_AGENT },
-    });
-    if (!response.ok) {
-      console.warn('[Nominatim search] HTTP', response.status);
+
+  // Faz UMA consulta ao Nominatim para a query informada.
+  const tryQuery = async (queryStr: string): Promise<LocationData | null> => {
+    const trimmed = (queryStr || "").trim();
+    if (!trimmed) { return null; }
+    try {
+      const q = encodeURIComponent(trimmed);
+      const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=br&accept-language=pt-BR`;
+      console.log("[Nominatim search] tentando:", trimmed);
+      const response = await fetch(url, {
+        headers: { "User-Agent": NOMINATIM_USER_AGENT },
+      });
+      if (!response.ok) {
+        console.warn("[Nominatim search] HTTP", response.status);
+        return null;
+      }
+      const data = await response.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        return null;
+      }
+      const first = data[0];
+      return {
+        latitude: parseFloat(first.lat),
+        longitude: parseFloat(first.lon),
+        address: first.display_name || trimmed,
+      };
+    } catch (error) {
+      console.warn("[Nominatim search] erro:", error);
       return null;
     }
-    const data = await response.json();
-    if (!Array.isArray(data) || data.length === 0) {
-      console.warn('[Nominatim search] sem resultados para:', address);
-      return null;
+  };
+
+  // fallback em cascata: monta variacoes do endereco, do mais
+  // especifico ao mais generico, e usa a primeira que achar.
+  const full = address.trim();
+  const candidates: string[] = [full];
+
+  // Variacao sem numero: remove sequencias ", 123" (numero isolado)
+  const semNumero = full.replace(/,\s*\d+\s*(?=,|$)/, "");
+  if (semNumero !== full) { candidates.push(semNumero); }
+
+  // Variacao so cidade + estado: pega o trecho final.
+  // O endereco estruturado termina em "... , Cidade - UF".
+  const hifenMatch = full.match(/([^,]+)\s*-\s*([A-Za-z]{2})\s*$/);
+  if (hifenMatch) {
+    const cidade = hifenMatch[1].trim();
+    const uf = hifenMatch[2].trim();
+    candidates.push(`${cidade} - ${uf}`);
+  } else {
+    // sem hifen: usa os 2 ultimos trechos separados por virgula
+    const partes = full.split(",").map((p) => p.trim()).filter(Boolean);
+    if (partes.length >= 2) {
+      candidates.push(partes.slice(-2).join(", "));
+    } else if (partes.length === 1) {
+      candidates.push(partes[0]);
     }
-    const first = data[0];
-    console.log('[Nominatim search] resultado lat/lon:', first?.lat, first?.lon);
-    return {
-      latitude: parseFloat(first.lat),
-      longitude: parseFloat(first.lon),
-      address: first.display_name || address,
-    };
-  } catch (error) {
-    console.warn('[Nominatim search] erro:', error);
-    return null;
   }
+
+  // remove duplicados mantendo a ordem
+  const seen = new Set<string>();
+  const uniqueCandidates = candidates.filter((c) => {
+    const key = c.toLowerCase();
+    if (seen.has(key)) { return false; }
+    seen.add(key);
+    return true;
+  });
+
+  for (const candidate of uniqueCandidates) {
+    const result = await tryQuery(candidate);
+    if (result) {
+      console.log("[Nominatim search] achou com:", candidate, "->", result.latitude, result.longitude);
+      return result;
+    }
+  }
+
+  console.warn("[Nominatim search] nenhuma variacao encontrou:", full);
+  return null;
 };
 
 // Salvar localização do estabelecimento
