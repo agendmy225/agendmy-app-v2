@@ -12,7 +12,7 @@ type AdminPanelNavigationProp = StackNavigationProp<AppStackParamList>;
 // Secoes do painel admin. "ready: false" => mostra "Em breve" e nao navega.
 // Conforme cada etapa for implementada, trocamos ready para true e ligamos a screen.
 const adminSections = [
-  { id: 'establishments', label: 'Estabelecimentos', description: 'Listar, ativar e desativar', icon: 'store', screen: 'AdminEstablishments', ready: false },
+  { id: 'establishments', label: 'Estabelecimentos', description: 'Listar, ativar e desativar', icon: 'store', screen: 'AdminEstablishments', ready: true },
   { id: 'overdue', label: 'Inadimplentes', description: 'Donos com pagamento pendente', icon: 'money-off', screen: 'AdminOverdue', ready: false },
   { id: 'users', label: 'Usuarios', description: 'Clientes e proprietarios', icon: 'people', screen: 'AdminUsers', ready: false },
   { id: 'analytics', label: 'Analytics', description: 'Por cidade e estado', icon: 'insights', screen: 'AdminAnalytics', ready: false },
@@ -50,6 +50,13 @@ const AdminPanelScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backIcon}
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        >
+          <Icon name="arrow-back" size={26} color={colors.white} />
+        </TouchableOpacity>
         <Icon name="admin-panel-settings" size={32} color={colors.white} />
         <Text style={styles.headerTitle}>Painel Admin</Text>
         <Text style={styles.headerSubtitle}>Controle geral do AgendMy</Text>
@@ -103,6 +110,12 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: colors.primary,
     alignItems: 'center',
+  },
+  backIcon: {
+    position: 'absolute',
+    top: 24,
+    left: 16,
+    zIndex: 2,
   },
   headerTitle: {
     color: colors.white,

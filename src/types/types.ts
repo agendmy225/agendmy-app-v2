@@ -89,6 +89,7 @@ export type AppStackParamList = {
   ReviewsManagementScreen: undefined; // Adicionando para navegação via Hub
   BusinessSettingsScreen: undefined; // Adicionando para navegação via Hub
   AdminPanel: undefined; // Painel administrativo (somente admin)
+  AdminEstablishments: undefined; // Admin: lista de estabelecimentos
   ChatManagementScreen: undefined; // Adicionando para navegação via Hub
   PromotionManagement: undefined;
   BusinessHub: undefined; // A tela do Hub em si, caso precise ser navegada como Stack screen

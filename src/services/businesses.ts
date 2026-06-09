@@ -438,6 +438,23 @@ export const createBusiness = async (data: CreateBusinessData): Promise<Business
   }
 };
 
+// ADMIN: retorna TODOS os estabelecimentos (ativos e inativos),
+// ordenados por nome. Nao filtra por active, ao contrario das demais.
+export const getAllBusinessesAdmin = async (): Promise<Business[]> => {
+  try {
+    const businessesCollectionRef = collection(firebaseDb, COLLECTION_NAME);
+    const querySnapshot = await getDocs(businessesCollectionRef);
+    const businesses = querySnapshot.docs.map(mapDocumentToBusiness);
+    businesses.sort((a: Business, b: Business) =>
+      (a.name || '').localeCompare(b.name || '')
+    );
+    return businesses;
+  } catch (error) {
+    console.warn('[getAllBusinessesAdmin] erro:', error);
+    return [];
+  }
+};
+
 export const updateBusiness = async (id: string, data: Partial<Business>): Promise<Business> => {
   try {
     const docRef = doc(firebaseDb, COLLECTION_NAME, id);
