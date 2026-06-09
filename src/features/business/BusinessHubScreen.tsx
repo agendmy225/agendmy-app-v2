@@ -23,7 +23,7 @@ const menuItems = [
 
 const BusinessHubScreen: React.FC = () => {
   const navigation = useNavigation<BusinessHubNavigationProp>();
-  const { user, refreshUser, signOut } = useAuth();
+  const { user, refreshUser, signOut, isAdmin } = useAuth();
   const handleBusinessCreated = () => {
     if (refreshUser) {
       refreshUser();
@@ -55,6 +55,16 @@ const BusinessHubScreen: React.FC = () => {
         <Text style={styles.headerTitle}>Meu Negócio</Text>
       </View>
       <View style={styles.menuContainer}>
+        {isAdmin && (
+          <TouchableOpacity
+            style={[styles.menuItem, styles.adminItem]}
+            onPress={() => navigation.navigate('AdminPanel')}
+          >
+            <Icon name="admin-panel-settings" size={24} color={colors.brandRed} style={styles.menuIcon} />
+            <Text style={[styles.menuText, styles.adminText]}>Painel Admin</Text>
+            <Icon name="chevron-right" size={24} color={colors.lightText} />
+          </TouchableOpacity>
+        )}
         {menuItems.map((item) => (
           <TouchableOpacity
             key={item.id}
@@ -82,6 +92,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  adminItem: {
+    borderWidth: 1,
+    borderColor: colors.brandRed,
+  },
+  adminText: {
+    color: colors.brandRed,
+    fontWeight: '600',
   },
   header: {
     padding: 20,

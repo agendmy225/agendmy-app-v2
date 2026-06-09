@@ -35,6 +35,7 @@ import EditPaymentMethodScreen from '../features/user/profile/EditPaymentMethodS
 
 
 import OwnerTabNavigator from './OwnerTabNavigator';
+import AdminPanelScreen from '../features/admin/AdminPanelScreen';
 import ReviewScreen from '../features/reviews/ReviewScreen';
 
 // Telas do proprietário
@@ -178,6 +179,7 @@ const AppNavigator: React.FC = () => {
               <Stack.Screen name="ServiceManagement" component={ServiceManagementScreen} />
               <Stack.Screen name="ReviewsManagementScreen" component={ReviewsManagementScreen} />
               <Stack.Screen name="BusinessSettingsScreen" component={BusinessSettingsScreen} />
+              <Stack.Screen name="AdminPanel" component={AdminPanelScreen} />
               {/* Telas compartilhadas */}
               <Stack.Screen name="Review" component={ReviewScreen} />
               <Stack.Screen name="EditProfile" component={EditProfileScreen} />

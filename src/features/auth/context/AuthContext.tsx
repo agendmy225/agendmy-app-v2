@@ -35,6 +35,7 @@ interface User {
   email: string | null;
   displayName: string | null;
   userType?: UserType;
+  role?: 'admin';
   businessId?: string;
   photoURL?: string | null;
 }
@@ -50,6 +51,7 @@ export interface UpdateProfileData {
 export interface AuthContextData {
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   favorites: FavoriteItem[];
   signIn: (email: string, password: string, expectedUserType?: UserType) => Promise<void>;
   signUp: (name: string, email: string, password: string, userType: UserType, establishmentName?: string) => Promise<void>;
@@ -96,6 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               displayName: firebaseAuthUser.displayName,
               photoURL: firebaseAuthUser.photoURL,
               userType: dbData?.userType as UserType,
+              role: (dbData?.role === 'admin' ? 'admin' : undefined),
               businessId: dbData?.businessId,
             };
             setUser(userDataFromDb);
@@ -467,7 +470,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return (
     <AuthContext.Provider
       value={{
-        user, loading, favorites, signIn, signUp, signOut,
+        user, loading, isAdmin: user?.role === 'admin', favorites, signIn, signUp, signOut,
         toggleFavorite, refreshFavorites, refreshUser, updateUserProfile,
         updateUserPassword, reauthenticate, sendVerificationEmail,
       }}

@@ -403,7 +403,7 @@ export const getTopRatedBusinesses = async (limitNum: number = 10): Promise<Busi
     );
     const querySnapshot = await getDocs(q);
     const businesses = querySnapshot.docs.map(mapDocumentToBusiness);
-    businesses.sort((a, b) =>
+    businesses.sort((a: Business, b: Business) =>
       ((b.rating || 0) - (a.rating || 0)) ||
       ((b.reviewCount || 0) - (a.reviewCount || 0))
     );

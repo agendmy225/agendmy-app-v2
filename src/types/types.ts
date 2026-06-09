@@ -88,6 +88,7 @@ export type AppStackParamList = {
   FinancialReportsScreen: undefined; // Adicionando para navegação via Hub
   ReviewsManagementScreen: undefined; // Adicionando para navegação via Hub
   BusinessSettingsScreen: undefined; // Adicionando para navegação via Hub
+  AdminPanel: undefined; // Painel administrativo (somente admin)
   ChatManagementScreen: undefined; // Adicionando para navegação via Hub
   PromotionManagement: undefined;
   BusinessHub: undefined; // A tela do Hub em si, caso precise ser navegada como Stack screen
@@ -117,39 +118,3 @@ export type OwnerTabParamList = {
   // ReviewsManagement: undefined;
   // BusinessSettings: undefined;
 };
-;
-  category: string; // UMA categoria só, não array
-  rating: number;
-  reviewCount: number;
-  workingHours: {
-    [day: string]: {
-      open: boolean;
-      start: string;
-      end: string;
-    };
-  };
-  policies: {
-    cancellationTimeLimit: number;
-    cancellationFee: number;
-    noShowFee: number;
-    advanceBookingLimit: number;
-  }; notifications: {
-    confirmationEnabled: boolean;
-    reminderEnabled: boolean;
-    reminderTime: number;
-  };
-  paymentMethods: {
-    cash: boolean;
-    creditCard: boolean;
-    debitCard: boolean;
-    pix: boolean;
-    transfer: boolean;
-    inApp: boolean;
-  };
-  defaultCommissionRate: number;
-  active: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  nameLowercase?: string;
-  hasActivePromotions?: boolean;
-}
