@@ -43,7 +43,6 @@ const AdminPanelScreen: React.FC = () => {
     if (!section.ready) {
       return;
     }
-    // @ts-expect-error rotas de admin sao registradas conforme implementadas
     navigation.navigate(section.screen);
   };
 
