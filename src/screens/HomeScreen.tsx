@@ -158,10 +158,10 @@ const HomeScreen: React.FC = () => {
     if (realTimeLocation) {
       applyLocationAndFilter(realTimeLocation.latitude, realTimeLocation.longitude);
 
-      if (GOOGLE_MAPS_API_KEY) {
+      {
         getAddressFromCoordinates(realTimeLocation.latitude, realTimeLocation.longitude, GOOGLE_MAPS_API_KEY)
           .then((address: string | null) => {
-            if (address) { setUserFriendlyLocation(address); }
+            if (address) { setUserFriendlyLocation(address); } else { setUserFriendlyLocation('Sua localizacao atual'); }
           })
           .catch(() => {
             setUserFriendlyLocation(`Lat: ${realTimeLocation.latitude.toFixed(4)}, Lon: ${realTimeLocation.longitude.toFixed(4)}`);
@@ -191,7 +191,7 @@ const HomeScreen: React.FC = () => {
     applyLocationAndFilter(latitude, longitude);
     if (friendlyName) {
       setUserFriendlyLocation(friendlyName);
-    } else if (GOOGLE_MAPS_API_KEY) {
+    } else {
       getAddressFromCoordinates(latitude, longitude, GOOGLE_MAPS_API_KEY)
         .then((address: string | null) => {
           if (address) { setUserFriendlyLocation(address); }

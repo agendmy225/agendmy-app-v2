@@ -163,12 +163,7 @@ const AdminReviewsScreen: React.FC = () => {
         </Text>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterScroll}
-        contentContainerStyle={styles.filterRow}
-      >
+      <View style={styles.filterRow}>
         {filters.map((f) => (
           <TouchableOpacity
             key={f.key}
@@ -180,7 +175,7 @@ const AdminReviewsScreen: React.FC = () => {
             </Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </View>
 
       <View style={styles.searchContainer}>
         <Icon name="search" size={20} color={colors.lightText} />
@@ -213,6 +208,7 @@ const AdminReviewsScreen: React.FC = () => {
         </View>
       ) : (
         <ScrollView
+          style={styles.list}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -331,10 +327,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
-  filterScroll: {
-    flexGrow: 0,
-  },
   filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: 16,
     paddingTop: 16,
   },
@@ -344,6 +339,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: colors.card,
     marginRight: 8,
+    marginBottom: 8,
+  },
+  list: {
+    flex: 1,
   },
   filterChipActive: {
     backgroundColor: colors.primary,
@@ -360,7 +359,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.card,
-    margin: 16,
+    marginHorizontal: 16,
+    marginTop: 4,
     marginBottom: 8,
     borderRadius: 10,
     paddingHorizontal: 12,

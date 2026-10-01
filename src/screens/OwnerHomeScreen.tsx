@@ -170,7 +170,7 @@ const OwnerHomeScreen: React.FC = () => {
         mapRef.current?.animateToRegion(newRegion, 1000);
       }, 100);
 
-      if (GOOGLE_MAPS_API_KEY) {
+      {
         getAddressFromCoordinates(realTimeLocation.latitude, realTimeLocation.longitude, GOOGLE_MAPS_API_KEY)
           .then((address: string | null) => {
             if (address) {
@@ -183,8 +183,6 @@ const OwnerHomeScreen: React.FC = () => {
           .catch(() => {
             setUserFriendlyLocation(`Lat: ${realTimeLocation.latitude.toFixed(4)}, Lon: ${realTimeLocation.longitude.toFixed(4)}`);
           });
-      } else {
-        setUserFriendlyLocation(`Lat: ${realTimeLocation.latitude.toFixed(4)}, Lon: ${realTimeLocation.longitude.toFixed(4)}`);
       }
     }
   }, [realTimeLocation]);
