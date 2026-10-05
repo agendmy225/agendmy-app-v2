@@ -142,11 +142,14 @@ const HomeScreen: React.FC = () => {
 
   const applyLocationAndFilter = useCallback((lat: number, lon: number) => {
     const newRegion = { latitude: lat, longitude: lon, latitudeDelta: 0.05, longitudeDelta: 0.05 };
+    // So recria o mapa se a posicao mudou ~100m (evita piscar com o GPS)
+    const prevCoords = userCoordsRef.current;
+    const movedFar = !prevCoords || Math.abs(prevCoords.lat - lat) > 0.001 || Math.abs(prevCoords.lon - lon) > 0.001;
     setUserCoords({ lat, lon });
     userCoordsRef.current = { lat, lon };
     setMapRegion(newRegion);
     // Incrementa key para forcar remontagem do MapView com nova regiao
-    setMapKey(k => k + 1);
+    if (movedFar) { setMapKey(k => k + 1); }
 
     if (allBusinessesRef.current.length > 0) {
       setBusinessesForMap(filterByRadius(allBusinessesRef.current, lat, lon, RADIUS_KM));
@@ -295,14 +298,20 @@ const HomeScreen: React.FC = () => {
 
   useEffect(() => { loadInitialData(); }, [loadInitialData]);
 
+  // Refs para o useFocusEffect usar valores atuais sem re-executar a cada mudanca
+  const loadInitialDataRef = useRef(loadInitialData);
+  loadInitialDataRef.current = loadInitialData;
+  const realTimeLocationRef = useRef(realTimeLocation);
+  realTimeLocationRef.current = realTimeLocation;
   useFocusEffect(
     useCallback(() => {
       setSearchQuery(''); setSelectedCategoryFilter(null); setSearchResults([]);
-      loadInitialData(); // CORRIGIDO: recarrega businesses ao ganhar foco
+      loadInitialDataRef.current(); // CORRIGIDO: recarrega businesses ao ganhar foco
+      const realTimeLocation = realTimeLocationRef.current;
       if (realTimeLocation) {
         applyLocationAndFilter(realTimeLocation.latitude, realTimeLocation.longitude);
       }
-    }, [realTimeLocation, applyLocationAndFilter, loadInitialData]),
+    }, [applyLocationAndFilter]),
   );
 
   const performSearch = useCallback(async () => {

@@ -336,14 +336,20 @@ const OwnerHomeScreen: React.FC = () => {
       setIsLoadingInitialData(false);
     }
   }, [hasLocationPermission, requestLocationPermission, mostRecent.length]);
+  // Refs para o useFocusEffect usar valores atuais sem re-executar a cada mudanca
+  const loadInitialDataRef = useRef(loadInitialData);
+  loadInitialDataRef.current = loadInitialData;
+  const realTimeLocationRef = useRef(realTimeLocation);
+  realTimeLocationRef.current = realTimeLocation;
 
   useFocusEffect(
     useCallback(() => {
       // CORRIGIDO: sempre recarrega ao ganhar foco para pegar dados frescos
       if (isInitialMount.current) { isInitialMount.current = false; }
-      loadInitialData();
+      loadInitialDataRef.current();
 
       // CORRIGIDO: sempre re-centraliza ao voltar para a tela
+      const realTimeLocation = realTimeLocationRef.current;
       if (realTimeLocation) {
         const currentRegion = {
           latitude: realTimeLocation.latitude,
@@ -356,7 +362,7 @@ const OwnerHomeScreen: React.FC = () => {
           mapRef.current?.animateToRegion(currentRegion, 1000);
         }, 300);
       }
-    }, [loadInitialData, topRated.length, promotions.length, realTimeLocation]),
+    }, []),
   );
 
   const performSearch = useCallback(async (query: string, categoryFilter?: string | null) => {
@@ -598,6 +604,7 @@ const OwnerHomeScreen: React.FC = () => {
             <>
               <View style={styles.mapContainer}>
                 <LeafletMap
+                  key={`${mapRegion.latitude.toFixed(3)}_${mapRegion.longitude.toFixed(3)}`}
                   style={styles.map}
                   initialRegion={{
                     latitude: mapRegion.latitude,
