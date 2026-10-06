@@ -5,7 +5,7 @@ import { collection, getDocs } from '@react-native-firebase/firestore';
 import { firebaseDb } from '../config/firebase';
 import { getAllBusinessesAdmin, Business } from './businesses';
 import { getAllUsersAdmin, AdminUser } from './adminUsers';
-import { getCategoryById } from './categories';
+import { getCategoryById, ensureCategoriesLoaded } from './categories';
 
 export interface RankItem {
   label: string;
@@ -65,6 +65,7 @@ const rank = (map: Map<string, number>): RankItem[] => {
 
 export const getAdminAnalytics = async (): Promise<AdminAnalytics> => {
   const now = Date.now();
+  await ensureCategoriesLoaded();
   const isRecent = (d: Date | null) => !!d && now - d.getTime() <= 30 * DAY_MS;
 
   const [businesses, users, apptDocs] = await Promise.all([

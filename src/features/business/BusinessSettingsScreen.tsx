@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import { addDoc, collection, doc, firestore, getDoc, getDocs, limit, query, serverTimestamp, updateDoc, where } from '../../config/firebase';
-import { BUSINESS_CATEGORIES } from '../../services/categories';
+import { useCategories } from '../../services/categories';
 import { colors } from '../../constants/colors';
 import { useAuth } from '../auth/context/AuthContext';
 import { getCoordinatesFromAddress } from '../../services/maps';
@@ -82,6 +82,7 @@ interface BusinessSettings {
 
 const BusinessSettingsScreen: React.FC = () => {
   const { user, signOut } = useAuth(); // Adicionar signOut
+  const categoryList = useCategories();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [businessId, setBusinessId] = useState<string | null>(null);
@@ -350,16 +351,6 @@ const BusinessSettingsScreen: React.FC = () => {
           console.log('[BusinessSettings] geocoding endereco:', fullAddress);
           const coordinates = await getCoordinatesFromAddress(fullAddress);
           console.log('[BusinessSettings] coordinates recebidas:', coordinates);
-          // DEBUG: testar Nominatim diretamente e mostrar status + resposta crua
-          try {
-            const _testUrl = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(fullAddress) + '&format=json&limit=1&countrycodes=br&accept-language=pt-BR';
-            const _testResp = await fetch(_testUrl, { headers: { 'User-Agent': 'AgendMy/1.0' } });
-            const _testText = await _testResp.text();
-            Alert.alert('DEBUG Nominatim', 'Status HTTP: ' + _testResp.status + '\n\nResposta (300 chars):\n' + _testText.substring(0, 300));
-          } catch (_e) {
-            Alert.alert('DEBUG Nominatim ERRO', 'Excecao de rede:\n' + String(_e));
-          }
-
           if (coordinates) {
             dataToSave.location = {
               latitude: coordinates.latitude,
@@ -925,7 +916,7 @@ const BusinessSettingsScreen: React.FC = () => {
             style={styles.picker}
           >
             <Picker.Item label="Selecione uma categoria..." value="" />
-            {BUSINESS_CATEGORIES.map((cat) => (
+            {categoryList.map((cat) => (
               <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
             ))}
           </Picker>

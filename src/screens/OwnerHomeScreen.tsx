@@ -24,7 +24,7 @@ import { useUserLocation } from '../hooks/useUserLocation';
 import { BusinessMarker } from '../features/business/components/BusinessMarker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useLocation } from '../context/LocationContext';
-import { BUSINESS_CATEGORIES, getCategoryById } from '../services/categories';
+import { getCategoryById, useCategories } from '../services/categories';
 import { colors } from '../constants/colors';
 import { AppStackParamList } from '../types/types';
 import { Business, getAllActiveBusinesses, getBusinessesWithPromotions, getMostRecentBusinesses, getTopRatedBusinesses, searchBusinesses } from '../services/businesses';
@@ -96,6 +96,7 @@ const OwnerHomeScreen: React.FC = () => {
 
   const mapRef = useRef<MapView>(null);
   const isInitialMount = useRef(true);
+  const categoryList = useCategories();
   const navigation = useNavigation<StackNavigationProp<AppStackParamList>>() as any;
 
   const applyFilters = (list: Business[]) => {
@@ -116,7 +117,6 @@ const OwnerHomeScreen: React.FC = () => {
     requestPermission: requestLocationPermission,
     startWatching: startLocationWatching,
     isWatching: isLocationWatching,
-    debug: locationDebug,
   } = useLocation();
 
   useEffect(() => {
@@ -426,7 +426,6 @@ const OwnerHomeScreen: React.FC = () => {
             <Text style={styles.headerLocationAddress} numberOfLines={1}>
               {isLocationLoading ? 'Obtendo sua localizacao...' : (userFriendlyLocation || 'Localizacao nao disponivel')}
             </Text>
-            <Text style={{ fontSize: 9, color: '#999999' }} numberOfLines={2}>{locationDebug}</Text>
           </View>
           <TouchableOpacity onPress={handleLocationPermission}>
             <Text style={styles.headerChangeLocationText}>
@@ -633,7 +632,7 @@ const OwnerHomeScreen: React.FC = () => {
                   <Text style={[styles.categoryName, selectedCategoryFilter === null && styles.activeCategoryName]}>Todos</Text>
                 </TouchableOpacity>
 
-                {BUSINESS_CATEGORIES.map((category: { id: string; name: string; icon: string }) => (
+                {categoryList.map((category: { id: string; name: string; icon: string }) => (
                   <TouchableOpacity
                     key={category.id}
                     style={[styles.categoryItem, selectedCategoryFilter === category.name && styles.activeCategoryItem]}

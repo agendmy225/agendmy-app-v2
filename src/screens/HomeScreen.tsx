@@ -23,7 +23,7 @@ import { useUserLocation } from '../hooks/useUserLocation';
 import { BusinessMarker } from '../features/business/components/BusinessMarker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useLocation } from '../context/LocationContext';
-import { BUSINESS_CATEGORIES, getCategoryById } from '../services/categories';
+import { getCategoryById, useCategories } from '../services/categories';
 import { colors } from '../constants/colors';
 import { useAuth } from '../features/auth/context/AuthContext';
 import { HomeStackParamList, AppStackParamList } from '../types/types';
@@ -104,6 +104,7 @@ const HomeScreen: React.FC = () => {
   const mapViewRef = useRef<MapView>(null);
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { user } = useAuth();
+  const categoryList = useCategories();
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
 
   const {
@@ -114,7 +115,6 @@ const HomeScreen: React.FC = () => {
     requestPermission: requestLocationPermission,
     startWatching: startLocationWatching,
     isWatching: isLocationWatching,
-    debug: locationDebug,
   } = useLocation();
 
   useEffect(() => {
@@ -362,7 +362,6 @@ const HomeScreen: React.FC = () => {
                   {isLocationLoading ? 'Obtendo sua localizacao...' : (userFriendlyLocation || 'Localizacao nao disponivel')}
                 </Text>
               </View>
-              <Text style={{ fontSize: 9, color: '#999999' }} numberOfLines={2}>{locationDebug}</Text>
             </View>
             <TouchableOpacity onPress={handleLocationPermission}>
               <Text style={styles.headerChangeLocationText}>{!hasLocationPermission ? 'PERMITIR' : 'ALTERAR'}</Text>
@@ -496,7 +495,7 @@ const HomeScreen: React.FC = () => {
                     <View style={styles.categoryIconContainer}><Icon name="apps" size={24} color={colors.white} /></View>
                     <Text style={[styles.categoryName, selectedCategoryFilter === null && styles.activeCategoryName]}>Todos</Text>
                   </TouchableOpacity>
-                  {BUSINESS_CATEGORIES.map((category) => (
+                  {categoryList.map((category) => (
                     <TouchableOpacity key={category.id} style={[styles.categoryItem, selectedCategoryFilter === category.id && styles.activeCategoryItem]} onPress={() => handleCategoryPress(category.id)}>
                       <View style={styles.categoryIconContainer}><Icon name={category.icon} size={24} color={colors.white} /></View>
                       <Text style={[styles.categoryName, selectedCategoryFilter === category.id && styles.activeCategoryName]}>{category.name}</Text>
