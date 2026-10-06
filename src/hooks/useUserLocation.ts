@@ -1,35 +1,22 @@
-import { useEffect } from 'react';
-import { useRealTimeLocation } from '../features/business/hooks/useRealTimeLocation';
+import { useMemo } from 'react';
+import { useLocation } from '../context/LocationContext';
 
 /**
- * Wrapper sobre useRealTimeLocation que automaticamente:
- *  - Pede permissao de localizacao se ainda nao foi concedida.
- *  - Inicia o watching da posicao em tempo real.
- *  - Retorna { latitude, longitude } | null no formato esperado pelo LeafletMap.
- *
- * Idempotente: se ja houver outro lugar do app pedindo permissao ou observando,
- * o useRealTimeLocation tem refs que evitam chamadas duplicadas.
+ * Posicao do usuario no formato do LeafletMap ({ latitude, longitude } | null).
+ * Le do contexto UNICO de localizacao (LocationContext). Nao cria outro
+ * pedido de GPS: o LocationProvider ja cuida da permissao e do acompanhamento.
  */
 export function useUserLocation(): { latitude: number; longitude: number } | null {
-  const { location, hasPermission, requestPermission, startWatching } =
-    useRealTimeLocation();
+  const { location } = useLocation();
+  const lat = location?.latitude;
+  const lon = location?.longitude;
 
-  useEffect(() => {
-    let mounted = true;
-    if (!hasPermission) {
-      requestPermission().then((granted) => {
-        if (granted && mounted) startWatching();
-      });
-    } else {
-      startWatching();
+  return useMemo(() => {
+    if (lat === undefined || lon === undefined) {
+      return null;
     }
-    return () => {
-      mounted = false;
-    };
-  }, [hasPermission, requestPermission, startWatching]);
-
-  if (!location) return null;
-  return { latitude: location.latitude, longitude: location.longitude };
+    return { latitude: lat, longitude: lon };
+  }, [lat, lon]);
 }
 
 export default useUserLocation;

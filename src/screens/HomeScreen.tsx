@@ -114,6 +114,7 @@ const HomeScreen: React.FC = () => {
     requestPermission: requestLocationPermission,
     startWatching: startLocationWatching,
     isWatching: isLocationWatching,
+    debug: locationDebug,
   } = useLocation();
 
   useEffect(() => {
@@ -361,6 +362,7 @@ const HomeScreen: React.FC = () => {
                   {isLocationLoading ? 'Obtendo sua localizacao...' : (userFriendlyLocation || 'Localizacao nao disponivel')}
                 </Text>
               </View>
+              <Text style={{ fontSize: 9, color: '#999999' }} numberOfLines={2}>{locationDebug}</Text>
             </View>
             <TouchableOpacity onPress={handleLocationPermission}>
               <Text style={styles.headerChangeLocationText}>{!hasLocationPermission ? 'PERMITIR' : 'ALTERAR'}</Text>

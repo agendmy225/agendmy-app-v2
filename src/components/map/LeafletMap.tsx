@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 
@@ -13,7 +13,7 @@ export interface LeafletMarker {
 }
 
 export interface LeafletMapProps {
-  /** Centro inicial e zoom do mapa */
+  /** Centro e zoom do mapa. Se mudar depois, o mapa se move para la. */
   initialRegion: {
     latitude: number;
     longitude: number;
@@ -27,28 +27,29 @@ export interface LeafletMapProps {
   onMarkerPress?: (marker: LeafletMarker) => void;
   /** Mostrar pin azul da localizacao do usuario */
   showUserLocation?: boolean;
+  /** Centralizar no usuario quando a posicao dele chegar pela primeira vez */
+  centerOnUser?: boolean;
   /** Estilo do container */
   style?: ViewStyle | ViewStyle[];
 }
 
-const LeafletMap: React.FC<LeafletMapProps> = ({
-  initialRegion,
-  markers = [],
-  userLocation,
-  onMarkerPress,
-  showUserLocation = true,
-  style,
-}) => {
-  const webviewRef = useRef<WebView>(null);
+type Region = LeafletMapProps['initialRegion'];
+type UserPos = { latitude: number; longitude: number } | null | undefined;
 
-  // Gerar HTML com Leaflet + OpenStreetMap
-  // useMemo para nao re-renderizar a cada render do pai
-  const html = useMemo(() => {
-    const zoom = initialRegion.zoom ?? 14;
-    const safeMarkers = JSON.stringify(markers).replace(/</g, '\\u003c');
-    const safeUser = JSON.stringify(userLocation || null);
+// Serializa para JS embutido no HTML / injectJavaScript (escapa "<")
+const toJs = (value: unknown): string =>
+  JSON.stringify(value === undefined ? null : value).replace(/</g, '\\u003c');
 
-    return `<!DOCTYPE html>
+// HTML do mapa. E gerado UMA vez; depois as mudancas sao enviadas via
+// injectJavaScript, sem recarregar a pagina (antes recarregava a cada mudanca).
+const buildHtml = (
+  region: Region,
+  markers: LeafletMarker[],
+  user: UserPos,
+  centerOnUser: boolean,
+): string => {
+  const zoom = region.zoom ?? 14;
+  return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8" />
@@ -112,7 +113,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
 <script>
 (function() {
   var map = L.map('map', { zoomControl: false, attributionControl: false })
-    .setView([${initialRegion.latitude}, ${initialRegion.longitude}], ${zoom});
+    .setView([${region.latitude}, ${region.longitude}], ${zoom});
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -128,57 +129,148 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
   }
 
   // --- Markers dos estabelecimentos ---
-  var markers = ${safeMarkers};
-  markers.forEach(function(m) {
-    var html;
-    if (m.logoUrl) {
-      html = '<div class="business-marker"><img src="' + m.logoUrl + '" onerror="this.parentElement.innerHTML=\\'<div class=business-marker-fallback>\\' + (m.name ? m.name.charAt(0).toUpperCase() : \\'?\\') + \\'</div>\\'" /></div>';
-    } else {
-      html = '<div class="business-marker"><div class="business-marker-fallback">' + (m.name ? m.name.charAt(0).toUpperCase() : '?') + '</div></div>';
-    }
-    var badge = (m.rating && m.rating > 0) ? '<div class="business-rating-badge"><span style="color:#FFC107;">&#9733;</span> ' + Number(m.rating).toFixed(1) + '</div>' : '';
-    html = '<div class="business-marker-wrapper">' + html + badge + '</div>';
-    var icon = L.divIcon({
-      html: html,
-      className: '',
-      iconSize: [44, 60],
-      iconAnchor: [22, 22]
+  var markerLayer = L.layerGroup().addTo(map);
+  function renderMarkers(list) {
+    markerLayer.clearLayers();
+    (list || []).forEach(function(m) {
+      var html;
+      if (m.logoUrl) {
+        html = '<div class="business-marker"><img src="' + m.logoUrl + '" onerror="this.parentElement.innerHTML=\\'<div class=business-marker-fallback>\\' + (m.name ? m.name.charAt(0).toUpperCase() : \\'?\\') + \\'</div>\\'" /></div>';
+      } else {
+        html = '<div class="business-marker"><div class="business-marker-fallback">' + (m.name ? m.name.charAt(0).toUpperCase() : '?') + '</div></div>';
+      }
+      var badge = (m.rating && m.rating > 0) ? '<div class="business-rating-badge"><span style="color:#FFC107;">&#9733;</span> ' + Number(m.rating).toFixed(1) + '</div>' : '';
+      html = '<div class="business-marker-wrapper">' + html + badge + '</div>';
+      var icon = L.divIcon({
+        html: html,
+        className: '',
+        iconSize: [44, 60],
+        iconAnchor: [22, 22]
+      });
+      var marker = L.marker([m.latitude, m.longitude], { icon: icon });
+      marker.on('click', function() {
+        postMsg('marker_press', m);
+      });
+      marker.bindPopup('<b>' + (m.name || '') + '</b>' + (m.category ? '<br/>' + m.category : ''));
+      markerLayer.addLayer(marker);
     });
-    var marker = L.marker([m.latitude, m.longitude], { icon: icon }).addTo(map);
-    marker.on('click', function() {
-      postMsg('marker_press', m);
-    });
-    marker.bindPopup('<b>' + (m.name || '') + '</b>' + (m.category ? '<br/>' + m.category : ''));
-  });
-
-  // --- Pin do usuario ---
-  var user = ${safeUser};
-  if (user && user.latitude && user.longitude) {
-    var userIcon = L.divIcon({
-      html: '<div class="user-marker"></div>',
-      className: '',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
-    });
-    L.marker([user.latitude, user.longitude], { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
   }
 
-  // --- Comunicacao com React Native ---
-  window.updateUserLocation = function(lat, lng) {
-    // Pode ser chamado via injectJavaScript depois
+  // --- Pin do usuario ---
+  var userMarker = null;
+  var centeredOnUser = false;
+  var userIcon = L.divIcon({
+    html: '<div class="user-marker"></div>',
+    className: '',
+    iconSize: [18, 18],
+    iconAnchor: [9, 9]
+  });
+
+  // --- Funcoes chamadas pelo React Native (injectJavaScript) ---
+  window.__setMarkers = function(list) {
+    renderMarkers(list);
+  };
+  window.__setUser = function(u, center) {
+    if (!u || typeof u.latitude !== 'number' || typeof u.longitude !== 'number') { return; }
+    var ll = [u.latitude, u.longitude];
+    if (!userMarker) {
+      userMarker = L.marker(ll, { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
+    } else {
+      userMarker.setLatLng(ll);
+    }
+    if (center && !centeredOnUser) {
+      centeredOnUser = true;
+      map.setView(ll, Math.max(map.getZoom(), 14));
+    }
+  };
+  window.__setView = function(lat, lng, z) {
+    map.setView([lat, lng], z || map.getZoom());
   };
 
-  postMsg('ready', { markers: markers.length });
+  renderMarkers(${toJs(markers)});
+  window.__setUser(${toJs(user)}, ${centerOnUser ? 'true' : 'false'});
+
+  postMsg('ready', {});
 })();
 </script>
 </body>
 </html>`;
-  }, [initialRegion.latitude, initialRegion.longitude, initialRegion.zoom, markers, userLocation]);
+};
+
+const LeafletMap: React.FC<LeafletMapProps> = ({
+  initialRegion,
+  markers = [],
+  userLocation,
+  onMarkerPress,
+  showUserLocation = true,
+  centerOnUser = true,
+  style,
+}) => {
+  const webviewRef = useRef<WebView>(null);
+  const readyRef = useRef(false);
+  const markersRef = useRef(markers);
+  markersRef.current = markers;
+  const userRef = useRef<UserPos>(userLocation);
+  userRef.current = userLocation;
+
+  // HTML gerado so na criacao do mapa (valores iniciais)
+  const html = useMemo(
+    () => buildHtml(initialRegion, markers, showUserLocation ? userLocation : null, centerOnUser),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  const inject = (code: string) => {
+    if (readyRef.current && webviewRef.current) {
+      webviewRef.current.injectJavaScript(`${code}; true;`);
+    }
+  };
+
+  const pushMarkers = () => {
+    inject(`window.__setMarkers && window.__setMarkers(${toJs(markersRef.current)})`);
+  };
+
+  const pushUser = () => {
+    if (showUserLocation && userRef.current) {
+      inject(`window.__setUser && window.__setUser(${toJs(userRef.current)}, ${centerOnUser ? 'true' : 'false'})`);
+    }
+  };
+
+  // Marcadores mudaram -> atualiza sem recarregar
+  useEffect(() => {
+    pushMarkers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [markers]);
+
+  // Usuario se moveu -> move o pin (e centraliza na primeira vez)
+  const userLat = userLocation?.latitude;
+  const userLng = userLocation?.longitude;
+  useEffect(() => {
+    pushUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userLat, userLng]);
+
+  // Centro pedido pela tela mudou -> move o mapa
+  const firstRegionRef = useRef(true);
+  useEffect(() => {
+    if (firstRegionRef.current) {
+      firstRegionRef.current = false;
+      return;
+    }
+    const z = initialRegion.zoom ?? 'null';
+    inject(`window.__setView && window.__setView(${initialRegion.latitude}, ${initialRegion.longitude}, ${z})`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialRegion.latitude, initialRegion.longitude, initialRegion.zoom]);
 
   const handleMessage = (event: WebViewMessageEvent) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === 'marker_press' && onMarkerPress) {
+      if (data.type === 'ready') {
+        readyRef.current = true;
+        // envia o estado mais recente (pode ter mudado enquanto carregava)
+        pushMarkers();
+        pushUser();
+      } else if (data.type === 'marker_press' && onMarkerPress) {
         onMarkerPress(data.payload);
       }
     } catch (e) {
@@ -199,9 +291,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         originWhitelist={['*']}
         scrollEnabled={false}
         bounces={false}
-        // Performance
         cacheEnabled
-        // Visual
         androidLayerType="hardware"
         nestedScrollEnabled
       />
