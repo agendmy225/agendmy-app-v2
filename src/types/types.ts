@@ -94,6 +94,7 @@ export type AppStackParamList = {
   AdminAnalytics: undefined; // Admin: analytics
   AdminReviews: undefined; // Admin: moderacao de avaliacoes
   AdminCategories: undefined; // Admin: categorias
+  AdminNotifications: undefined; // Admin: comunicados
   ChatManagementScreen: undefined; // Adicionando para navegação via Hub
   PromotionManagement: undefined;
   BusinessHub: undefined; // A tela do Hub em si, caso precise ser navegada como Stack screen

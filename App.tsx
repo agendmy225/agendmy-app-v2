@@ -4,6 +4,7 @@ import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/features/auth/context/AuthContext';
 import { LocationProvider } from './src/context/LocationContext';
+import PushRegistrar from './src/components/PushRegistrar';
 import AppNavigator from './src/navigation/AppNavigator';
 import { notificationService } from './src/services/notificationService';
 import messaging from '@react-native-firebase/messaging';
@@ -25,6 +26,7 @@ function App() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
+        <PushRegistrar />
         <LocationProvider>
           <NavigationContainer>
             <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />

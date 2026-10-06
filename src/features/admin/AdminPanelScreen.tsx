@@ -18,7 +18,7 @@ const adminSections = [
   { id: 'analytics', label: 'Analytics', description: 'Por cidade e estado', icon: 'insights', screen: 'AdminAnalytics', ready: true },
   { id: 'reviews', label: 'Avaliacoes', description: 'Moderacao global', icon: 'star-rate', screen: 'AdminReviews', ready: true },
   { id: 'categories', label: 'Categorias', description: 'Gerenciar categorias de servico', icon: 'category', screen: 'AdminCategories', ready: true },
-  { id: 'notifications', label: 'Comunicados', description: 'Enviar notificacoes', icon: 'campaign', screen: 'AdminNotifications', ready: false },
+  { id: 'notifications', label: 'Comunicados', description: 'Enviar notificacoes', icon: 'campaign', screen: 'AdminNotifications', ready: true },
 ] as const;
 
 const AdminPanelScreen: React.FC = () => {
