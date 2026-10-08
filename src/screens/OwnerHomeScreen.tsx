@@ -25,6 +25,7 @@ import { BusinessMarker } from '../features/business/components/BusinessMarker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useLocation } from '../context/LocationContext';
 import { getCategoryById, useCategories } from '../services/categories';
+import AnnouncementsBell from '../components/AnnouncementsBell';
 import { colors } from '../constants/colors';
 import { AppStackParamList } from '../types/types';
 import { Business, getAllActiveBusinesses, getBusinessesWithPromotions, getMostRecentBusinesses, getTopRatedBusinesses, searchBusinesses } from '../services/businesses';
@@ -433,7 +434,10 @@ const OwnerHomeScreen: React.FC = () => {
             </Text>
           </TouchableOpacity>
         </View>
-        <Image source={require('../assets/images/logo.png')} style={styles.headerLogo} resizeMode="contain" />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <AnnouncementsBell />
+          <Image source={require('../assets/images/logo.png')} style={styles.headerLogo} resizeMode="contain" />
+        </View>
       </View>
 
       <Modal
