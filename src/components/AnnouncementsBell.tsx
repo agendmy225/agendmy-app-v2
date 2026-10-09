@@ -19,7 +19,7 @@ const AnnouncementsBell: React.FC = () => {
       onPress={() => navigation.navigate('Announcements')}
       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
-      <Icon name={unreadCount > 0 ? 'notifications-active' : 'notifications-none'} size={26} color={colors.primary} />
+      <Icon name={unreadCount > 0 ? 'notifications-active' : 'notifications'} size={26} color={unreadCount > 0 ? '#FFC107' : colors.brandRed} />
       {unreadCount > 0 && (
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>

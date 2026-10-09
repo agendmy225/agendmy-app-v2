@@ -434,7 +434,7 @@ const OwnerHomeScreen: React.FC = () => {
             </Text>
           </TouchableOpacity>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 0 }}>
           <AnnouncementsBell />
           <Image source={require('../assets/images/logo.png')} style={styles.headerLogo} resizeMode="contain" />
         </View>
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white, borderBottomWidth: 1, borderBottomColor: colors.lightGray,
   },
   headerLogo: { height: 28, width: 120 },
-  headerLocationContainer: { flexDirection: 'row', alignItems: 'center' },
+  headerLocationContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', marginRight: 8 },
   headerLocationInfo: { marginLeft: 5, flexShrink: 1 },
   headerLocationText: { fontSize: 10, color: colors.lightText },
   headerLocationAddress: { fontSize: 12, color: colors.text },

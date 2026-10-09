@@ -368,7 +368,7 @@ const HomeScreen: React.FC = () => {
               <Text style={styles.headerChangeLocationText}>{!hasLocationPermission ? 'PERMITIR' : 'ALTERAR'}</Text>
             </TouchableOpacity>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 0 }}>
             <AnnouncementsBell />
             <Image source={require('../assets/images/logo.png')} style={styles.headerLogo} resizeMode="contain" />
           </View>
@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
   screenContainer: { flex: 1, backgroundColor: colors.background },
   headerContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 8, backgroundColor: colors.white, borderBottomWidth: 1, borderBottomColor: colors.lightGray },
   headerLogo: { height: 28, width: 120 },
-  headerLocationContainer: { flexDirection: 'row', alignItems: 'center' },
+  headerLocationContainer: { flex: 1, flexDirection: 'row', alignItems: 'center', marginRight: 8 },
   headerLocationInfo: { marginLeft: 5, flexShrink: 1 },
   locationAddressContainer: { flexDirection: 'row', alignItems: 'center' },
   locationLoadingSpinner: { marginRight: 6 },
