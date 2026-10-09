@@ -26,7 +26,7 @@ import {
 type NavProp = StackNavigationProp<AppStackParamList>;
 
 const TITLE_MAX = 50;
-const BODY_MAX = 200;
+const BODY_MAX = 2000;
 const STUCK_MS = 3 * 60 * 1000;
 
 const AUDIENCES: { key: Audience; label: string }[] = [
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.text,
   },
-  textArea: { minHeight: 90 },
+  textArea: { minHeight: 160, maxHeight: 360 },
   counter: { fontSize: 11, color: colors.lightText, textAlign: 'right', marginTop: 2 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap' },
   chip: {
