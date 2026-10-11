@@ -43,6 +43,8 @@ import AdminReviewsScreen from '../features/admin/AdminReviewsScreen';
 import AdminCategoriesScreen from '../features/admin/AdminCategoriesScreen';
 import AdminNotificationsScreen from '../features/admin/AdminNotificationsScreen';
 import AnnouncementsScreen from '../features/announcements/AnnouncementsScreen';
+import OwnerSubscriptionScreen from '../features/subscription/OwnerSubscriptionScreen';
+import AdminOverdueScreen from '../features/admin/AdminOverdueScreen';
 import ReviewScreen from '../features/reviews/ReviewScreen';
 
 // Telas do proprietário
@@ -193,6 +195,8 @@ const AppNavigator: React.FC = () => {
               <Stack.Screen name="AdminReviews" component={AdminReviewsScreen} />
               <Stack.Screen name="AdminCategories" component={AdminCategoriesScreen} />
               <Stack.Screen name="AdminNotifications" component={AdminNotificationsScreen} />
+              <Stack.Screen name="OwnerSubscription" component={OwnerSubscriptionScreen} />
+              <Stack.Screen name="AdminOverdue" component={AdminOverdueScreen} />
               <Stack.Screen name="Announcements" component={AnnouncementsScreen} />
               {/* Telas compartilhadas */}
               <Stack.Screen name="Review" component={ReviewScreen} />

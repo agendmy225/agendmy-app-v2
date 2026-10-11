@@ -19,6 +19,7 @@ const menuItems = [
   { id: 'reports', label: 'Relatórios Financeiros', icon: 'assessment', screen: 'FinancialReportsScreen' },
   { id: 'reviews', label: 'Gerenciar Avaliações', icon: 'star-rate', screen: 'ReviewsManagementScreen' },
   { id: 'settings', label: 'Configurações do Negócio', icon: 'settings', screen: 'BusinessSettingsScreen' },
+  { id: 'subscription', label: 'Minha Assinatura', icon: 'card-membership', screen: 'OwnerSubscription' },
 ] as const;
 
 const BusinessHubScreen: React.FC = () => {

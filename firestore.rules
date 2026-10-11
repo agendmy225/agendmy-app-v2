@@ -68,7 +68,12 @@ service cloud.firestore {
       allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
       allow update: if isAdmin() ||
         (signedIn() && resource.data.ownerId == request.auth.uid &&
-         request.resource.data.ownerId == resource.data.ownerId);
+         request.resource.data.ownerId == resource.data.ownerId &&
+         // o dono nao mexe na propria assinatura
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscription', 'suspendedForPayment']) &&
+         // suspenso por falta de pagamento nao se reativa sozinho
+         (resource.data.get('suspendedForPayment', false) != true ||
+          request.resource.data.get('active', false) == resource.data.get('active', false)));
       allow delete: if isAdmin();
 
       // tudo dentro do negocio (servicos, profissionais, relatorios...):

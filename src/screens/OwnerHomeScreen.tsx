@@ -26,6 +26,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useLocation } from '../context/LocationContext';
 import { getCategoryById, useCategories } from '../services/categories';
 import AnnouncementsBell from '../components/AnnouncementsBell';
+import SubscriptionBanner from '../components/SubscriptionBanner';
 import { colors } from '../constants/colors';
 import { AppStackParamList } from '../types/types';
 import { Business, getAllActiveBusinesses, getBusinessesWithPromotions, getMostRecentBusinesses, getTopRatedBusinesses, searchBusinesses } from '../services/businesses';
@@ -539,6 +540,7 @@ const OwnerHomeScreen: React.FC = () => {
         </View>
       ) : (
         <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <SubscriptionBanner />
           <View style={styles.searchBarContainer}>
             <Icon name="search" size={20} color={colors.lightText} />
             <TextInput

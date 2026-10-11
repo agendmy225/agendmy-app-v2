@@ -13,7 +13,7 @@ type AdminPanelNavigationProp = StackNavigationProp<AppStackParamList>;
 // Conforme cada etapa for implementada, trocamos ready para true e ligamos a screen.
 const adminSections = [
   { id: 'establishments', label: 'Estabelecimentos', description: 'Listar, ativar e desativar', icon: 'store', screen: 'AdminEstablishments', ready: true },
-  { id: 'overdue', label: 'Inadimplentes', description: 'Donos com pagamento pendente', icon: 'money-off', screen: 'AdminOverdue', ready: false },
+  { id: 'overdue', label: 'Inadimplentes', description: 'Donos com pagamento pendente', icon: 'money-off', screen: 'AdminOverdue', ready: true },
   { id: 'users', label: 'Usuarios', description: 'Clientes e proprietarios', icon: 'people', screen: 'AdminUsers', ready: true },
   { id: 'analytics', label: 'Analytics', description: 'Por cidade e estado', icon: 'insights', screen: 'AdminAnalytics', ready: true },
   { id: 'reviews', label: 'Avaliacoes', description: 'Moderacao global', icon: 'star-rate', screen: 'AdminReviews', ready: true },
