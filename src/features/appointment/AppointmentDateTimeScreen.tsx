@@ -16,6 +16,7 @@ import { checkTimeSlotAvailability } from '../../services/appointments';
 import { getServiceById } from '../../services/services';
 import { getBusinessById } from '../../services/businesses';
 import { toLocalDateString, parseLocalDate } from '../../utils/localDate';
+import { getProfessionalDayWindow, isInBreak } from '../../services/professionalSchedule';
 
 type AppointmentDateTimeScreenRouteProp = RouteProp<AppStackParamList, 'AppointmentDateTime'>;
 type AppointmentDateTimeScreenNavigationProp = StackNavigationProp<AppStackParamList, 'AppointmentDateTime'>;
@@ -121,15 +122,16 @@ const AppointmentDateTimeScreen: React.FC = () => {
           const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
           const dayKey = days[dayOfWeek];
 
-          // Get working hours for this day
-          const workingHours = business.workingHours[dayKey];
-          if (!workingHours || !workingHours.open) {
+          // Horario do profissional neste dia (agenda propria, folga, intervalo e bloqueios)
+          const dayWindow = await getProfessionalDayWindow(professionalId, selectedDate, business.workingHours);
+          if (!dayWindow) {
             setAvailableTimeSlots([]);
             return;
           }
 
-          // Generate time slots based on business hours
-          const timeSlots = generateTimeSlots(workingHours.start, workingHours.end, 60);
+          // Horarios dentro do expediente do profissional, pulando o intervalo
+          const timeSlots = generateTimeSlots(dayWindow.start, dayWindow.end, 60)
+            .filter((t: string) => !isInBreak(t, 60, dayWindow));
 
           const availabilitySlots = await Promise.all(
             timeSlots.map(async (time: string) => {

@@ -28,6 +28,10 @@ const WelcomeScreen: React.FC = () => {
             <TouchableOpacity style={styles.userTypeButton} onPress={() => navigation.navigate('Login', { userType: 'client' })}>
               <Text style={styles.buttonText}>CLIENTE</Text>
             </TouchableOpacity>
+            <Text style={styles.orText}>OU</Text>
+            <TouchableOpacity style={styles.userTypeButton} onPress={() => navigation.navigate('Login', { userType: 'professional' })}>
+              <Text style={styles.buttonText}>PROFISSIONAL</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </SafeAreaView>

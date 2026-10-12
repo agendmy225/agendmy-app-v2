@@ -2,7 +2,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 
 // Tipos para a navegação do aplicativo
 
-export type UserType = 'client' | 'owner';
+export type UserType = 'client' | 'owner' | 'professional';
 
 // NEW: Define the param list for the stack navigator in the Home tab
 export type HomeStackParamList = {
@@ -31,6 +31,7 @@ export type AppStackParamList = {
   // Navegação principal
   ClientTabs: NavigatorScreenParams<ClientTabParamList>;
   OwnerTabs: NavigatorScreenParams<OwnerTabParamList>;
+  ProfessionalTabs: undefined; // Area do profissional
 
   // Telas compartilhadas
   BusinessDetails: { businessId: string };

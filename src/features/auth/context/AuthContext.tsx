@@ -27,7 +27,7 @@ import { notificationService } from '../../../services/notificationService';
 import { Business } from '../../../services/businesses';
 
 // Tipos de usuário
-export type UserType = 'client' | 'owner';
+export type UserType = 'client' | 'owner' | 'professional';
 
 // Interface para o usuário autenticado
 interface User {
@@ -35,6 +35,7 @@ interface User {
   email: string | null;
   displayName: string | null;
   userType?: UserType;
+  professionalId?: string;
   role?: 'admin';
   businessId?: string;
   photoURL?: string | null;
@@ -54,7 +55,7 @@ export interface AuthContextData {
   isAdmin: boolean;
   favorites: FavoriteItem[];
   signIn: (email: string, password: string, expectedUserType?: UserType) => Promise<void>;
-  signUp: (name: string, email: string, password: string, userType: UserType, establishmentName?: string) => Promise<void>;
+  signUp: (name: string, email: string, password: string, userType: UserType, establishmentName?: string, inviteCode?: string) => Promise<void>;
   signOut: () => Promise<void>;
   toggleFavorite: (businessData: Pick<Business, 'id' | 'name' | 'address' | 'rating' | 'imageUrl' | 'coverImage'>) => Promise<void>;
   refreshFavorites: () => Promise<void>;
@@ -99,6 +100,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               photoURL: firebaseAuthUser.photoURL,
               userType: dbData?.userType as UserType,
               role: (dbData?.role === 'admin' ? 'admin' : undefined),
+              professionalId: dbData?.professionalId,
               businessId: dbData?.businessId,
             };
             setUser(userDataFromDb);
@@ -191,7 +193,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           if (expectedUserType && actualUserType !== expectedUserType) {
             await authSignOut(firebaseAuth);
-            throw new Error(`Esta conta é de ${actualUserType === 'client' ? 'cliente' : 'proprietário'}. Para acessar como ${expectedUserType === 'client' ? 'cliente' : 'proprietário'}, use a conta correta.`);
+            const typeLabel = (t?: string) => (t === 'client' ? 'cliente' : t === 'professional' ? 'profissional' : 'proprietário');
+            throw new Error(`Esta conta é de ${typeLabel(actualUserType)}. Para acessar como ${typeLabel(expectedUserType)}, use a conta correta.`);
           }
 
           if (actualUserType === 'client') {
@@ -225,13 +228,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signUp = async (name: string, email: string, password: string, userType: UserType, establishmentName?: string) => {
+  const signUp = async (name: string, email: string, password: string, userType: UserType, establishmentName?: string, inviteCode?: string) => {
     try {
       setLoading(true);
       const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
       const firebaseAuthUser = userCredential.user;
 
       await updateProfile(firebaseAuthUser, { displayName: name });
+
+      // Profissional: valida o codigo de convite antes de criar o perfil
+      let professionalLink: { businessId: string; professionalId: string; code: string } | null = null;
+      if (userType === 'professional') {
+        const code = (inviteCode || '').trim().toUpperCase();
+        const inviteSnap = code ? await getDoc(doc(firebaseDb, 'professionalInvites', code)) : null;
+        const invite = inviteSnap && inviteSnap.exists() ? inviteSnap.data() : null;
+        if (!invite || invite.status !== 'pending' || !invite.businessId || !invite.professionalId) {
+          try { await firebaseAuthUser.delete(); } catch { /* ignora */ }
+          throw new Error('Codigo de convite invalido ou ja utilizado. Peca um novo codigo ao estabelecimento.');
+        }
+        professionalLink = { businessId: invite.businessId, professionalId: invite.professionalId, code };
+      }
 
       const userDataForFirestore = {
         uid: firebaseAuthUser.uid, 
@@ -242,6 +258,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       };
       const userDocRef = doc(firebaseDb, 'users', firebaseAuthUser.uid);
       await setDoc(userDocRef, userDataForFirestore);
+      if (professionalLink) {
+        await updateDoc(userDocRef, {
+          businessId: professionalLink.businessId,
+          professionalId: professionalLink.professionalId,
+        });
+        await updateDoc(doc(firebaseDb, 'professionals', professionalLink.professionalId), {
+          accessUserId: firebaseAuthUser.uid,
+          appAccess: true,
+          inviteCode: professionalLink.code,
+          updatedAt: serverTimestamp(),
+        });
+        await updateDoc(doc(firebaseDb, 'professionalInvites', professionalLink.code), {
+          status: 'used',
+          usedBy: firebaseAuthUser.uid,
+          usedAt: serverTimestamp(),
+        });
+      }
 
       if (userType === 'owner' && establishmentName) {
         // Criar documento na coleção 'businesses' para o novo negócio
@@ -324,10 +357,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         displayName: name,
         userType,
         businessId: updatedData?.businessId,
+        professionalId: updatedData?.professionalId,
       });
     } catch (error) {
       const err = error as { code: string };
-      let errorMessage = 'Ocorreu um erro durante o cadastro.';
+      let errorMessage = !err.code && (error as Error)?.message ? (error as Error).message : 'Ocorreu um erro durante o cadastro.';
       if (err.code === 'auth/email-already-in-use') {
         errorMessage = 'Este e-mail já está em uso. Tente outro ou faça login.';
       } else if (err.code === 'auth/invalid-email') {
@@ -373,6 +407,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           displayName: refreshedAuthUser.displayName, 
           photoURL: refreshedAuthUser.photoURL,
           userType: dbData?.userType as UserType, 
+          role: (dbData?.role === 'admin' ? 'admin' : undefined),
+          professionalId: dbData?.professionalId,
           businessId: dbData?.businessId,
         });
       }

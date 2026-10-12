@@ -29,6 +29,14 @@ service cloud.firestore {
         get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerId == request.auth.uid;
     }
 
+    // profissional com acesso ao app ligado a esta conta
+    function isProfessional(professionalId) {
+      return signedIn() && professionalId is string &&
+        exists(/databases/$(database)/documents/professionals/$(professionalId)) &&
+        get(/databases/$(database)/documents/professionals/$(professionalId)).data.get('accessUserId', '') == request.auth.uid &&
+        get(/databases/$(database)/documents/professionals/$(professionalId)).data.get('appAccess', false) == true;
+    }
+
     // ---------- usuarios ----------
     match /users/{uid} {
       allow read: if signedIn();
@@ -116,6 +124,18 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isBusinessOwner(request.resource.data.businessId) || isAdmin();
       allow update, delete: if isBusinessOwner(resource.data.businessId) || isAdmin();
+      // o proprio profissional edita seus horarios e bloqueios
+      allow update: if isProfessional(professionalId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['schedule', 'blockedDates', 'updatedAt']);
+      // vinculo da conta do profissional usando um convite valido
+      allow update: if signedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['accessUserId', 'appAccess', 'inviteCode', 'updatedAt']) &&
+        request.resource.data.accessUserId == request.auth.uid &&
+        request.resource.data.appAccess == true &&
+        request.resource.data.inviteCode is string &&
+        exists(/databases/$(database)/documents/professionalInvites/$(request.resource.data.inviteCode)) &&
+        get(/databases/$(database)/documents/professionalInvites/$(request.resource.data.inviteCode)).data.professionalId == professionalId &&
+        get(/databases/$(database)/documents/professionalInvites/$(request.resource.data.inviteCode)).data.status == 'pending';
     }
 
     match /services/{serviceId} {
@@ -136,11 +156,24 @@ service cloud.firestore {
       allow read: if signedIn();
       allow create: if signedIn() &&
         (request.resource.data.clientId == request.auth.uid ||
-         isBusinessOwner(request.resource.data.businessId));
+         isBusinessOwner(request.resource.data.businessId) ||
+         isProfessional(request.resource.data.professionalId));
       allow update: if isAdmin() ||
         (signedIn() && resource.data.clientId == request.auth.uid) ||
-        isBusinessOwner(resource.data.businessId);
+        isBusinessOwner(resource.data.businessId) ||
+        isProfessional(resource.data.professionalId);
       allow delete: if isAdmin() || isBusinessOwner(resource.data.businessId);
+    }
+
+    // ---------- convites de profissionais ----------
+    match /professionalInvites/{code} {
+      allow read: if signedIn();
+      allow create: if isBusinessOwner(request.resource.data.businessId) && request.resource.data.status == 'pending';
+      allow update: if isBusinessOwner(resource.data.businessId) ||
+        (signedIn() && resource.data.status == 'pending' && request.resource.data.status == 'used' &&
+         request.resource.data.usedBy == request.auth.uid &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'usedBy', 'usedAt']));
+      allow delete: if isBusinessOwner(resource.data.businessId) || isAdmin();
     }
 
     // ---------- favoritos ----------

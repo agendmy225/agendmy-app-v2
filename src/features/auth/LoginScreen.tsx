@@ -126,7 +126,7 @@ const LoginScreen: React.FC = () => {
               Agend<Text style={styles.logoAccent}>My</Text>
             </Text>
             <Text style={styles.clientTypeText}>
-              {userType === 'client' ? 'CLIENTE' : 'PROPRIETÁRIO'}
+              {userType === 'client' ? 'CLIENTE' : userType === 'professional' ? 'PROFISSIONAL' : 'PROPRIETÁRIO'}
             </Text>
             <Text style={styles.welcomeText}>BEM-VINDO!</Text>
             {rememberMe && email && password ? (

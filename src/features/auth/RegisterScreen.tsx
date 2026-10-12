@@ -30,6 +30,7 @@ const RegisterScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [establishmentName, setEstablishmentName] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,6 +55,10 @@ const RegisterScreen: React.FC = () => {
       Alert.alert('Erro', 'As senhas não coincidem.');
       return;
     }
+    if (userType === 'professional' && inviteCode.trim().length !== 6) {
+      Alert.alert('Erro', 'Informe o codigo de convite de 6 letras enviado pelo estabelecimento.');
+      return;
+    }
     if (userType === 'owner' && !establishmentName) {
       Alert.alert('Erro', 'Por favor, informe o nome do estabelecimento.');
       return;
@@ -61,7 +66,7 @@ const RegisterScreen: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await signUp(name, email, password, userType as 'client' | 'owner', establishmentName);
+      await signUp(name, email, password, userType, establishmentName, inviteCode);
     } catch (error) {
       const err = error as Error;
       Alert.alert('Erro no Cadastro', err.message || 'Não foi possível criar a conta.');
@@ -85,7 +90,7 @@ const RegisterScreen: React.FC = () => {
               Agend<Text style={styles.logoAccent}>My</Text>
             </Text>
             <Text style={styles.clientTypeText}>
-              {userType === 'client' ? 'CLIENTE' : 'PROPRIETÁRIO'}
+              {userType === 'client' ? 'CLIENTE' : userType === 'professional' ? 'PROFISSIONAL' : 'PROPRIETÁRIO'}
             </Text>
             <Text style={styles.welcomeText}>CADASTRO</Text>
             <Text style={styles.registerText}>Cadastre-se agora!</Text>
@@ -125,6 +130,21 @@ const RegisterScreen: React.FC = () => {
                   placeholderTextColor="#999"
                   value={establishmentName}
                   onChangeText={setEstablishmentName}
+                />
+              </View>
+            )}
+
+            {userType === 'professional' && (
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>CODIGO DE CONVITE</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Codigo enviado pelo estabelecimento"
+                  placeholderTextColor="#999"
+                  autoCapitalize="characters"
+                  maxLength={6}
+                  value={inviteCode}
+                  onChangeText={(v) => setInviteCode(v.toUpperCase())}
                 />
               </View>
             )}

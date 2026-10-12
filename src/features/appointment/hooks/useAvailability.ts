@@ -12,6 +12,7 @@ import { firebaseDb } from '../../../config/firebase';
 import { getServiceById } from '../../../services/services';
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { toLocalDateString } from '../../../utils/localDate';
+import { getProfessionalData } from '../../../services/professionalSchedule';
 
 type DaySchedule = { start: string; end: string } | null;
 type WorkingHours = { [day: string]: DaySchedule };
@@ -109,6 +110,8 @@ export const getAvailableDays = async (
     const profWH = await getProfessionalWorkingHours(professionalId, businessWH);
     const today = new Date();
 
+    const profInfo = await getProfessionalData(professionalId).catch(() => ({} as Record<string, any>));
+    const blocked: string[] = Array.isArray(profInfo.blockedDates) ? profInfo.blockedDates : [];
     return Array.from({ length: daysToShow }, (_, i) => {
       const date = new Date();
       date.setDate(today.getDate() + i);
@@ -118,7 +121,7 @@ export const getAvailableDays = async (
         day: date.getDate(),
         month: MONTHS[date.getMonth()],
         weekday: WEEKDAYS[date.getDay()],
-        available: !!profWH[dayKey],
+        available: !!profWH[dayKey] && !blocked.includes(toLocalDateString(date)),
       };
     });
   } catch {
@@ -141,6 +144,8 @@ export const getAvailableTimeSlots = async (
     const profWH = await getProfessionalWorkingHours(professionalId, businessWH);
     const daySchedule = profWH[dayKey];
     if (!daySchedule) return [];
+    const profData = await getProfessionalData(professionalId).catch(() => ({} as Record<string, any>));
+    if (Array.isArray(profData.blockedDates) && profData.blockedDates.includes(date)) return [];
 
     const service = await getServiceById(businessId, serviceId);
     if (!service) { Alert.alert('Erro', 'Serviço não encontrado.'); return []; }

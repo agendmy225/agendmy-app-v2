@@ -17,6 +17,7 @@ import {
 import { addDoc, collection, deleteDoc, doc, firestore, getDocs, limit, query, serverTimestamp, updateDoc, where, orderBy } from '../../config/firebase';
 import { colors } from '../../constants/colors';
 import { useAuth } from '../auth/context/AuthContext';
+import ProfessionalAppAccess from '../../components/ProfessionalAppAccess';
 import { selectAndUploadImage, selectAndUploadVideo, showImagePickerDialog } from '../../services/imageUpload';
 
 interface Professional {
@@ -351,6 +352,7 @@ const ProfessionalManagementScreen: React.FC = () => {
           <Text style={styles.actionButtonText}>Excluir</Text>
         </TouchableOpacity>
       </View>
+      {businessId ? <ProfessionalAppAccess businessId={businessId} professionalId={item.id} professionalName={item.name} /> : null}
     </View>
   );
 

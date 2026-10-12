@@ -35,6 +35,7 @@ import EditPaymentMethodScreen from '../features/user/profile/EditPaymentMethodS
 
 
 import OwnerTabNavigator from './OwnerTabNavigator';
+import ProfessionalTabNavigator from './ProfessionalTabNavigator';
 import AdminPanelScreen from '../features/admin/AdminPanelScreen';
 import AdminEstablishmentsScreen from '../features/admin/AdminEstablishmentsScreen';
 import AdminUsersScreen from '../features/admin/AdminUsersScreen';
@@ -163,7 +164,7 @@ const AppNavigator: React.FC = () => {
   return (
     <Stack.Navigator
       id={undefined}
-      initialRouteName={user ? (user.userType === 'owner' ? 'OwnerTabs' : 'ClientTabs') : 'Welcome'}
+      initialRouteName={user ? (user.userType === 'owner' ? 'OwnerTabs' : user.userType === 'professional' ? 'ProfessionalTabs' : 'ClientTabs') : 'Welcome'}
       screenOptions={{
         headerShown: false,
         gestureEnabled: true,
@@ -208,6 +209,13 @@ const AppNavigator: React.FC = () => {
               <Stack.Screen name="AddPaymentMethod" component={AddPaymentMethodScreen} />
               <Stack.Screen name="EditPaymentMethod" component={EditPaymentMethodScreen} />
               <Stack.Screen name="Payment" component={PaymentScreen} />
+            </>
+          ) : user.userType === 'professional' ? (
+            <>
+              <Stack.Screen name="ProfessionalTabs" component={ProfessionalTabNavigator} />
+              <Stack.Screen name="Announcements" component={AnnouncementsScreen} />
+              <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+              <Stack.Screen name="Support" component={SupportScreen} />
             </>
           ) : (
             <>

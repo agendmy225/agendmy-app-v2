@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // Adicionar useNavigation
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack'; // Adicionar StackNavigationProp
 import { AppStackParamList } from '../../types/types'; // Adicionar AppStackParamList
 import { colors } from '../../constants/colors';
@@ -129,9 +129,13 @@ const AppointmentsScreen: React.FC = () => {
   };
 
   // Load appointments on component mount
-  useEffect(() => {
-    loadAppointments();
-  }, []);
+  // Recarrega sempre que a tela ganha foco (ex: depois de avaliar)
+  useFocusEffect(
+    React.useCallback(() => {
+      loadAppointments();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
 
   // Handle pull-to-refresh
   const handleRefresh = () => {
