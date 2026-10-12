@@ -28,6 +28,7 @@ import {
 } from '../../services/appointments';
 import { getServicesByBusiness, Service } from '../../services/services';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { toLocalDateString, parseLocalDate } from '../../utils/localDate';
 
 type ProfessionalAppointmentsScreenNavigationProp = StackNavigationProp<AppStackParamList, 'ProfessionalAppointmentsScreen'>;
 
@@ -241,7 +242,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
         setClientEmail(appointment.clientEmail || '');
         setClientPhone(appointment.clientPhone || '');
         setSelectedService(services.find(s => s.id === appointment.serviceId) || null);
-        setSelectedDate(new Date(appointment.date));
+        setSelectedDate(parseLocalDate(appointment.date));
         setSelectedTime(new Date(`2000-01-01T${appointment.time}`));
         setNotes(appointment.notes || '');
         setIsEditModalVisible(true);
@@ -274,7 +275,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                 clientName: clientName.trim(),
                 clientEmail: clientEmail.trim() || undefined,
                 clientPhone: clientPhone.trim() || undefined,
-                date: selectedDate.toISOString().split('T')[0],
+                date: toLocalDateString(selectedDate),
                 time: selectedTime.toTimeString().slice(0, 5),
                 serviceName: selectedService.name,
                 professionalName: selectedProfessional.name,
@@ -304,7 +305,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
 
         try {
             // Update appointment date/time if changed
-            const newDate = selectedDate.toISOString().split('T')[0];
+            const newDate = toLocalDateString(selectedDate);
             const newTime = selectedTime.toTimeString().slice(0, 5);
 
             if (newDate !== selectedAppointment.date || newTime !== selectedAppointment.time) {

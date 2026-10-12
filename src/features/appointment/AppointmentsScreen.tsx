@@ -16,6 +16,8 @@ import { colors } from '../../constants/colors';
 import { getClientAppointments, getBusinessAppointments, Appointment } from '../../services/appointments'; // Usar importação nomeada
 import { getBusinessByOwnerId } from '../../services/businesses'; // Importar função para buscar negócio do proprietário
 import { firebaseAuth } from '../../config/firebase';
+import BusinessThumb from '../../components/BusinessThumb';
+import { formatLocalDate } from '../../utils/localDate';
 
 
 // Usar o tipo Appointment importado, que é mais completo
@@ -185,12 +187,7 @@ const AppointmentsScreen: React.FC = () => {
         style={styles.appointmentCard}
         onPress={() => navigation.navigate('BusinessDetails', { businessId: item.businessId })} // Navegar para detalhes do negócio
       >
-        <Image
-          source={{
-            uri: item.image || 'https://via.placeholder.com/100x100/CCCCCC/FFFFFF?Text=Business',
-          }}
-          style={styles.appointmentImage}
-        />
+        <BusinessThumb businessId={item.businessId} name={item.businessName} style={styles.appointmentImage} />
         <View style={styles.appointmentInfo}>
           <Text style={styles.businessName}>{item.businessName}</Text>
           <Text style={styles.serviceName}>{item.serviceName}</Text>
@@ -199,7 +196,7 @@ const AppointmentsScreen: React.FC = () => {
             <Text style={styles.clientName}>Cliente: {item.clientName}</Text>
           )}
           <View style={styles.appointmentDetails}>
-            <Text style={styles.dateTime}>{`${item.date} às ${item.time}`}</Text>
+            <Text style={styles.dateTime}>{`${formatLocalDate(item.date)} às ${item.time}`}</Text>
             <Text style={[styles.status, { color: getStatusColor(item.status) }]}>
               {getStatusText(item.status)}
             </Text>
@@ -207,7 +204,7 @@ const AppointmentsScreen: React.FC = () => {
           <Text style={styles.price}>{`R$ ${item.price ? item.price.toFixed(2) : 'N/A'}`}</Text>
         </View>
       </TouchableOpacity>
-      {item.status === 'completed' && !isOwner && (
+      {item.status === 'completed' && !isOwner && !(item as any).reviewed && (
         <TouchableOpacity
           style={styles.reviewButton}
           onPress={() => navigation.navigate('Review', {

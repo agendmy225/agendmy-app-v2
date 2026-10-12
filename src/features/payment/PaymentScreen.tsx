@@ -15,6 +15,7 @@ import {
   validateCardNumber, detectCardBrand, maskCardNumber,
   PaymentResult, CardData,
 } from '../../services/mercadopago';
+import { parseLocalDate } from '../../utils/localDate';
 
 type PaymentRouteProp = RouteProp<AppStackParamList, 'Payment'>;
 type PaymentNavProp = StackNavigationProp<AppStackParamList, 'Payment'>;
@@ -174,7 +175,7 @@ const PaymentScreen: React.FC = () => {
               </TouchableOpacity>
               {paymentResult.pixExpirationDate && (
                 <Text style={styles.pixExpiry}>
-                  Válido até: {new Date(paymentResult.pixExpirationDate).toLocaleString('pt-BR')}
+                  Válido até: {parseLocalDate(paymentResult.pixExpirationDate).toLocaleString('pt-BR')}
                 </Text>
               )}
               <View style={styles.pollingIndicator}>

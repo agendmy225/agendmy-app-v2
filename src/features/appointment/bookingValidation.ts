@@ -2,6 +2,7 @@ import { getServicesByBusiness, Service } from '../../services/services';
 import { getProfessionalsByBusiness, Professional } from '../../services/professionals';
 import { getBusinessById } from '../../services/businesses';
 import { firebaseDb, collection, query, where, getDocs } from '../../config/firebase';
+import { parseLocalDate } from '../../utils/localDate';
 
 /**
  * Valida se é possível agendar para o business/profissional/data/hora
@@ -45,7 +46,7 @@ export async function canBookAppointment({
   }
   const dayOfWeek = [
     'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',
-  ][new Date(date).getDay()];
+  ][parseLocalDate(date).getDay()];
   const wh = business.workingHours?.[dayOfWeek as keyof typeof business.workingHours];
   if (!wh || !wh.open) {
     return { valid: false, reason: 'Estabelecimento fechado neste dia.' };

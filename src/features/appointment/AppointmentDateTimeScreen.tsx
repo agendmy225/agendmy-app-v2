@@ -15,6 +15,7 @@ import { AppStackParamList } from '../../types/types';
 import { checkTimeSlotAvailability } from '../../services/appointments';
 import { getServiceById } from '../../services/services';
 import { getBusinessById } from '../../services/businesses';
+import { toLocalDateString, parseLocalDate } from '../../utils/localDate';
 
 type AppointmentDateTimeScreenRouteProp = RouteProp<AppStackParamList, 'AppointmentDateTime'>;
 type AppointmentDateTimeScreenNavigationProp = StackNavigationProp<AppStackParamList, 'AppointmentDateTime'>;
@@ -29,7 +30,7 @@ const generateAvailableDays = () => {
     date.setDate(today.getDate() + i);
 
     days.push({
-      date: date.toISOString().split('T')[0],
+      date: toLocalDateString(date),
       day: date.getDate(),
       month: date.toLocaleDateString('pt-BR', { month: 'short' }),
       weekday: date.toLocaleDateString('pt-BR', { weekday: 'short' }),
@@ -115,7 +116,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
         setLoadingTimes(true);
         try {
           // Get day of week
-          const dateObj = new Date(selectedDate);
+          const dateObj = parseLocalDate(selectedDate);
           const dayOfWeek = dateObj.getDay();
           const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
           const dayKey = days[dayOfWeek];
@@ -254,7 +255,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
               <View key={index} style={styles.sessionItem}>
                 <View style={styles.sessionInfo}>
                   <Text style={styles.sessionDate}>
-                    {new Date(session.date).toLocaleDateString('pt-BR', {
+                    {parseLocalDate(session.date).toLocaleDateString('pt-BR', {
                       weekday: 'short',
                       day: '2-digit',
                       month: 'short',

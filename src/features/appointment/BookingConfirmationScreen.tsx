@@ -19,6 +19,7 @@ import { saveAppointment } from '../../services/appointments';
 import { Business, getBusinessById, getBusinessByOwnerId } from '../../services/businesses'; // Adicionar getBusinessByOwnerId
 import { Professional, getProfessionalById } from '../../services/professionals';
 import { Service, getServiceById } from '../../services/services';
+import { parseLocalDate } from '../../utils/localDate';
 
 // Função para detectar se o usuário é proprietário
 const checkIfUserIsOwner = async (): Promise<boolean> => {
@@ -165,7 +166,7 @@ const BookingConfirmationScreen: React.FC = () => {
 
   // Formatar a data para exibição
   const formatDate = (dateString: string) => {
-    const d = new Date(dateString);
+    const d = parseLocalDate(dateString);
     return d.toLocaleDateString('pt-BR', {
       weekday: 'long',
       day: 'numeric',

@@ -36,6 +36,7 @@ import { getServicesByBusiness, Service } from '../../services/services';
 import { isBusinessOpen } from '../../services/businessHours';
 import { checkMultipleProfessionalsAvailability } from '../../services/professionalAvailability';
 import { useCachedFirebaseImage } from '../../hooks/useCachedFirebaseImage';
+import { parseLocalDate } from '../../utils/localDate';
 // Remover imports diretos de services/favorites, usaremos o contexto
 // import { addToFavorites, removeFromFavorites, isFavorite as checkIsFavorite } from '../../services/favorites';
 
@@ -266,6 +267,10 @@ const BusinessDetailsScreen: React.FC = () => {
   };
 
   const handleScheduleService = (professionalId: string) => {
+    if (business && (business as any).active === false) {
+      Alert.alert('Estabelecimento indisponivel', 'Este estabelecimento nao esta recebendo agendamentos no momento.');
+      return;
+    }
     if (selectedService) {
       setIsModalVisible(false);
       navigation.navigate('AppointmentDateTime', {
@@ -279,6 +284,10 @@ const BusinessDetailsScreen: React.FC = () => {
   };
 
   const handleBookNow = () => {
+    if (business && (business as any).active === false) {
+      Alert.alert('Estabelecimento indisponivel', 'Este estabelecimento nao esta recebendo agendamentos no momento.');
+      return;
+    }
     // Se houver apenas um serviço, abre a seleção de profissional diretamente
     if (filteredServices.length === 1) {
       handleServiceSelect(filteredServices[0]);
@@ -422,7 +431,7 @@ const BusinessDetailsScreen: React.FC = () => {
 
       // Se for uma string
       if (typeof date === 'string') {
-        return new Date(date).toLocaleDateString('pt-BR');
+        return parseLocalDate(date).toLocaleDateString('pt-BR');
       }
 
       return 'Data não disponível';

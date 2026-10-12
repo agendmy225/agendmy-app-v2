@@ -14,6 +14,7 @@ import { Business } from '../../../services/businesses';
 import { Service } from '../../../services/services';
 import { Professional } from '../../../services/professionals';
 import { checkTimeSlotAvailability } from '../../../services/appointments';
+import { toLocalDateString, parseLocalDate } from '../../../utils/localDate';
 
 // Function to parse duration from various formats
 const parseDurationInMinutes = (duration: string): number => {
@@ -84,7 +85,7 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
 
       // Verificar se o negócio está aberto neste dia
       if (business.workingHours[dayKey]?.open) {
-        dates.push(date.toISOString().split('T')[0]);
+        dates.push(toLocalDateString(date));
       }
     }
 
@@ -100,7 +101,7 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
     }
   }, [visible, business, generateAvailableDates]);
   const generateTimeSlots = useCallback(async (date: string) => {
-    const dateObj = new Date(date);
+    const dateObj = parseLocalDate(date);
     const dayName = dateObj.toLocaleDateString('pt-BR', { weekday: 'long' });
     const dayKey = getDayKey(dayName);
 
@@ -191,7 +192,7 @@ const TimeSlotsModal: React.FC<TimeSlotsModalProps> = ({
   };
 
   const formatDateDisplay = (dateString: string): string => {
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     return date.toLocaleDateString('pt-BR', {
       weekday: 'short',
       day: '2-digit',

@@ -1,6 +1,7 @@
 import { checkTimeSlotAvailability } from '../services/appointments';
 import { Business } from '../services/businesses';
 import { Professional } from '../services/professionals';
+import { toLocalDateString } from '../utils/localDate';
 
 /**
  * Verifica se um profissional tem horários disponíveis nos próximos dias
@@ -22,7 +23,7 @@ export const hasProfessionalAvailableSlots = async (
             const date = new Date(today);
             date.setDate(today.getDate() + i);
 
-            const dateString = date.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+            const dateString = toLocalDateString(date); // 'YYYY-MM-DD'
             const dayName = date.toLocaleDateString('pt-BR', { weekday: 'long' });
             const dayKey = getDayKey(dayName);
 

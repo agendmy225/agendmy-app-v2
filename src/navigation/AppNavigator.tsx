@@ -212,6 +212,7 @@ const AppNavigator: React.FC = () => {
           ) : (
             <>
               <Stack.Screen name="ClientTabs" component={ClientTabNavigator} />
+              <Stack.Screen name="BusinessDetails" component={BusinessDetailsScreen} />
               <Stack.Screen name="Announcements" component={AnnouncementsScreen} />
               <Stack.Screen name="AppointmentDateTime" component={AppointmentDateTimeScreen} />
               <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />

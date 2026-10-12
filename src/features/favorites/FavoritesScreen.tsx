@@ -15,6 +15,7 @@ import { AppStackParamList } from '../../types/types';
 import { FavoriteItem } from '../../services/favorites';
 import { colors } from '../../constants/colors';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import BusinessThumb from '../../components/BusinessThumb';
 
 type FavoritesScreenNavigationProp = StackNavigationProp<AppStackParamList, 'Favorites'>;
 
@@ -34,10 +35,7 @@ const FavoritesScreen: React.FC = () => {
       style={styles.itemContainer}
       onPress={() => navigation.navigate('BusinessDetails', { businessId: item.businessId })}
     >
-      <Image
-        source={{ uri: item.businessImage || 'https://via.placeholder.com/80' }}
-        style={styles.itemImage}
-      />
+      <BusinessThumb businessId={item.businessId} fallbackUri={item.businessImage} name={item.businessName} style={styles.itemImage} />
       <View style={styles.itemTextContainer}>
         <Text style={styles.itemName}>{item.businessName}</Text>
         <Text style={styles.itemAddress} numberOfLines={1}>{item.businessAddress}</Text>

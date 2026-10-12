@@ -17,7 +17,7 @@ import { colors } from '../../constants/colors';
 import { useAuth } from '../auth/context/AuthContext';
 import { addReview } from '../../services/reviews';
 import { getProfessionalById, Professional } from '../../services/professionals';
-import { firestore, collection, query, where, getDocs } from '../../config/firebase';
+import { firestore, collection, query, where, getDocs, doc, updateDoc } from '../../config/firebase';
 import { useResolvedFirebaseUrl } from '../../hooks/useResolvedFirebaseUrl';
 
 interface ReviewScreenParams {
@@ -106,39 +106,35 @@ const ReviewScreen: React.FC = () => {
     try {
       setIsSubmitting(true);
       
-      // FLAG TEMPORARIA: setar para true bloqueia novamente. Para testes deixar false.
-      const ENFORCE_ONE_REVIEW_PER_CLIENT = false;
-      if (ENFORCE_ONE_REVIEW_PER_CLIENT) {
-      // Verificar se o usuario ja avaliou este estabelecimento (limite 1 por cliente)
-      // Buscamos direto na subcolecao do business para nao precisar de indice composto
+      // Limite de avaliacoes:
+      //  - com agendamento: 1 avaliacao por agendamento
+      //  - sem agendamento: 1 avaliacao geral por cliente neste estabelecimento
       if (user?.uid) {
         try {
           const reviewsRef = collection(firestore, 'businesses', businessId, 'reviews');
-          const q = query(reviewsRef, where('userId', '==', user.uid));
+          const q = appointmentId
+            ? query(reviewsRef, where('appointmentId', '==', appointmentId))
+            : query(reviewsRef, where('userId', '==', user.uid));
           const snap = await getDocs(q);
-          if (!snap.empty) {
-            // Verificar se algum nao esta rejeitado (rejeitado pode reavaliar)
-            const hasActiveReview = snap.docs.some(d => {
-              const data = d.data();
-              return data.status !== 'rejected';
-            });
-            if (hasActiveReview) {
-              setIsSubmitting(false);
-              Alert.alert(
-                'Avaliacao ja realizada',
-                'Voce ja avaliou este estabelecimento. Cada cliente pode fazer apenas uma avaliacao.',
-                [{ text: 'OK', onPress: () => navigation.goBack() }]
-              );
-              return;
-            }
+          const hasActiveReview = snap.docs.some((d: any) => {
+            const data = d.data();
+            if (data.status === 'rejected') { return false; }
+            return appointmentId ? true : !data.appointmentId;
+          });
+          if (hasActiveReview) {
+            setIsSubmitting(false);
+            Alert.alert(
+              'Avaliacao ja realizada',
+              appointmentId ? 'Voce ja avaliou este atendimento.' : 'Voce ja fez uma avaliacao geral deste estabelecimento.',
+              [{ text: 'OK', onPress: () => navigation.goBack() }]
+            );
+            return;
           }
         } catch (checkErr) {
           console.warn('Erro ao verificar avaliacoes anteriores:', checkErr);
-          // Nao bloquear se falhar a verificacao
         }
       }
-      }
-      
+
       // Construir objeto removendo campos undefined (Firestore nao aceita undefined)
       // Avaliacao UNIFICADA: 1 review com nota do estabelecimento + nota do profissional + comentario
       const reviewData: any = {
@@ -160,6 +156,13 @@ const ReviewScreen: React.FC = () => {
       }
       
       await addReview(reviewData);
+      if (appointmentId) {
+        try {
+          await updateDoc(doc(firestore, 'appointments', appointmentId), { reviewed: true });
+        } catch (markErr) {
+          console.warn('Nao foi possivel marcar o agendamento como avaliado:', markErr);
+        }
+      }
 
       Alert.alert(
         'Avaliação enviada!',

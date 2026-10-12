@@ -30,6 +30,7 @@ import {
 } from '../../services/financialReports';
 import { validateCommissionConfig } from '../../services/businessConfig';
 import { formatCurrency as formatCurrencyUtil } from '../../constants/reportConfig';
+import { parseLocalDate } from '../../utils/localDate';
 
 const FinancialReportsScreen: React.FC = () => {
   const { user } = useAuth();
@@ -145,8 +146,8 @@ const FinancialReportsScreen: React.FC = () => {
       let end: Date;
 
       try {
-        start = new Date(startDate);
-        end = new Date(endDate);
+        start = parseLocalDate(startDate);
+        end = parseLocalDate(endDate);
       } catch (dateError) {
         Alert.alert('Erro', 'Formato de data inválido. Use o formato AAAA-MM-DD.');
         setGeneratingReport(false);

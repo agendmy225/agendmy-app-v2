@@ -11,6 +11,7 @@ import {
 import { firebaseDb } from '../../../config/firebase';
 import { getServiceById } from '../../../services/services';
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { toLocalDateString } from '../../../utils/localDate';
 
 type DaySchedule = { start: string; end: string } | null;
 type WorkingHours = { [day: string]: DaySchedule };
@@ -113,7 +114,7 @@ export const getAvailableDays = async (
       date.setDate(today.getDate() + i);
       const dayKey = DAY_KEYS[date.getDay()];
       return {
-        date: date.toISOString().split('T')[0],
+        date: toLocalDateString(date),
         day: date.getDate(),
         month: MONTHS[date.getMonth()],
         weekday: WEEKDAYS[date.getDay()],
@@ -152,7 +153,7 @@ export const getAvailableTimeSlots = async (
     const startMin = timeToMinutes(daySchedule.start);
     const endMin = timeToMinutes(daySchedule.end);
     const now = new Date();
-    const isToday = date === now.toISOString().split('T')[0];
+    const isToday = date === toLocalDateString(now);
     const slots: TimeSlot[] = [];
 
     for (let min = startMin; min <= endMin - serviceDuration; min += 30) {
