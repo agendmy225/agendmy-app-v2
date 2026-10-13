@@ -1,5 +1,5 @@
 // src/features/professionalArea/ProfessionalAgendaScreen.tsx
-// "Minha Agenda" do profissional: so os agendamentos dele.
+// "Minha Agenda" do profissional: so os agendamentos dele, em lista ou calendario.
 // Following React Native Firebase v22 modular API patterns
 import React, { useEffect, useMemo, useState } from 'react';
 import {
@@ -20,9 +20,11 @@ import { useAuth } from '../auth/context/AuthContext';
 import { updateAppointmentStatus } from '../../services/appointments';
 import { formatLocalDate, toLocalDateString } from '../../utils/localDate';
 import { ManualBookingModal, RescheduleModal } from './AgendaModals';
+import AgendaCalendar, { MONTH_NAMES, ymd } from './AgendaCalendar';
 
 type Status = 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
 type FilterKey = 'today' | 'upcoming' | 'pending' | 'history';
+type ViewMode = 'list' | 'calendar';
 
 interface AgendaItem {
   id: string;
@@ -44,12 +46,31 @@ const STATUS_INFO: Record<Status, { label: string; color: string }> = {
   no_show: { label: 'Nao compareceu', color: colors.lightText },
 };
 
+const STATUS_COLORS: Record<string, string> = {
+  scheduled: STATUS_INFO.scheduled.color,
+  confirmed: STATUS_INFO.confirmed.color,
+  completed: STATUS_INFO.completed.color,
+  cancelled: STATUS_INFO.cancelled.color,
+  no_show: STATUS_INFO.no_show.color,
+};
+
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'today', label: 'Hoje' },
   { key: 'upcoming', label: 'Proximos' },
   { key: 'pending', label: 'A confirmar' },
   { key: 'history', label: 'Historico' },
 ];
+
+const WEEKDAY_NAMES = ['Domingo', 'Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado'];
+
+const dayTitle = (date: string) => {
+  const [y, m, d] = date.split('-').map((n) => parseInt(n, 10));
+  if (!y || !m || !d) {
+    return date;
+  }
+  const weekday = new Date(y, m - 1, d).getDay();
+  return `${WEEKDAY_NAMES[weekday]}, ${d} de ${MONTH_NAMES[m - 1].toLowerCase()}`;
+};
 
 const ProfessionalAgendaScreen: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -63,6 +84,11 @@ const ProfessionalAgendaScreen: React.FC = () => {
   const [business, setBusiness] = useState<Record<string, any> | null>(null);
   const [rescheduleItem, setRescheduleItem] = useState<AgendaItem | null>(null);
   const [manualOpen, setManualOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [calYear, setCalYear] = useState(() => new Date().getFullYear());
+  const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
+  const [selectedDate, setSelectedDate] = useState(() => toLocalDateString(new Date()));
+  const [blockedDates, setBlockedDates] = useState<string[]>([]);
 
   // horario e nome do estabelecimento
   useEffect(() => {
@@ -74,7 +100,7 @@ const ProfessionalAgendaScreen: React.FC = () => {
       .catch(() => undefined);
   }, [user?.businessId]);
 
-  // acesso e nome do profissional
+  // acesso, nome e datas bloqueadas do profissional
   useEffect(() => {
     if (!professionalId) {
       return;
@@ -85,6 +111,7 @@ const ProfessionalAgendaScreen: React.FC = () => {
         const data = snap.data() || {};
         setHasAccess(data.appAccess === true && data.accessUserId === user?.uid);
         setProfessionalName(data.name || '');
+        setBlockedDates(Array.isArray(data.blockedDates) ? data.blockedDates : []);
       },
       () => undefined,
     );
@@ -137,12 +164,21 @@ const ProfessionalAgendaScreen: React.FC = () => {
     }
   }, [items, filter, today]);
 
+  const dayItems = useMemo(() => items.filter((i) => i.date === selectedDate), [items, selectedDate]);
+
   const count = (f: FilterKey) => {
     const isOpen = (s: Status) => s === 'scheduled' || s === 'confirmed';
     if (f === 'today') { return items.filter((i) => i.date === today && i.status !== 'cancelled').length; }
     if (f === 'upcoming') { return items.filter((i) => i.date >= today && isOpen(i.status)).length; }
     if (f === 'pending') { return items.filter((i) => i.date >= today && i.status === 'scheduled').length; }
     return items.filter((i) => i.date < today || !isOpen(i.status)).length;
+  };
+
+  const changeMonth = (y: number, m: number) => {
+    setCalYear(y);
+    setCalMonth(m);
+    const [ty, tm] = today.split('-').map((n) => parseInt(n, 10));
+    setSelectedDate(ty === y && tm - 1 === m ? today : ymd(y, m, 1));
   };
 
   const changeStatus = (item: AgendaItem, status: Status, title: string) => {
@@ -165,6 +201,67 @@ const ProfessionalAgendaScreen: React.FC = () => {
     ]);
   };
 
+  const renderCard = (item: AgendaItem, showDate: boolean) => {
+    const st = STATUS_INFO[item.status] || STATUS_INFO.scheduled;
+    const busy = busyId === item.id;
+    return (
+      <View key={item.id} style={styles.card}>
+        <View style={styles.cardTop}>
+          <Text style={styles.cardTime}>{item.time}</Text>
+          <Text style={styles.cardDate}>
+            {showDate ? formatLocalDate(item.date) : `${item.duration} min`}
+          </Text>
+          <View style={[styles.badge, { backgroundColor: st.color }]}>
+            <Text style={styles.badgeText}>{st.label}</Text>
+          </View>
+        </View>
+        <Text style={styles.cardClient}>{item.clientName}</Text>
+        <Text style={styles.cardService}>
+          {item.serviceName}{item.price ? `  -  R$ ${item.price.toFixed(2).replace('.', ',')}` : ''}
+        </Text>
+        {item.clientPhone ? (
+          <TouchableOpacity onPress={() => Linking.openURL(`tel:${item.clientPhone}`)}>
+            <Text style={styles.phone}>{item.clientPhone}</Text>
+          </TouchableOpacity>
+        ) : null}
+
+        <View style={styles.actions}>
+          {busy ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : (
+            <>
+              {item.status === 'scheduled' && (
+                <TouchableOpacity style={[styles.btn, styles.btnOk]} onPress={() => changeStatus(item, 'confirmed', 'Aceitar agendamento')}>
+                  <Text style={styles.btnTextLight}>Aceitar</Text>
+                </TouchableOpacity>
+              )}
+              {item.status === 'confirmed' && (
+                <>
+                  <TouchableOpacity style={[styles.btn, styles.btnOk]} onPress={() => changeStatus(item, 'completed', 'Marcar como concluido')}>
+                    <Text style={styles.btnTextLight}>Concluir</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.btn} onPress={() => changeStatus(item, 'no_show', 'Cliente nao compareceu')}>
+                    <Text style={styles.btnText}>Nao veio</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+              {(item.status === 'scheduled' || item.status === 'confirmed') && (
+                <TouchableOpacity style={styles.btn} onPress={() => setRescheduleItem(item)}>
+                  <Text style={styles.btnText}>Remarcar</Text>
+                </TouchableOpacity>
+              )}
+              {(item.status === 'scheduled' || item.status === 'confirmed') && (
+                <TouchableOpacity style={[styles.btn, styles.btnDanger]} onPress={() => changeStatus(item, 'cancelled', 'Cancelar agendamento')}>
+                  <Text style={styles.btnTextLight}>Cancelar</Text>
+                </TouchableOpacity>
+              )}
+            </>
+          )}
+        </View>
+      </View>
+    );
+  };
+
   if (!professionalId || !hasAccess) {
     return (
       <View style={[styles.container, styles.center]}>
@@ -180,6 +277,13 @@ const ProfessionalAgendaScreen: React.FC = () => {
     );
   }
 
+  const dayActive = dayItems.filter((i) => i.status !== 'cancelled').length;
+  const dayCancelled = dayItems.length - dayActive;
+  const daySummary =
+    (dayActive === 1 ? '1 agendamento' : `${dayActive} agendamentos`) +
+    (dayCancelled > 0 ? `  -  ${dayCancelled} cancelado${dayCancelled > 1 ? 's' : ''}` : '');
+  const selectedBlocked = blockedDates.includes(selectedDate);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -191,87 +295,81 @@ const ProfessionalAgendaScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.filterRow}>
-        {FILTERS.map((f) => (
-          <TouchableOpacity
-            key={f.key}
-            style={[styles.chip, filter === f.key && styles.chipActive]}
-            onPress={() => setFilter(f.key)}
-          >
-            <Text style={[styles.chipText, filter === f.key && styles.chipTextActive]}>
-              {f.label} ({count(f.key)})
-            </Text>
-          </TouchableOpacity>
-        ))}
+      <View style={styles.toggleRow}>
+        <TouchableOpacity
+          style={[styles.toggleBtn, viewMode === 'list' && styles.toggleBtnActive]}
+          onPress={() => setViewMode('list')}
+        >
+          <Icon name="view-list" size={18} color={viewMode === 'list' ? colors.white : colors.primary} />
+          <Text style={[styles.toggleText, viewMode === 'list' && styles.toggleTextActive]}>Lista</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.toggleBtn, viewMode === 'calendar' && styles.toggleBtnActive]}
+          onPress={() => setViewMode('calendar')}
+        >
+          <Icon name="date-range" size={18} color={viewMode === 'calendar' ? colors.white : colors.primary} />
+          <Text style={[styles.toggleText, viewMode === 'calendar' && styles.toggleTextActive]}>Calendario</Text>
+        </TouchableOpacity>
       </View>
+
+      {viewMode === 'list' ? (
+        <View style={styles.filterRow}>
+          {FILTERS.map((f) => (
+            <TouchableOpacity
+              key={f.key}
+              style={[styles.chip, filter === f.key && styles.chipActive]}
+              onPress={() => setFilter(f.key)}
+            >
+              <Text style={[styles.chipText, filter === f.key && styles.chipTextActive]}>
+                {f.label} ({count(f.key)})
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      ) : null}
 
       {!loaded ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
-      ) : (
+      ) : viewMode === 'list' ? (
         <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
           {filtered.length === 0 ? (
             <Text style={styles.emptyText}>Nenhum agendamento aqui.</Text>
           ) : (
-            filtered.map((item) => {
-              const st = STATUS_INFO[item.status] || STATUS_INFO.scheduled;
-              const busy = busyId === item.id;
-              return (
-                <View key={item.id} style={styles.card}>
-                  <View style={styles.cardTop}>
-                    <Text style={styles.cardTime}>{item.time}</Text>
-                    <Text style={styles.cardDate}>{formatLocalDate(item.date)}</Text>
-                    <View style={[styles.badge, { backgroundColor: st.color }]}>
-                      <Text style={styles.badgeText}>{st.label}</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.cardClient}>{item.clientName}</Text>
-                  <Text style={styles.cardService}>
-                    {item.serviceName}{item.price ? `  -  R$ ${item.price.toFixed(2).replace('.', ',')}` : ''}
-                  </Text>
-                  {item.clientPhone ? (
-                    <TouchableOpacity onPress={() => Linking.openURL(`tel:${item.clientPhone}`)}>
-                      <Text style={styles.phone}>{item.clientPhone}</Text>
-                    </TouchableOpacity>
-                  ) : null}
+            filtered.map((item) => renderCard(item, true))
+          )}
+        </ScrollView>
+      ) : (
+        <ScrollView style={styles.list} contentContainerStyle={styles.calendarContent}>
+          <AgendaCalendar
+            entries={items}
+            year={calYear}
+            month={calMonth}
+            onChangeMonth={changeMonth}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            today={today}
+            blockedDates={blockedDates}
+            statusColors={STATUS_COLORS}
+          />
 
-                  <View style={styles.actions}>
-                    {busy ? (
-                      <ActivityIndicator size="small" color={colors.primary} />
-                    ) : (
-                      <>
-                        {item.status === 'scheduled' && (
-                          <TouchableOpacity style={[styles.btn, styles.btnOk]} onPress={() => changeStatus(item, 'confirmed', 'Aceitar agendamento')}>
-                            <Text style={styles.btnTextLight}>Aceitar</Text>
-                          </TouchableOpacity>
-                        )}
-                        {item.status === 'confirmed' && (
-                          <>
-                            <TouchableOpacity style={[styles.btn, styles.btnOk]} onPress={() => changeStatus(item, 'completed', 'Marcar como concluido')}>
-                              <Text style={styles.btnTextLight}>Concluir</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.btn} onPress={() => changeStatus(item, 'no_show', 'Cliente nao compareceu')}>
-                              <Text style={styles.btnText}>Nao veio</Text>
-                            </TouchableOpacity>
-                          </>
-                        )}
-                        {(item.status === 'scheduled' || item.status === 'confirmed') && (
-                          <TouchableOpacity style={styles.btn} onPress={() => setRescheduleItem(item)}>
-                            <Text style={styles.btnText}>Remarcar</Text>
-                          </TouchableOpacity>
-                        )}
-                        {(item.status === 'scheduled' || item.status === 'confirmed') && (
-                          <TouchableOpacity style={[styles.btn, styles.btnDanger]} onPress={() => changeStatus(item, 'cancelled', 'Cancelar agendamento')}>
-                            <Text style={styles.btnTextLight}>Cancelar</Text>
-                          </TouchableOpacity>
-                        )}
-                      </>
-                    )}
-                  </View>
-                </View>
-              );
-            })
+          <View style={styles.dayHeader}>
+            <Text style={styles.dayTitle}>{dayTitle(selectedDate)}</Text>
+            <Text style={styles.daySubtitle}>{daySummary}</Text>
+          </View>
+
+          {selectedBlocked ? (
+            <View style={styles.blockedNote}>
+              <Icon name="block" size={16} color={colors.lightText} />
+              <Text style={styles.blockedNoteText}>Dia bloqueado em Meus Horarios</Text>
+            </View>
+          ) : null}
+
+          {dayItems.length === 0 ? (
+            <Text style={styles.emptyText}>Nenhum agendamento neste dia.</Text>
+          ) : (
+            dayItems.map((item) => renderCard(item, false))
           )}
         </ScrollView>
       )}
@@ -305,6 +403,11 @@ const styles = StyleSheet.create({
   headerSubtitle: { color: colors.offWhite, fontSize: 13, marginTop: 2 },
   addButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6, marginTop: 10 },
   addButtonText: { color: colors.primary, fontWeight: 'bold', fontSize: 13, marginLeft: 4 },
+  toggleRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 14, backgroundColor: colors.card, borderRadius: 10, padding: 4 },
+  toggleBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 8, borderRadius: 8 },
+  toggleBtnActive: { backgroundColor: colors.primary },
+  toggleText: { fontSize: 14, color: colors.primary, fontWeight: '600', marginLeft: 6 },
+  toggleTextActive: { color: colors.white },
   filterRow: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, paddingTop: 14 },
   chip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, backgroundColor: colors.card, marginRight: 8, marginBottom: 8 },
   chipActive: { backgroundColor: colors.primary },
@@ -312,6 +415,12 @@ const styles = StyleSheet.create({
   chipTextActive: { color: colors.white, fontWeight: '600' },
   list: { flex: 1 },
   listContent: { padding: 16, paddingTop: 4, paddingBottom: 32 },
+  calendarContent: { padding: 16, paddingTop: 14, paddingBottom: 32 },
+  dayHeader: { marginBottom: 10 },
+  dayTitle: { fontSize: 17, fontWeight: 'bold', color: colors.text },
+  daySubtitle: { fontSize: 13, color: colors.lightText, marginTop: 2 },
+  blockedNote: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: 8, padding: 10, marginBottom: 10 },
+  blockedNoteText: { fontSize: 13, color: colors.lightText, marginLeft: 6 },
   card: { backgroundColor: colors.card, borderRadius: 12, padding: 14, marginBottom: 10 },
   cardTop: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
   cardTime: { fontSize: 20, fontWeight: 'bold', color: colors.text, marginRight: 8 },

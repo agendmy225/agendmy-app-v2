@@ -1,7 +1,7 @@
 // src/features/professionalArea/AgendaModals.tsx
 // Janelas da agenda do profissional: Remarcar e Encaixe (marcar manualmente).
 // Following React Native Firebase v22 modular API patterns
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -32,7 +32,20 @@ const SlotPicker: React.FC<{
   time: string | null;
   onChange: (date: string | null, time: string | null) => void;
 }> = ({ professionalId, businessWorkingHours, durationMin, ignoreAppointmentId, date, time, onChange }) => {
-  const days = nextDays(30);
+  const baseDays = nextDays(30);
+  const days = date && !baseDays.includes(date) && date > baseDays[0] ? [...baseDays, date] : baseDays;
+  const dayScrollRef = useRef<ScrollView>(null);
+
+  // ao abrir com uma data ja escolhida, rola a lista ate ela
+  useEffect(() => {
+    const idx = date ? days.indexOf(date) : -1;
+    if (idx > 2) {
+      const t = setTimeout(() => dayScrollRef.current?.scrollTo({ x: (idx - 2) * 60, animated: false }), 80);
+      return () => clearTimeout(t);
+    }
+    return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [slots, setSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +66,7 @@ const SlotPicker: React.FC<{
   return (
     <View>
       <Text style={styles.label}>Data</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayScroll}>
+      <ScrollView ref={dayScrollRef} horizontal showsHorizontalScrollIndicator={false} style={styles.dayScroll}>
         {days.map((d) => {
           const dt = parseLocalDate(d);
           const active = d === date;
@@ -182,6 +195,7 @@ export const ManualBookingModal: React.FC<{
   businessName: string;
   businessWorkingHours: any;
   userId: string;
+  initialDate?: string;
 }> = (p) => {
   const [services, setServices] = useState<Service[]>([]);
   const [service, setService] = useState<Service | null>(null);
@@ -198,10 +212,10 @@ export const ManualBookingModal: React.FC<{
     setService(null);
     setClientName('');
     setClientPhone('');
-    setDate(null);
+    setDate(p.initialDate || null);
     setTime(null);
     getServicesByBusiness(p.businessId).then(setServices).catch(() => setServices([]));
-  }, [p.visible, p.businessId]);
+  }, [p.visible, p.businessId, p.initialDate]);
 
   const duration = service ? parseInt(String(service.duration), 10) || 60 : 60;
   const price = service
