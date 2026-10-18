@@ -15,7 +15,8 @@ import {
   where,
 } from '@react-native-firebase/firestore';
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
-import { firebaseDb, firebaseAuth } from '../config/firebase';
+import { firebaseDb, firebaseAuth, functionsSP } from '../config/firebase';
+import { httpsCallable } from '@react-native-firebase/functions';
 import { toLocalDateString } from '../utils/localDate';
 
 // Tipo completo para o agendamento
@@ -261,8 +262,26 @@ export const getProfessionalAppointments = async (
   professionalId: string,
   status?: string,
   date?: string,
+  businessId?: string,
 ): Promise<Appointment[]> => {
   try {
+    if (businessId) {
+      // dono: filtra tambem pelo negocio (exigido pelas regras de privacidade) e ordena aqui
+      let q2 = query(collection(firebaseDb, 'appointments'),
+        where('professionalId', '==', professionalId),
+        where('businessId', '==', businessId));
+      if (status && status !== 'all') {
+        q2 = query(q2, where('status', '==', status));
+      }
+      if (date) {
+        q2 = query(q2, where('date', '==', date));
+      }
+      const snap2 = await getDocs(q2);
+      const list = snap2.docs.map((d: FirebaseFirestoreTypes.QueryDocumentSnapshot) =>
+        ({ id: d.id, ...d.data() } as Appointment));
+      return list.sort((x, y) =>
+        (y.date || '').localeCompare(x.date || '') || (x.time || '').localeCompare(y.time || ''));
+    }
     let queryRef = query(
       collection(firebaseDb, 'appointments'),
       where('professionalId', '==', professionalId),
@@ -525,6 +544,19 @@ export const hasCompletedAppointmentWithBusiness = async (userId: string | undef
   }
 };
 
+// Agendamento do cliente gravado pela funcao criarAgendamento: confere o horario com trava,
+// e preco, duracao e nomes vem do banco (nao do aparelho).
+export const createAppointmentsViaServer = async (params: {
+  businessId: string;
+  serviceId: string;
+  professionalId: string;
+  sessions: { date: string; time: string }[];
+}): Promise<string[]> => {
+  const fn = httpsCallable<Record<string, unknown>, { ids?: string[] }>(functionsSP, 'criarAgendamento');
+  const res = await fn(params);
+  const ids = res && res.data ? res.data.ids : undefined;
+  return Array.isArray(ids) ? ids : [];
+};
 export default {
   saveAppointment,
   cancelAppointment,

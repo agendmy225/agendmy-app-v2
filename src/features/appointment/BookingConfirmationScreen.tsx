@@ -15,7 +15,7 @@ import {
 import { firebaseAuth } from '../../config/firebase'; // Adicionar auth na importação
 import { colors } from '../../constants/colors';
 import { AppStackParamList } from '../../types/types';
-import { saveAppointment } from '../../services/appointments';
+import { createAppointmentsViaServer } from '../../services/appointments';
 import { getFreeSlots, parseDurationMin } from '../../services/professionalSchedule';
 import BusinessThumb from '../../components/BusinessThumb';
 import { Business, getBusinessById, getBusinessByOwnerId } from '../../services/businesses'; // Adicionar getBusinessByOwnerId
@@ -56,6 +56,16 @@ const testFirestoreConnection = async (): Promise<boolean> => {
     console.error('❌ [testFirestore] Erro de conectividade:', error);
     return false;
   }
+};
+
+// mensagem para o cliente a partir do erro da funcao criarAgendamento
+const bookingErrorMessage = (error: unknown): string => {
+  const code = String((error as any)?.code || '');
+  const msg = String((error as any)?.message || '');
+  if (/already-exists|failed-precondition|invalid-argument|not-found/.test(code) && msg) {
+    return msg.replace(/^\[[^\]]*\]\s*/, '');
+  }
+  return 'Não foi possível confirmar seu agendamento. Verifique sua internet e tente novamente.';
 };
 
 type BookingConfirmationScreenRouteProp = RouteProp<AppStackParamList, 'BookingConfirmation'>;
@@ -228,53 +238,13 @@ const BookingConfirmationScreen: React.FC = () => {
         }
       }
 
-      if (isPackage && appointmentSessions) {
-        console.log('📦 Processando pacote com múltiplas sessões:', appointmentSessions.length);
-        // Para pacotes, criar múltiplos agendamentos
-        const appointmentPromises = appointmentSessions.map(async (session, index) => {
-          console.log(`📅 Criando sessão ${index + 1}:`, session);
-          const appointmentData = {
-            businessId,
-            serviceId,
-            professionalId,
-            date: session.date,
-            time: session.time,
-            serviceName: serviceData?.name || 'Serviço',
-            professionalName: professionalData?.name || 'Profissional',
-            businessName: businessData?.name || 'Estabelecimento',
-            price: unitPrice / appointmentSessions.length, // Dividir o preço entre as sessões
-            duration: String(serviceData?.duration || 0),
-            status: 'scheduled' as const,
-          };
-          const result = await saveAppointment(appointmentData);
-          console.log(`✅ Sessão ${index + 1} salva com ID:`, result);
-          return result;
-        });
-
-        const results = await Promise.all(appointmentPromises);
-        console.log('✅ Todas as sessões do pacote foram salvas:', results);
-
-      } else {
-        console.log('📅 Processando sessão única');
-        // Para sessão única, manter comportamento original
-        const appointmentData = {
-          businessId,
-          serviceId,
-          professionalId,
-          date: date!,
-          time: time!,
-          serviceName: serviceData?.name || 'Serviço',
-          professionalName: professionalData?.name || 'Profissional',
-          businessName: businessData?.name || 'Estabelecimento',
-          price: unitPrice,
-          duration: String(serviceData?.duration || 0),
-          status: 'scheduled' as const,
-        };
-
-        console.log('💾 Salvando agendamento único:', appointmentData);
-        const result = await saveAppointment(appointmentData);
-        console.log('✅ Agendamento único salvo com ID:', result);
-      }
+      // grava pelo servidor: trava contra horario duplo, preco e dados do servico vindos do banco
+      await createAppointmentsViaServer({
+        businessId,
+        serviceId,
+        professionalId,
+        sessions: appointmentSessions || [],
+      });
       console.log('🎉 Agendamento confirmado com sucesso!');
 
       const goToAppointments = async () => {
@@ -350,7 +320,7 @@ const BookingConfirmationScreen: React.FC = () => {
 
       Alert.alert(
         'Erro',
-        'Não foi possível confirmar seu agendamento. Verifique sua internet e tente novamente.',
+        bookingErrorMessage(error),
         [
           { text: 'OK', style: 'default' },
         ],

@@ -4,7 +4,8 @@
 // agendamento dos clientes.
 // Following React Native Firebase v22 modular API patterns
 import { collection, doc, getDoc, getDocs, query, where } from '@react-native-firebase/firestore';
-import { firebaseDb } from '../config/firebase';
+import { firebaseDb, functionsSP } from '../config/firebase';
+import { httpsCallable } from '@react-native-firebase/functions';
 import { parseLocalDate, toLocalDateString } from '../utils/localDate';
 
 export const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -117,8 +118,8 @@ const openAppointmentsOn = async (professionalId: string, date: string): Promise
 export const countOpenAppointments = async (professionalId: string, date: string): Promise<number> =>
   (await openAppointmentsOn(professionalId, date)).length;
 
-/** Horarios livres do profissional numa data para um servico com essa duracao. */
-export const getFreeSlots = async (params: {
+/** Calculo local dos horarios livres (reserva, caso a funcao do servidor nao responda). */
+const getFreeSlotsLocal = async (params: {
   professionalId: string;
   date: string;
   durationMin: number;
@@ -158,6 +159,26 @@ export const getFreeSlots = async (params: {
     out.push(toTime(m));
   }
   return out;
+};
+
+type FreeSlotsParams = Parameters<typeof getFreeSlotsLocal>[0];
+
+/** Horarios livres do profissional numa data, calculados no servidor (funcao horariosLivres). */
+export const getFreeSlots = async (params: FreeSlotsParams): Promise<string[]> => {
+  try {
+    const fn = httpsCallable<Record<string, unknown>, { slots?: string[] }>(functionsSP, 'horariosLivres');
+    const res = await fn({
+      professionalId: params.professionalId,
+      date: params.date,
+      durationMin: params.durationMin,
+      stepMin: params.stepMin || 30,
+      ignoreAppointmentId: params.ignoreAppointmentId || null,
+    });
+    const slots = res && res.data ? res.data.slots : undefined;
+    return Array.isArray(slots) ? slots : [];
+  } catch {
+    return getFreeSlotsLocal(params);
+  }
 };
 
 /** Proximos N dias como 'YYYY-MM-DD'. */

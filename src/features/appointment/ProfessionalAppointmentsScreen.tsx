@@ -131,7 +131,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                     };
 
                     // Fetch appointments for this professional
-                    const appointments = await getProfessionalAppointments(professional.id);
+                    const appointments = await getProfessionalAppointments(professional.id, undefined, undefined, businessId || undefined);
 
                     return {
                         ...professional,

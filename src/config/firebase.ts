@@ -5,12 +5,15 @@ import { getFirestore } from '@react-native-firebase/firestore';
 import { getAuth } from '@react-native-firebase/auth';
 import storageModule from '@react-native-firebase/storage';
 import { getFunctions } from '@react-native-firebase/functions';
+import { getApp } from '@react-native-firebase/app';
 
 // Initialize Firebase instances following v22 patterns
 export const firebaseDb = getFirestore();
 export const firebaseAuth = getAuth();
 export const firebaseStorage = storageModule();
 export const firebaseFunctions = getFunctions();
+// funcoes de agendamento ficam em Sao Paulo (southamerica-east1)
+export const functionsSP = getFunctions(getApp(), 'southamerica-east1');
 
 // For backward compatibility, keep some exports
 export const db = firebaseDb;
