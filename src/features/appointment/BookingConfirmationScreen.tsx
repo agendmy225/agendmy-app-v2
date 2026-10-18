@@ -16,6 +16,8 @@ import { firebaseAuth } from '../../config/firebase'; // Adicionar auth na impor
 import { colors } from '../../constants/colors';
 import { AppStackParamList } from '../../types/types';
 import { saveAppointment } from '../../services/appointments';
+import { getFreeSlots, parseDurationMin } from '../../services/professionalSchedule';
+import BusinessThumb from '../../components/BusinessThumb';
 import { Business, getBusinessById, getBusinessByOwnerId } from '../../services/businesses'; // Adicionar getBusinessByOwnerId
 import { Professional, getProfessionalById } from '../../services/professionals';
 import { Service, getServiceById } from '../../services/services';
@@ -73,16 +75,26 @@ const BookingConfirmationScreen: React.FC = () => {
   const isPackage = Boolean(sessions && sessions.length > 0);
   const appointmentSessions = isPackage ? sessions : [{ date: date!, time: time! }];
 
+  // preco que o cliente paga: o promocional quando a promocao esta ativa
+  const unitPrice = serviceData
+    ? ((serviceData.isPromotionActive && serviceData.promotionalPrice ? serviceData.promotionalPrice : serviceData.price) || 0)
+    : 0;
+  const hasPromo = !!serviceData && !!serviceData.isPromotionActive && !!serviceData.promotionalPrice &&
+    (serviceData.promotionalPrice || 0) < serviceData.price;
+  const brl = (v: number) => `R$ ${(v || 0).toFixed(2).replace('.', ',')}`;
+  const durationMin = parseDurationMin(serviceData?.duration);
+
   // Load real data from Firestore
   useEffect(() => {
     const loadData = async () => {
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
       try {
         setLoading(true);
         console.log('🔵 [BookingConfirmation] Iniciando carregamento de dados...');
         console.log('📊 [BookingConfirmation] IDs recebidos:', { businessId, serviceId, professionalId });
 
         // Set a timeout to prevent infinite loading
-        const timeoutId = setTimeout(() => {
+        timeoutId = setTimeout(() => {
           console.error('⏰ [BookingConfirmation] Timeout ao carregar dados');
           setLoading(false);
           Alert.alert('Erro', 'Tempo limite excedido ao carregar dados. Tente novamente.');
@@ -157,6 +169,7 @@ const BookingConfirmationScreen: React.FC = () => {
         );
       } finally {
         console.log('🔄 [BookingConfirmation] Finalizando carregamento...');
+        if (timeoutId) { clearTimeout(timeoutId); }
         setLoading(false);
       }
     };
@@ -197,6 +210,24 @@ const BookingConfirmationScreen: React.FC = () => {
         isPackage,
       });
 
+      // confere de novo se os horarios continuam livres (outro cliente pode ter marcado)
+      for (const s of appointmentSessions || []) {
+        const free = await getFreeSlots({
+          professionalId,
+          date: s.date,
+          durationMin,
+          businessWorkingHours: businessData?.workingHours,
+        });
+        if (!free.includes(s.time)) {
+          Alert.alert(
+            'Horário indisponível',
+            `O horário das ${s.time} em ${formatDate(s.date)} acabou de ser ocupado ou já passou. Escolha outro horário.`,
+            [{ text: 'Escolher outro', onPress: () => navigation.goBack() }],
+          );
+          return;
+        }
+      }
+
       if (isPackage && appointmentSessions) {
         console.log('📦 Processando pacote com múltiplas sessões:', appointmentSessions.length);
         // Para pacotes, criar múltiplos agendamentos
@@ -211,7 +242,7 @@ const BookingConfirmationScreen: React.FC = () => {
             serviceName: serviceData?.name || 'Serviço',
             professionalName: professionalData?.name || 'Profissional',
             businessName: businessData?.name || 'Estabelecimento',
-            price: (serviceData?.price || 0) / appointmentSessions.length, // Dividir o preço entre as sessões
+            price: unitPrice / appointmentSessions.length, // Dividir o preço entre as sessões
             duration: String(serviceData?.duration || 0),
             status: 'scheduled' as const,
           };
@@ -235,7 +266,7 @@ const BookingConfirmationScreen: React.FC = () => {
           serviceName: serviceData?.name || 'Serviço',
           professionalName: professionalData?.name || 'Profissional',
           businessName: businessData?.name || 'Estabelecimento',
-          price: serviceData?.price || 0,
+          price: unitPrice,
           duration: String(serviceData?.duration || 0),
           status: 'scheduled' as const,
         };
@@ -251,7 +282,8 @@ const BookingConfirmationScreen: React.FC = () => {
         navigation.reset({ index: 0, routes: [{ name: isOwner ? 'OwnerTabs' : 'ClientTabs', params: { screen: 'Appointments' } }] });
       };
 
-      const inAppPaymentEnabled = businessData?.paymentMethods?.inApp ?? false;
+      // pagamento pelo app desligado ate integrar o Checkout do Mercado Pago
+      const inAppPaymentEnabled = false;
       if (inAppPaymentEnabled && (serviceData?.price ?? 0) > 0) {
         Alert.alert(
           'Agendamento Confirmado! 🎉',
@@ -318,7 +350,7 @@ const BookingConfirmationScreen: React.FC = () => {
 
       Alert.alert(
         'Erro',
-        `Não foi possível confirmar seu agendamento.\n\nDetalhes: ${error instanceof Error ? error.message : 'Erro desconhecido'}\n\nTente novamente ou entre em contato conosco.`,
+        'Não foi possível confirmar seu agendamento. Verifique sua internet e tente novamente.',
         [
           { text: 'OK', style: 'default' },
         ],
@@ -399,10 +431,7 @@ const BookingConfirmationScreen: React.FC = () => {
 
       <ScrollView style={styles.content}>
         <View style={styles.businessCard}>
-          <Image
-            source={{ uri: businessData.imageUrl }}
-            style={styles.businessImage}
-          />
+          <BusinessThumb businessId={businessData.id} name={businessData.name} style={styles.businessImage} />
           <View style={styles.businessInfo}>
             <Text style={styles.businessName}>{businessData.name}</Text>
             <Text style={styles.businessAddress}>{businessData.address}</Text>
@@ -451,7 +480,7 @@ const BookingConfirmationScreen: React.FC = () => {
           )}
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Duração:</Text>
-            <Text style={styles.detailValue}>{serviceData.duration}</Text>
+            <Text style={styles.detailValue}>{`${durationMin} min`}</Text>
           </View>
         </View>
 
@@ -459,12 +488,12 @@ const BookingConfirmationScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Resumo do Pagamento</Text>
           <View style={styles.paymentRow}>
             <Text style={styles.paymentLabel}>{serviceData.name}</Text>
-            <Text style={styles.paymentValue}>R$ {serviceData.price.toFixed(2)}</Text>
+            <Text style={styles.paymentValue}>{hasPromo ? <Text style={styles.priceOriginal}>{brl(serviceData.price)}  </Text> : null}{brl(unitPrice)}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>R$ {serviceData.price.toFixed(2)}</Text>
+            <Text style={styles.totalValue}>{brl(unitPrice)}</Text>
           </View>
         </View>
 
@@ -607,6 +636,11 @@ const styles = StyleSheet.create({
   paymentLabel: {
     fontSize: 14,
     color: colors.text,
+  },
+  priceOriginal: {
+    color: colors.lightText,
+    fontWeight: 'normal',
+    textDecorationLine: 'line-through',
   },
   paymentValue: {
     fontSize: 14,

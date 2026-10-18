@@ -8,16 +8,17 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack'; // Adicionar StackNavigationProp
 import { AppStackParamList } from '../../types/types'; // Adicionar AppStackParamList
 import { colors } from '../../constants/colors';
-import { getClientAppointments, getBusinessAppointments, Appointment } from '../../services/appointments'; // Usar importação nomeada
+import { getClientAppointments, getBusinessAppointments, cancelAppointment, Appointment } from '../../services/appointments'; // Usar importação nomeada
 import { getBusinessByOwnerId } from '../../services/businesses'; // Importar função para buscar negócio do proprietário
 import { firebaseAuth } from '../../config/firebase';
 import BusinessThumb from '../../components/BusinessThumb';
-import { formatLocalDate } from '../../utils/localDate';
+import { formatLocalDate, toLocalDateString } from '../../utils/localDate';
 
 
 // Usar o tipo Appointment importado, que é mais completo
@@ -144,18 +145,49 @@ const AppointmentsScreen: React.FC = () => {
   };
 
   // Filtrar agendamentos por status
-  const upcomingAppointments = appointments.filter(
-    (appointment: AppointmentType) => appointment.status === 'scheduled' || appointment.status === 'confirmed',
-  );
+  // proximos: abertos e de hoje em diante, do mais perto para o mais longe
+  const todayStr = toLocalDateString(new Date());
+  const isOpenStatus = (s: AppointmentType['status']) => s === 'scheduled' || s === 'confirmed';
+  const upcomingAppointments = appointments
+    .filter((a: AppointmentType) => isOpenStatus(a.status) && a.date >= todayStr)
+    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
 
-  const pastAppointments = appointments.filter(
-    (appointment: AppointmentType) => appointment.status === 'completed' || appointment.status === 'cancelled' || appointment.status === 'no_show',
-  );
+  // anteriores: concluidos, cancelados, faltas e os abertos cuja data ja passou
+  const pastAppointments = appointments
+    .filter((a: AppointmentType) => !isOpenStatus(a.status) || a.date < todayStr)
+    .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
+
+  const handleCancel = (item: AppointmentType) => {
+    const start = new Date(`${item.date}T${item.time}:00`);
+    const hoursLeft = (start.getTime() - Date.now()) / 3600000;
+    const warning = hoursLeft < 24
+      ? '\n\nFaltam menos de 24 horas. O estabelecimento pode cobrar pelo cancelamento.'
+      : '';
+    Alert.alert(
+      'Cancelar agendamento',
+      `${item.serviceName} em ${formatLocalDate(item.date)} às ${item.time}.${warning}`,
+      [
+        { text: 'Voltar', style: 'cancel' },
+        {
+          text: 'Cancelar agendamento',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await cancelAppointment(item.id);
+              loadAppointments();
+            } catch {
+              // cancelAppointment ja mostra o aviso de erro
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const getStatusText = (status: AppointmentType['status']) => {
     switch (status) {
       case 'scheduled': // Adicionar 'scheduled'
-        return 'Agendado';
+        return 'Aguardando confirmação';
       case 'confirmed':
         return 'Confirmado';
       case 'completed':
@@ -195,6 +227,7 @@ const AppointmentsScreen: React.FC = () => {
         <View style={styles.appointmentInfo}>
           <Text style={styles.businessName}>{item.businessName}</Text>
           <Text style={styles.serviceName}>{item.serviceName}</Text>
+          {item.professionalName ? <Text style={styles.serviceName}>com {item.professionalName}</Text> : null}
           {/* Mostrar nome do cliente para proprietários */}
           {isOwner && item.clientName && (
             <Text style={styles.clientName}>Cliente: {item.clientName}</Text>
@@ -205,7 +238,7 @@ const AppointmentsScreen: React.FC = () => {
               {getStatusText(item.status)}
             </Text>
           </View>
-          <Text style={styles.price}>{`R$ ${item.price ? item.price.toFixed(2) : 'N/A'}`}</Text>
+          {item.price ? <Text style={styles.price}>{`R$ ${item.price.toFixed(2).replace('.', ',')}`}</Text> : null}
         </View>
       </TouchableOpacity>
       {item.status === 'completed' && !isOwner && !(item as any).reviewed && (
@@ -221,6 +254,11 @@ const AppointmentsScreen: React.FC = () => {
           })}
         >
           <Text style={styles.reviewButtonText}>Avaliar Serviço</Text>
+        </TouchableOpacity>
+      )}
+      {!isOwner && isOpenStatus(item.status) && item.date >= todayStr && (
+        <TouchableOpacity style={styles.cancelButton} onPress={() => handleCancel(item)}>
+          <Text style={styles.cancelButtonText}>Cancelar agendamento</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -304,7 +342,7 @@ const AppointmentsScreen: React.FC = () => {
         ) : (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Você não tem agendamentos próximos.</Text>
-            <TouchableOpacity style={styles.bookButton}>
+            <TouchableOpacity style={styles.bookButton} onPress={() => navigation.navigate('ClientTabs', { screen: 'Home' })}>
               <Text style={styles.bookButtonText}>Agendar Serviço</Text>
             </TouchableOpacity>
           </View>
@@ -442,6 +480,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
+  },
+  cancelButton: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: colors.lightGray,
+  },
+  cancelButtonText: {
+    color: colors.error,
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   reviewButtonText: {
     color: colors.white,

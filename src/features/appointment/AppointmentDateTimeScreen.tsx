@@ -12,11 +12,10 @@ import {
 } from 'react-native';
 import { colors } from '../../constants/colors';
 import { AppStackParamList } from '../../types/types';
-import { checkTimeSlotAvailability } from '../../services/appointments';
 import { getServiceById } from '../../services/services';
 import { getBusinessById } from '../../services/businesses';
 import { toLocalDateString, parseLocalDate } from '../../utils/localDate';
-import { getProfessionalDayWindow, isInBreak } from '../../services/professionalSchedule';
+import { getFreeSlots, getProfessionalData, parseDurationMin, resolveDayWindow } from '../../services/professionalSchedule';
 
 type AppointmentDateTimeScreenRouteProp = RouteProp<AppStackParamList, 'AppointmentDateTime'>;
 type AppointmentDateTimeScreenNavigationProp = StackNavigationProp<AppStackParamList, 'AppointmentDateTime'>;
@@ -61,6 +60,11 @@ const generateTimeSlots = (startTime: string, endTime: string, intervalMinutes =
   return slots;
 };
 
+const toMin = (t: string): number => {
+  const [h, m] = t.split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+};
+
 const AppointmentDateTimeScreen: React.FC = () => {
   const route = useRoute<AppointmentDateTimeScreenRouteProp>();
   const navigation = useNavigation<AppointmentDateTimeScreenNavigationProp>();
@@ -74,6 +78,8 @@ const AppointmentDateTimeScreen: React.FC = () => {
   const [isPackage, setIsPackage] = useState(false);
   const [requiredSessions, setRequiredSessions] = useState(1);
   const [business, setBusiness] = useState<any>(null);
+  const [serviceDuration, setServiceDuration] = useState(60);
+  const [profData, setProfData] = useState<Record<string, any> | null>(null);
 
   // Generate available days (next 30 days)
   const availableDays = generateAvailableDays();
@@ -92,6 +98,28 @@ const AppointmentDateTimeScreen: React.FC = () => {
     loadBusinessData();
   }, [businessId]);
 
+  // agenda e bloqueios do profissional (para apagar os dias sem atendimento)
+  useEffect(() => {
+    getProfessionalData(professionalId)
+      .then(setProfData)
+      .catch(() => setProfData({}));
+  }, [professionalId]);
+
+  const isDayOff = (date: string): boolean =>
+    !!business && !!profData && resolveDayWindow(profData, business.workingHours, date) === null;
+
+  // abre ja no primeiro dia com atendimento
+  useEffect(() => {
+    if (selectedDate || !business || !profData) {
+      return;
+    }
+    const first = availableDays.find((d) => resolveDayWindow(profData, business.workingHours, d.date) !== null);
+    if (first) {
+      setSelectedDate(first.date);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [business, profData]);
+
   // Load service data to check if it's a package
   useEffect(() => {
     const loadServiceData = async () => {
@@ -101,6 +129,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
           const isServicePackage = serviceData.numSessions && serviceData.numSessions > 1;
           setIsPackage(!!isServicePackage);
           setRequiredSessions(serviceData.numSessions || 1);
+          setServiceDuration(parseDurationMin(serviceData.duration));
         }
       } catch (error) {
 
@@ -116,34 +145,15 @@ const AppointmentDateTimeScreen: React.FC = () => {
       if (selectedDate && professionalId && business) {
         setLoadingTimes(true);
         try {
-          // Get day of week
-          const dateObj = parseLocalDate(selectedDate);
-          const dayOfWeek = dateObj.getDay();
-          const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-          const dayKey = days[dayOfWeek];
-
-          // Horario do profissional neste dia (agenda propria, folga, intervalo e bloqueios)
-          const dayWindow = await getProfessionalDayWindow(professionalId, selectedDate, business.workingHours);
-          if (!dayWindow) {
-            setAvailableTimeSlots([]);
-            return;
-          }
-
-          // Horarios dentro do expediente do profissional, pulando o intervalo
-          const timeSlots = generateTimeSlots(dayWindow.start, dayWindow.end, 60)
-            .filter((t: string) => !isInBreak(t, 60, dayWindow));
-
-          const availabilitySlots = await Promise.all(
-            timeSlots.map(async (time: string) => {
-              const isAvailable = await checkTimeSlotAvailability(
-                professionalId,
-                selectedDate,
-                time,
-              );
-              return { time, available: isAvailable };
-            }),
-          );
-          setAvailableTimeSlots(availabilitySlots);
+          // Horarios livres do profissional: duracao real do servico, intervalo,
+          // folga, datas bloqueadas e horarios que ja passaram
+          const free = await getFreeSlots({
+            professionalId,
+            date: selectedDate,
+            durationMin: serviceDuration,
+            businessWorkingHours: business.workingHours,
+          });
+          setAvailableTimeSlots(free.map((t: string) => ({ time: t, available: true })));
         } catch (error) {
           console.error('Error loading time slots:', error);
           // Fallback to empty array if there's an error
@@ -157,7 +167,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
     };
 
     loadAvailableTimes();
-  }, [selectedDate, professionalId, business]);
+  }, [selectedDate, professionalId, business, serviceDuration]);
 
   const handleDateSelect = (date: string) => {
     if (isPackage) {
@@ -181,7 +191,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
       if (selectedDate && selectedSessions.length < requiredSessions) {
         // Verificar se essa combinação data/hora já foi selecionada
         const alreadyExists = selectedSessions.some(
-          session => session.date === selectedDate && session.time === time,
+          session => session.date === selectedDate && Math.abs(toMin(session.time) - toMin(time)) < serviceDuration,
         );
 
         if (!alreadyExists) {
@@ -289,8 +299,10 @@ const AppointmentDateTimeScreen: React.FC = () => {
                 style={[
                   styles.dayCard,
                   selectedDate === day.date && styles.selectedDayCard,
+                  isDayOff(day.date) && styles.dayOffCard,
                 ]}
                 onPress={() => handleDateSelect(day.date)}
+                disabled={isDayOff(day.date)}
               >
                 <Text style={[
                   styles.weekdayText,
@@ -323,6 +335,8 @@ const AppointmentDateTimeScreen: React.FC = () => {
                 <ActivityIndicator size="large" color="#007AFF" />
                 <Text style={styles.loadingText}>Carregando horários disponíveis...</Text>
               </View>
+            ) : availableTimeSlots.length === 0 ? (
+              <Text style={styles.loadingText}>Sem horários livres neste dia. Escolha outro dia.</Text>
             ) : (
               <View style={styles.timeSlotsContainer}>
                 {availableTimeSlots.map((slot) => (
@@ -462,6 +476,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+  },
+  dayOffCard: {
+    opacity: 0.35,
   },
   selectedDayCard: {
     backgroundColor: colors.primary,

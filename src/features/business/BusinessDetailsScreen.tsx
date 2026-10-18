@@ -34,7 +34,7 @@ import { getProfessionalsByBusiness, Professional } from '../../services/profess
 import { getBusinessReviews, Review, updateBusinessRating } from '../../services/reviews';
 import { getServicesByBusiness, Service } from '../../services/services';
 import { isBusinessOpen } from '../../services/businessHours';
-import { checkMultipleProfessionalsAvailability } from '../../services/professionalAvailability';
+import { nextDays, resolveDayWindow } from '../../services/professionalSchedule';
 import { useCachedFirebaseImage } from '../../hooks/useCachedFirebaseImage';
 import { parseLocalDate } from '../../utils/localDate';
 // Remover imports diretos de services/favorites, usaremos o contexto
@@ -152,7 +152,7 @@ const BusinessDetailsScreen: React.FC = () => {
 
             // Recalcular a contagem de avaliações para este negócio
             try {
-              await updateBusinessRating(businessId);
+              if (businessData.ownerId === user?.uid) { await updateBusinessRating(businessId); }
             } catch (error) {
               console.error('Erro ao recalcular rating do negócio:', error);
               // Silently handle the error - rating recalculation is not critical
@@ -172,11 +172,15 @@ const BusinessDetailsScreen: React.FC = () => {
             // Verificar disponibilidade dos profissionais
             if (professionalsData.length > 0 && businessData) {
               try {
-                const availabilityMap = await checkMultipleProfessionalsAvailability(
-                  professionalsData,
-                  businessData,
-                  7, // Verificar próximos 7 dias
-                );
+                // atende em algum dos proximos 7 dias? (agenda propria, folga e bloqueios, sem consultar o banco)
+                const week = nextDays(7);
+                const availabilityMap = new Map<string, boolean>();
+                professionalsData.forEach((prof: any) => {
+                  availabilityMap.set(
+                    prof.id,
+                    week.some((d) => resolveDayWindow(prof, businessData.workingHours, d) !== null),
+                  );
+                });
                 setProfessionalAvailability(availabilityMap);
               } catch {
                 // Em caso de erro, marcar todos como disponíveis para não bloquear funcionalidade
@@ -700,7 +704,7 @@ const BusinessDetailsScreen: React.FC = () => {
             {/* Avaliações */}
             <View style={styles.reviewsContainer}>
               <View style={styles.reviewsHeaderContainer}>
-                <Text style={styles.sectionTitle}>Avaliações ({String(reviews.length)})</Text>
+                <Text style={styles.sectionTitle}>Avaliações ({String(business.reviewCount || reviews.length)})</Text>
                 <TouchableOpacity
                   style={[
                     styles.addReviewButton,

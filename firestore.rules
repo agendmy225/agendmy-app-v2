@@ -101,7 +101,10 @@ service cloud.firestore {
       // avaliacoes: publicas para leitura; o cliente cria no proprio nome
       match /reviews/{reviewId} {
         allow read: if true;
-        allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+        allow create: if signedIn() && request.resource.data.userId == request.auth.uid &&
+          request.resource.data.get('status', 'pending') == 'pending' &&
+          request.resource.data.rating is number &&
+          request.resource.data.rating >= 1 && request.resource.data.rating <= 5;
         // o autor pode editar o texto, mas nao aprovar a propria avaliacao
         allow update: if signedIn() && resource.data.userId == request.auth.uid &&
           request.resource.data.get('status', null) == resource.data.get('status', null);
@@ -154,14 +157,21 @@ service cloud.firestore {
     match /appointments/{appointmentId} {
       // leitura aberta para logados: o cliente precisa ver os horarios ocupados
       allow read: if signedIn();
+      // cliente: so no proprio nome e sempre aguardando a confirmacao do estabelecimento
       allow create: if signedIn() &&
-        (request.resource.data.clientId == request.auth.uid ||
+        ((request.resource.data.clientId == request.auth.uid &&
+          request.resource.data.status == 'scheduled') ||
          isBusinessOwner(request.resource.data.businessId) ||
          isProfessional(request.resource.data.professionalId));
       allow update: if isAdmin() ||
-        (signedIn() && resource.data.clientId == request.auth.uid) ||
         isBusinessOwner(resource.data.businessId) ||
-        isProfessional(resource.data.professionalId);
+        isProfessional(resource.data.professionalId) ||
+        // cliente: so cancela (enquanto aberto) e marca como avaliado
+        (signedIn() && resource.data.clientId == request.auth.uid &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reviewed', 'updatedAt']) &&
+         (request.resource.data.status == resource.data.status ||
+          (request.resource.data.status == 'cancelled' &&
+           resource.data.status in ['scheduled', 'confirmed'])));
       allow delete: if isAdmin() || isBusinessOwner(resource.data.businessId);
     }
 

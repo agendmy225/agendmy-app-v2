@@ -30,6 +30,28 @@ export const toTime = (min: number): string =>
   `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
 export const isValidTime = (t: string): boolean => /^([01]\d|2[0-3]):[0-5]\d$/.test(t || '');
 
+/** Duracao do servico em minutos: aceita 60, "60", "60 min", "1h", "1 hora", "1h30", "1:30". */
+export const parseDurationMin = (d: unknown, fallback = 60): number => {
+  if (typeof d === 'number') {
+    return d > 0 ? Math.round(d) : fallback;
+  }
+  const s = String(d || '').toLowerCase().trim();
+  if (!s) {
+    return fallback;
+  }
+  const hm = s.match(/^(\d+):(\d{2})$/);
+  if (hm) {
+    return parseInt(hm[1], 10) * 60 + parseInt(hm[2], 10) || fallback;
+  }
+  const h = s.match(/^(\d+(?:[.,]\d+)?)\s*h(?:ora)?s?\s*(\d+)?/);
+  if (h) {
+    const total = Math.round(parseFloat(h[1].replace(',', '.')) * 60) + (h[2] ? parseInt(h[2], 10) : 0);
+    return total > 0 ? total : fallback;
+  }
+  const n = s.match(/(\d+)/);
+  return n && parseInt(n[1], 10) > 0 ? parseInt(n[1], 10) : fallback;
+};
+
 /** Horario do estabelecimento num dia (formato { open, start, end }). */
 export const businessDayWindow = (businessWH: any, dayKey: string): DayWindow | null => {
   const d = businessWH && businessWH[dayKey];
@@ -116,7 +138,7 @@ export const getFreeSlots = async (params: {
     .map((d) => {
       const a = d.data() || {};
       const s = toMinutes(a.time);
-      return [s, s + (parseInt(String(a.duration), 10) || 60)];
+      return [s, s + parseDurationMin(a.duration)];
     });
   const now = new Date();
   const isToday = params.date === toLocalDateString(now);
