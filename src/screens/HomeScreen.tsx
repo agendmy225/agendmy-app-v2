@@ -1,6 +1,6 @@
 ﻿import { useFocusEffect, useNavigation, CompositeNavigationProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -40,6 +40,18 @@ import {
 import { cacheService } from '../services/cache';
 import { getAddressFromCoordinates, getCoordinatesFromAddress } from '../services/maps';
 import CachedImage from '../components/common/CachedImage';
+import {
+  applyExtraFilters,
+  BusinessFilters,
+  DEFAULT_FILTERS,
+  filterByScope,
+  getCityFromCoordinates,
+  PlaceInfo,
+  Scope,
+  scopeLabel,
+  sortRecent,
+  sortTopRated,
+} from '../services/cityLocation';
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyBRowlrsBPawKX_Fgi8ZIWNt1_HO2DYI84';
 const RADIUS_KM = 30;
@@ -101,7 +113,85 @@ const HomeScreen: React.FC = () => {
       setMarkersRefreshKey((k) => k + 1);
     }, [])
   );
-  const leafletMarkers = useBusinessMarkers(allBusinessesLoaded, markersRefreshKey);
+  // ---------- cidade do cliente e filtros ----------
+  const [filters, setFilters] = useState<BusinessFilters>(DEFAULT_FILTERS);
+  const [draftFilters, setDraftFilters] = useState<BusinessFilters>(DEFAULT_FILTERS);
+  const [draftCity, setDraftCity] = useState('');
+  const [place, setPlace] = useState<PlaceInfo | null>(null);
+  const manualLocationRef = useRef(false);
+  const placeLat = userCoords ? Math.round(userCoords.lat * 100) / 100 : null;
+  const placeLon = userCoords ? Math.round(userCoords.lon * 100) / 100 : null;
+  useEffect(() => {
+    if (placeLat === null || placeLon === null || !userCoords) {
+      return;
+    }
+    let active = true;
+    getCityFromCoordinates(userCoords.lat, userCoords.lon).then((p) => {
+      if (active) {
+        setPlace(p);
+      }
+    });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [placeLat, placeLon]);
+  const placeQuery = { city: place?.city, lat: userCoords?.lat, lon: userCoords?.lon };
+  const scopedBusinesses = useMemo(
+    () => applyExtraFilters(filterByScope(allBusinessesLoaded, filters.scope, placeQuery), filters),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allBusinessesLoaded, filters, place?.city, userCoords?.lat, userCoords?.lon],
+  );
+  const cityRecent = useMemo(() => sortRecent(scopedBusinesses).slice(0, 20), [scopedBusinesses]);
+  const cityTop = useMemo(() => sortTopRated(scopedBusinesses).slice(0, 10), [scopedBusinesses]);
+  const cityPromotions = useMemo(
+    () => scopedBusinesses.filter((b: Business) => b.hasActivePromotions === true).slice(0, 10),
+    [scopedBusinesses],
+  );
+  const filteredSearchResults = useMemo(
+    () => applyExtraFilters(filterByScope(searchResults, filters.scope, placeQuery), filters),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchResults, filters, place?.city, userCoords?.lat, userCoords?.lon],
+  );
+  const allListParams = {
+    scope: filters.scope,
+    city: place?.city,
+    minRating: filters.minRating,
+    onlyPromotions: filters.onlyPromotions,
+  };
+  const openFilters = () => {
+    setDraftFilters(filters);
+    setDraftCity('');
+    setIsFilterModalVisible(true);
+  };
+  const applyFilters = async () => {
+    const typed = draftCity.trim();
+    if (typed) {
+      try {
+        const coords = await getCoordinatesFromAddress(typed, GOOGLE_MAPS_API_KEY);
+        if (!coords) {
+          Alert.alert('Cidade não encontrada', 'Confira o nome da cidade e tente de novo.');
+          return;
+        }
+        manualLocationRef.current = true;
+        updateLocationStates(coords.latitude, coords.longitude, typed);
+      } catch {
+        Alert.alert('Erro', 'Não foi possível buscar essa cidade.');
+        return;
+      }
+    }
+    setFilters(typed ? { ...draftFilters, scope: 'city' } : draftFilters);
+    setIsFilterModalVisible(false);
+  };
+  const switchToGps = () => {
+    manualLocationRef.current = false;
+    if (realTimeLocation) {
+      updateLocationStates(realTimeLocation.latitude, realTimeLocation.longitude);
+    }
+    setIsFilterModalVisible(false);
+  };
+
+  const leafletMarkers = useBusinessMarkers(scopedBusinesses, markersRefreshKey);
   const mapViewRef = useRef<MapView>(null);
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { user } = useAuth();
@@ -160,7 +250,7 @@ const HomeScreen: React.FC = () => {
 
   // Atualiza localizacao quando GPS muda
   useEffect(() => {
-    if (realTimeLocation) {
+    if (realTimeLocation && !manualLocationRef.current) {
       applyLocationAndFilter(realTimeLocation.latitude, realTimeLocation.longitude);
 
       {
@@ -212,6 +302,7 @@ const HomeScreen: React.FC = () => {
     try {
       const coords = await getCoordinatesFromAddress(newAddress.trim(), GOOGLE_MAPS_API_KEY);
       if (coords) {
+        manualLocationRef.current = true;
         updateLocationStates(coords.latitude, coords.longitude, newAddress.trim());
         setIsChangeLocationModalVisible(false);
         setNewAddress('');
@@ -232,7 +323,7 @@ const HomeScreen: React.FC = () => {
         setMostRecent(cachedData.mostRecent || []);
         setTopRated(cachedData.topRated || []);
         setPromotions(cachedData.promotions || []);
-        const biz = (cachedData.allActive || []).filter((b: Business) => b.location?.latitude && b.location?.longitude);
+        const biz = (cachedData.allActive || []).filter((b: Business) => !!b && !!b.id);
         setAllBusinessesLoaded(biz);
         allBusinessesRef.current = biz;
         const coords = userCoordsRef.current;
@@ -255,7 +346,7 @@ const HomeScreen: React.FC = () => {
         catch (e) { console.warn('Cache save error:', e); }
       }
 
-      const biz = allBiz.filter((b: Business) => b.location?.latitude && b.location?.longitude);
+      const biz = allBiz.filter((b: Business) => !!b && !!b.id);
       setAllBusinessesLoaded(biz);
       allBusinessesRef.current = biz;
 
@@ -265,9 +356,10 @@ const HomeScreen: React.FC = () => {
       } else {
         setBusinessesForMap(biz);
         // Centralizar no centro dos estabelecimentos se nao tiver GPS
-        if (biz.length > 0) {
-          const lats = biz.map(b => b.location!.latitude);
-          const lons = biz.map(b => b.location!.longitude);
+        const geo = biz.filter((x: Business) => x.location?.latitude && x.location?.longitude);
+          if (geo.length > 0) {
+          const lats = geo.map(b => b.location!.latitude);
+          const lons = geo.map(b => b.location!.longitude);
           const center = {
             latitude: lats.reduce((a, b) => a + b, 0) / lats.length,
             longitude: lons.reduce((a, b) => a + b, 0) / lons.length,
@@ -285,7 +377,7 @@ const HomeScreen: React.FC = () => {
         const ec = await cacheService.getCachedData();
         if (ec) {
           setMostRecent(ec.mostRecent || []); setTopRated(ec.topRated || []); setPromotions(ec.promotions || []);
-          const biz = (ec.allActive || []).filter((b: Business) => b.location?.latitude && b.location?.longitude);
+          const biz = (ec.allActive || []).filter((b: Business) => !!b && !!b.id);
           setAllBusinessesLoaded(biz); allBusinessesRef.current = biz;
           const coords = userCoordsRef.current;
           setBusinessesForMap(coords ? filterByRadius(biz, coords.lat, coords.lon, RADIUS_KM) : biz);
@@ -310,7 +402,7 @@ const HomeScreen: React.FC = () => {
       setSearchQuery(''); setSelectedCategoryFilter(null); setSearchResults([]);
       loadInitialDataRef.current(); // CORRIGIDO: recarrega businesses ao ganhar foco
       const realTimeLocation = realTimeLocationRef.current;
-      if (realTimeLocation) {
+      if (realTimeLocation && !manualLocationRef.current) {
         applyLocationAndFilter(realTimeLocation.latitude, realTimeLocation.longitude);
       }
     }, [applyLocationAndFilter]),
@@ -392,12 +484,48 @@ const HomeScreen: React.FC = () => {
 
         <Modal animationType="slide" transparent={true} visible={isFilterModalVisible} onRequestClose={() => setIsFilterModalVisible(false)}>
           <View style={styles.modalCenteredView}>
-            <View style={styles.modalView}>
-              <Text style={styles.modalText}>Filtros Avancados</Text>
-              <Text style={styles.filterModalText}>Opcoes de filtro por data, hora, localizacao, preco, avaliacao serao adicionadas aqui.</Text>
+            <View style={[styles.modalView, filterStyles.box]}>
+              <Text style={styles.modalText}>Filtros</Text>
+              <Text style={filterStyles.label}>Onde procurar</Text>
+              <View style={filterStyles.chips}>
+                {([
+                  ['city', place?.city ? `Em ${place.city}` : 'Minha cidade'],
+                  ['radius10', 'Até 10 km'],
+                  ['radius30', 'Até 30 km'],
+                  ['all', 'Todas as cidades'],
+                ] as [Scope, string][]).map(([key, label]) => (
+                  <TouchableOpacity key={key} style={[filterStyles.chip, draftFilters.scope === key && filterStyles.chipActive]}
+                    onPress={() => setDraftFilters((f) => ({ ...f, scope: key }))}>
+                    <Text style={[filterStyles.chipText, draftFilters.scope === key && filterStyles.chipTextActive]}>{label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={filterStyles.label}>Procurar em outra cidade</Text>
+              <TextInput style={styles.modalInput} placeholder="Ex: Bauru, SP" placeholderTextColor={colors.lightText}
+                value={draftCity} onChangeText={setDraftCity} />
+              <TouchableOpacity onPress={switchToGps} style={filterStyles.gpsButton}>
+                <Icon name="my-location" size={16} color={colors.primary} />
+                <Text style={filterStyles.gpsText}>Usar minha localização atual</Text>
+              </TouchableOpacity>
+              <Text style={filterStyles.label}>Avaliação mínima</Text>
+              <View style={filterStyles.chips}>
+                {[0, 3, 4, 4.5].map((r) => (
+                  <TouchableOpacity key={String(r)} style={[filterStyles.chip, draftFilters.minRating === r && filterStyles.chipActive]}
+                    onPress={() => setDraftFilters((f) => ({ ...f, minRating: r }))}>
+                    <Text style={[filterStyles.chipText, draftFilters.minRating === r && filterStyles.chipTextActive]}>
+                      {r ? `${String(r).replace('.', ',')}+` : 'Qualquer'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TouchableOpacity style={filterStyles.toggleRow}
+                onPress={() => setDraftFilters((f) => ({ ...f, onlyPromotions: !f.onlyPromotions }))}>
+                <Icon name={draftFilters.onlyPromotions ? 'check-box' : 'check-box-outline-blank'} size={22} color={colors.primary} />
+                <Text style={filterStyles.toggleText}>Só estabelecimentos com promoção</Text>
+              </TouchableOpacity>
               <View style={styles.modalButtonContainer}>
-                <Button title="Limpar" onPress={() => setIsFilterModalVisible(false)} color={colors.lightText} />
-                <Button title="Aplicar" onPress={() => setIsFilterModalVisible(false)} />
+                <Button title="Limpar" onPress={() => { setFilters(DEFAULT_FILTERS); setIsFilterModalVisible(false); }} color={colors.lightText} />
+                <Button title="Aplicar" onPress={applyFilters} />
               </View>
             </View>
           </View>
@@ -423,16 +551,22 @@ const HomeScreen: React.FC = () => {
                 placeholderTextColor={colors.lightText} value={searchQuery}
                 onChangeText={(text) => { setSearchQuery(text); setSelectedCategoryFilter(null); }} />
               {isSearching && <ActivityIndicator size="small" color={colors.primary} style={styles.searchSpinner} />}
-              <TouchableOpacity onPress={() => setIsFilterModalVisible(true)} style={styles.filterIconContainer}>
+              <TouchableOpacity onPress={openFilters} style={styles.filterIconContainer}>
                 <Icon name="filter-list" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
 
-            {!searchQuery.trim() && !selectedCategoryFilter && promotions.length > 0 && (
+            <TouchableOpacity style={filterStyles.scopeBar} onPress={openFilters} activeOpacity={0.7}>
+              <Icon name="place" size={16} color={colors.primary} />
+              <Text style={filterStyles.scopeText} numberOfLines={1}>{scopeLabel(filters, place?.city)}</Text>
+              <Text style={filterStyles.scopeLink}>Alterar</Text>
+            </TouchableOpacity>
+
+            {!searchQuery.trim() && !selectedCategoryFilter && cityPromotions.length > 0 && (
               <View style={styles.bannerContainer}>
                 <Text style={styles.sectionTitle}>Destaques</Text>
                 <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.bannerScrollView}>
-                  {promotions.map((item) => (
+                  {cityPromotions.map((item) => (
                     <TouchableOpacity key={`promo-${item.id}`} style={styles.bannerItem} activeOpacity={0.7}
                       onPress={() => { if (item.id) { navigation.navigate('BusinessDetails', { businessId: item.id }); } }}>
                       <CachedImage storagePath={item.coverImage || item.logo} style={styles.bannerImage} resizeMode="cover" />
@@ -456,15 +590,15 @@ const HomeScreen: React.FC = () => {
                     <Text style={styles.sectionTitle}>
                       {searchQuery.trim() ? `Resultados para "${searchQuery}"` : `Negocios em "${selectedCategoryFilter}"`}
                     </Text>
-                    {searchResults.length > 0 && <Text style={styles.resultsCount}>{searchResults.length} encontrados</Text>}
+                    {filteredSearchResults.length > 0 && <Text style={styles.resultsCount}>{filteredSearchResults.length} encontrados</Text>}
                   </View>
                 </View>
                 {isSearching && <ActivityIndicator size="small" color={colors.primary} />}
-                {!isSearching && searchResults.length === 0 && (
+                {!isSearching && filteredSearchResults.length === 0 && (
                   <Text style={styles.emptyListText}>{`Nenhum resultado encontrado para "${searchQuery || selectedCategoryFilter || 'filtro selecionado'}".`}</Text>
                 )}
-                {searchResults.length > 0 && (
-                  <FlatList data={searchResults} renderItem={renderInfoCard} keyExtractor={(item) => item.id}
+                {filteredSearchResults.length > 0 && (
+                  <FlatList data={filteredSearchResults} renderItem={renderInfoCard} keyExtractor={(item) => item.id}
                     horizontal={false} showsVerticalScrollIndicator={false} contentContainerStyle={styles.verticalListContent}
                     removeClippedSubviews={false} scrollEnabled={false} nestedScrollEnabled={true} />
                 )}
@@ -509,33 +643,33 @@ const HomeScreen: React.FC = () => {
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Os 20 mais recentes</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'recent', userCity: userCoords ? `${userCoords.lat},${userCoords.lon}` : undefined })}>
+                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'recent', ...allListParams })}>
                     <Text style={styles.seeAllText}>Ver todos</Text>
                   </TouchableOpacity>
                 </View>
-                <FlatList data={mostRecent} renderItem={renderInfoCard} keyExtractor={(item) => item.id} horizontal
+                <FlatList data={cityRecent} renderItem={renderInfoCard} keyExtractor={(item) => item.id} horizontal
                   showsHorizontalScrollIndicator={false} style={styles.horizontalList} contentContainerStyle={styles.horizontalListContent}
                   removeClippedSubviews={false} scrollEnabled={true} nestedScrollEnabled={true}
                   ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhum estabelecimento encontrado.</Text> : null} />
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Os top 10 mais avaliados da regiao</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'topRated', userCity: userCoords ? `${userCoords.lat},${userCoords.lon}` : undefined })}>
+                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'topRated', ...allListParams })}>
                     <Text style={styles.seeAllText}>Ver todos</Text>
                   </TouchableOpacity>
                 </View>
-                <FlatList data={topRated} renderItem={renderInfoCard} keyExtractor={(item) => item.id} horizontal
+                <FlatList data={cityTop} renderItem={renderInfoCard} keyExtractor={(item) => item.id} horizontal
                   showsHorizontalScrollIndicator={false} style={styles.horizontalList} contentContainerStyle={styles.horizontalListContent}
                   removeClippedSubviews={false} scrollEnabled={true} nestedScrollEnabled={true}
                   ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhum estabelecimento encontrado.</Text> : null} />
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Estabelecimentos com promocoes</Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'promotions', userCity: userCoords ? `${userCoords.lat},${userCoords.lon}` : undefined })}>
+                  <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'promotions', ...allListParams })}>
                     <Text style={styles.seeAllText}>Ver todas</Text>
                   </TouchableOpacity>
                 </View>
-                <FlatList data={promotions} renderItem={renderInfoCard} keyExtractor={(item) => item.id} horizontal
+                <FlatList data={cityPromotions} renderItem={renderInfoCard} keyExtractor={(item) => item.id} horizontal
                   showsHorizontalScrollIndicator={false} style={styles.horizontalList} contentContainerStyle={styles.horizontalListContent}
                   removeClippedSubviews={false} scrollEnabled={true} nestedScrollEnabled={true}
                   ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhuma promocao encontrada.</Text> : null} />
@@ -607,4 +741,20 @@ const styles = StyleSheet.create({
   modalInput: { height: 40, borderColor: colors.lightGray, borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, marginBottom: 20, color: colors.text },
 });
 
+const filterStyles = StyleSheet.create({
+  box: { width: '90%', maxWidth: 480, alignItems: 'stretch' },
+  label: { fontSize: 13, fontWeight: 'bold', color: colors.text, marginTop: 10, marginBottom: 6 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap' },
+  chip: { borderWidth: 1, borderColor: colors.primary, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6, marginRight: 8, marginBottom: 8 },
+  chipActive: { backgroundColor: colors.primary },
+  chipText: { fontSize: 13, color: colors.primary, fontWeight: '600' },
+  chipTextActive: { color: colors.white },
+  gpsButton: { flexDirection: 'row', alignItems: 'center', marginTop: -10, marginBottom: 4 },
+  gpsText: { color: colors.primary, fontWeight: '600', marginLeft: 6 },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 16 },
+  toggleText: { fontSize: 14, color: colors.text, marginLeft: 8 },
+  scopeBar: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 4, marginBottom: 8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.lightGray },
+  scopeText: { flex: 1, fontSize: 13, color: colors.text, marginLeft: 6 },
+  scopeLink: { fontSize: 13, color: colors.primary, fontWeight: 'bold' },
+});
 export default HomeScreen;

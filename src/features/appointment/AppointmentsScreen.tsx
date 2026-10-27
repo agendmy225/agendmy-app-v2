@@ -217,52 +217,94 @@ const AppointmentsScreen: React.FC = () => {
     }
   };
 
-  const renderAppointmentItem = ({ item }: { item: AppointmentType }) => (
+  // pacotes: as sessoes do mesmo pacote viram um card so
+  type AppointmentGroup = { key: string; main: AppointmentType; sessions: AppointmentType[] };
+  const groupByPackage = (list: AppointmentType[]): AppointmentGroup[] => {
+    const out: AppointmentGroup[] = [];
+    const byPkg: Record<string, AppointmentGroup> = {};
+    list.forEach((a) => {
+      const pid = (a as any).packageId as string | undefined;
+      if (pid) {
+        if (!byPkg[pid]) {
+          byPkg[pid] = { key: 'pkg_' + pid, main: a, sessions: [] };
+          out.push(byPkg[pid]);
+        }
+        byPkg[pid].sessions.push(a);
+      } else {
+        out.push({ key: a.id, main: a, sessions: [a] });
+      }
+    });
+    out.forEach((g) => g.sessions.sort((x, y) => (x.date + x.time).localeCompare(y.date + y.time)));
+    return out;
+  };
+  const upcomingGroups = groupByPackage(upcomingAppointments);
+  const pastGroups = groupByPackage(pastAppointments);
+
+  const openDetails = (item: AppointmentType) => navigation.navigate('AppointmentDetails', { appointmentId: item.id });
+
+  const renderAppointmentItem = ({ item: group }: { item: AppointmentGroup }) => {
+    const item = group.main;
+    const isPackage = group.sessions.length > 1;
+    const packageTotal = group.sessions.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
+    return (
     <View style={styles.appointmentCardContainer}>
       <TouchableOpacity
         style={styles.appointmentCard}
-        onPress={() => navigation.navigate('BusinessDetails', { businessId: item.businessId })} // Navegar para detalhes do negócio
+        onPress={() => openDetails(item)}
       >
         <BusinessThumb businessId={item.businessId} name={item.businessName} style={styles.appointmentImage} />
         <View style={styles.appointmentInfo}>
           <Text style={styles.businessName}>{item.businessName}</Text>
           <Text style={styles.serviceName}>{item.serviceName}</Text>
           {item.professionalName ? <Text style={styles.serviceName}>com {item.professionalName}</Text> : null}
-          {/* Mostrar nome do cliente para proprietários */}
           {isOwner && item.clientName && (
             <Text style={styles.clientName}>Cliente: {item.clientName}</Text>
           )}
-          <View style={styles.appointmentDetails}>
-            <Text style={styles.dateTime}>{`${formatLocalDate(item.date)} às ${item.time}`}</Text>
-            <Text style={[styles.status, { color: getStatusColor(item.status) }]}>
-              {getStatusText(item.status)}
-            </Text>
-          </View>
-          {item.price ? <Text style={styles.price}>{`R$ ${item.price.toFixed(2).replace('.', ',')}`}</Text> : null}
+          {isPackage ? (
+            <View style={styles.packageBox}>
+              <Text style={styles.packageTitle}>{`Pacote: ${group.sessions.length} sessões`}</Text>
+              {group.sessions.map((s, i) => (
+                <Text key={s.id} style={styles.packageLine}>
+                  {`Sessão ${i + 1}: ${formatLocalDate(s.date)} às ${s.time}  `}
+                  <Text style={{ color: getStatusColor(s.status) }}>{getStatusText(s.status)}</Text>
+                </Text>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.appointmentDetails}>
+              <Text style={styles.dateTime}>{`${formatLocalDate(item.date)} às ${item.time}`}</Text>
+              <Text style={[styles.status, { color: getStatusColor(item.status) }]}>
+                {getStatusText(item.status)}
+              </Text>
+            </View>
+          )}
+          {(isPackage ? packageTotal : item.price) ? <Text style={styles.price}>{`R$ ${(isPackage ? packageTotal : item.price).toFixed(2).replace('.', ',')}`}</Text> : null}
+          <Text style={styles.detailsHint}>Toque para ver os detalhes</Text>
         </View>
       </TouchableOpacity>
-      {item.status === 'completed' && !isOwner && !(item as any).reviewed && (
+      {!isPackage && item.status === 'completed' && !isOwner && !(item as any).reviewed && (
         <TouchableOpacity
           style={styles.reviewButton}
           onPress={() => navigation.navigate('Review', {
             businessId: item.businessId,
             businessName: item.businessName,
-            serviceId: item.serviceId, // Passar serviceId
-            professionalId: item.professionalId, // Passar professionalId
-            professionalName: item.professionalName, // Passar professionalName
-            appointmentId: item.id, // Passar appointmentId
+            serviceId: item.serviceId,
+            professionalId: item.professionalId,
+            professionalName: item.professionalName,
+            appointmentId: item.id,
           })}
         >
           <Text style={styles.reviewButtonText}>Avaliar Serviço</Text>
         </TouchableOpacity>
       )}
-      {!isOwner && isOpenStatus(item.status) && item.date >= todayStr && (
+      {!isPackage && !isOwner && isOpenStatus(item.status) && item.date >= todayStr && (
         <TouchableOpacity style={styles.cancelButton} onPress={() => handleCancel(item)}>
           <Text style={styles.cancelButtonText}>Cancelar agendamento</Text>
         </TouchableOpacity>
       )}
     </View>
-  );
+    );
+  };
 
   // Show loading screen while fetching appointments
   if (loading) {
@@ -327,9 +369,9 @@ const AppointmentsScreen: React.FC = () => {
       {activeTab === 'upcoming' ? (
         upcomingAppointments.length > 0 ? (
           <FlatList
-            data={upcomingAppointments}
+            data={upcomingGroups}
             renderItem={renderAppointmentItem}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(g) => g.key}
             contentContainerStyle={styles.appointmentsList}
             refreshControl={
               <RefreshControl
@@ -342,7 +384,7 @@ const AppointmentsScreen: React.FC = () => {
         ) : (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Você não tem agendamentos próximos.</Text>
-            <TouchableOpacity style={styles.bookButton} onPress={() => navigation.navigate('ClientTabs', { screen: 'Home' })}>
+            <TouchableOpacity style={styles.bookButton} onPress={() => navigation.navigate('HomeStack', { screen: 'Home' })}>
               <Text style={styles.bookButtonText}>Agendar Serviço</Text>
             </TouchableOpacity>
           </View>
@@ -350,9 +392,9 @@ const AppointmentsScreen: React.FC = () => {
       ) : (
         pastAppointments.length > 0 ? (
           <FlatList
-            data={pastAppointments}
+            data={pastGroups}
             renderItem={renderAppointmentItem}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(g) => g.key}
             contentContainerStyle={styles.appointmentsList}
             refreshControl={
               <RefreshControl
@@ -480,6 +522,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
+  },
+  packageBox: {
+    marginTop: 6,
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: colors.lightGray,
+  },
+  packageTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 2,
+  },
+  packageLine: {
+    fontSize: 13,
+    color: colors.text,
+    marginTop: 2,
+  },
+  detailsHint: {
+    fontSize: 11,
+    color: colors.lightText,
+    marginTop: 4,
   },
   cancelButton: {
     paddingVertical: 10,

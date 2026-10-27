@@ -1,5 +1,6 @@
 import React, { useRef, useMemo, useEffect } from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 
 export interface LeafletMarker {
@@ -186,6 +187,9 @@ const buildHtml = (
   window.__setView = function(lat, lng, z) {
     map.setView([lat, lng], z || map.getZoom());
   };
+  window.__centerUser = function() {
+    if (userMarker) { map.setView(userMarker.getLatLng(), Math.max(map.getZoom(), 15)); }
+  };
 
   renderMarkers(${toJs(markers)});
   window.__setUser(${toJs(user)}, ${centerOnUser ? 'true' : 'false'});
@@ -295,6 +299,15 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
         androidLayerType="hardware"
         nestedScrollEnabled
       />
+      {showUserLocation && userLocation ? (
+        <TouchableOpacity
+          style={styles.centerButton}
+          onPress={() => inject('window.__centerUser && window.__centerUser()')}
+          activeOpacity={0.8}
+        >
+          <Icon name="my-location" size={22} color="#d31027" />
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 };
@@ -303,6 +316,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     overflow: 'hidden',
+  },
+  centerButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
   },
   webview: {
     flex: 1,

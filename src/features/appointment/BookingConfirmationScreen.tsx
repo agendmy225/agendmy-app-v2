@@ -93,6 +93,11 @@ const BookingConfirmationScreen: React.FC = () => {
     (serviceData.promotionalPrice || 0) < serviceData.price;
   const brl = (v: number) => `R$ ${(v || 0).toFixed(2).replace('.', ',')}`;
   const durationMin = parseDurationMin(serviceData?.duration);
+  const promoPct = hasPromo && serviceData
+    ? (Number((serviceData as any).discountPercentage) > 0
+      ? Math.round(Number((serviceData as any).discountPercentage))
+      : Math.round((1 - unitPrice / serviceData.price) * 100))
+    : 0;
 
   // Load real data from Firestore
   useEffect(() => {
@@ -460,6 +465,12 @@ const BookingConfirmationScreen: React.FC = () => {
             <Text style={styles.paymentLabel}>{serviceData.name}</Text>
             <Text style={styles.paymentValue}>{hasPromo ? <Text style={styles.priceOriginal}>{brl(serviceData.price)}  </Text> : null}{brl(unitPrice)}</Text>
           </View>
+          {hasPromo ? (
+            <View style={styles.paymentRow}>
+              <Text style={styles.promoLabel}>{`Promoção: ${promoPct}% de desconto`}</Text>
+              <Text style={styles.promoValue}>{`- ${brl(serviceData.price - unitPrice)}`}</Text>
+            </View>
+          ) : null}
           <View style={styles.divider} />
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Total</Text>
@@ -606,6 +617,16 @@ const styles = StyleSheet.create({
   paymentLabel: {
     fontSize: 14,
     color: colors.text,
+  },
+  promoLabel: {
+    fontSize: 14,
+    color: colors.success,
+    fontWeight: '600',
+  },
+  promoValue: {
+    fontSize: 14,
+    color: colors.success,
+    fontWeight: '600',
   },
   priceOriginal: {
     color: colors.lightText,

@@ -1,448 +1,280 @@
-import React, { useState, useEffect } from 'react';
+// src/features/business/AllBusinessesScreen.tsx
+// "Ver todos" da tela inicial: recentes, mais avaliados, promocoes ou todos,
+// filtrados pela cidade do cliente (ou distancia / todas as cidades).
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
-  RefreshControl,
-  PermissionsAndroid,
-  Platform,
-  Alert,
+  View,
 } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { HomeStackParamList, AppStackParamList } from '../../types/types';
 import { colors } from '../../constants/colors';
-import { Business ,
-  getAllActiveBusinesses,
-  getTopRatedBusinesses,
-  getMostRecentBusinesses,
-  getBusinessesWithPromotions,
-} from '../../services/businesses';
-
+import { Business, getAllActiveBusinesses } from '../../services/businesses';
 import { getCategoryById } from '../../services/categories';
-import Geolocation from '@react-native-community/geolocation';
+import { useUserLocation } from '../../hooks/useUserLocation';
+import {
+  applyExtraFilters,
+  BusinessFilters,
+  DEFAULT_FILTERS,
+  filterByScope,
+  getCityFromCoordinates,
+  scopeLabel,
+  Scope,
+  sortRecent,
+  sortTopRated,
+} from '../../services/cityLocation';
 import CachedImage from '../../components/common/CachedImage';
 
-type AllBusinessesScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'AllBusinesses'> & {
-  navigate<RouteName extends keyof AppStackParamList>(
-    ...args: undefined extends AppStackParamList[RouteName]
-      ? [screen: RouteName] | [screen: RouteName, params: AppStackParamList[RouteName]]
-      : [screen: RouteName, params: AppStackParamList[RouteName]]
-  ): void;
-};
-type AllBusinessesScreenRouteProp = RouteProp<HomeStackParamList, 'AllBusinesses'>;
+type ListType = 'recent' | 'topRated' | 'promotions' | 'all';
 
 const defaultPlaceholderImage = require('../../assets/images/banner-home.png');
 
-const AllBusinessesScreen: React.FC = () => {
-  const navigation = useNavigation<AllBusinessesScreenNavigationProp>() as any;
-  const route = useRoute<AllBusinessesScreenRouteProp>();
-  const { listType, userCity } = route.params;
+const TITLES: Record<ListType, string> = {
+  recent: 'Estabelecimentos recentes',
+  topRated: 'Mais bem avaliados',
+  promotions: 'Promoções',
+  all: 'Todos os estabelecimentos',
+};
 
+const SCOPES: { key: Scope; label: string }[] = [
+  { key: 'city', label: 'Minha cidade' },
+  { key: 'radius30', label: 'Até 30 km' },
+  { key: 'all', label: 'Todas' },
+];
+
+const AllBusinessesScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const params = route.params || {};
+  const listType: ListType = (['recent', 'topRated', 'promotions', 'all'].includes(params.listType)
+    ? params.listType : 'all') as ListType;
+
+  const userLocation = useUserLocation();
   const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [filteredBusinesses, setFilteredBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [userCoordinates, setUserCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [error, setError] = useState(false);
+  const [city, setCity] = useState<string | undefined>(
+    typeof params.city === 'string' && params.city ? params.city : undefined,
+  );
+  const [filters, setFilters] = useState<BusinessFilters>({
+    scope: (['city', 'radius10', 'radius30', 'all'].includes(params.scope) ? params.scope : DEFAULT_FILTERS.scope) as Scope,
+    minRating: Number(params.minRating) || 0,
+    onlyPromotions: params.onlyPromotions === true,
+  });
 
-  useEffect(() => {
-    // Obter localização do usuário
-    const getUserLocation = async () => {
-      try {
-        // Request permission for Android
-        if (Platform.OS === 'android') {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            {
-              title: 'Permissão de Localização',
-              message: 'O app precisa acessar sua localização para encontrar estabelecimentos próximos.',
-              buttonNeutral: 'Perguntar depois',
-              buttonNegative: 'Cancelar',
-              buttonPositive: 'OK',
-            }
-          );
-          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-            console.log('Permissão de localização negada');
-            return;
-          }
-        }
-
-        // Get current position
-        Geolocation.getCurrentPosition(
-          (position) => {
-            setUserCoordinates({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            });
-          },
-          (error) => {
-            console.log('Erro ao obter localização:', error);
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 10000,
-          }
-        );
-      } catch (error) {
-        console.log('Erro ao obter localização:', error);
-      }
-    };
-    
-    getUserLocation();
-
-    loadBusinesses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    // Filtrar negócios sempre que a lista mudar ou a localização for obtida
-    filterBusinessesByCity();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businesses, userCoordinates, userCity]);
-
-  const loadBusinesses = async () => {
+  const load = useCallback(async () => {
     try {
-      setLoading(true);
-      let data: Business[] = [];
-
-      switch (listType) {
-        case 'recent':
-          data = await getMostRecentBusinesses(100); // Carrega mais negócios
-          break;
-        case 'topRated':
-          data = await getTopRatedBusinesses(100);
-          break;
-        case 'promotions':
-          data = await getBusinessesWithPromotions(100);
-          break;
-        default:
-          data = await getAllActiveBusinesses(100);
-      }
-
-      setBusinesses(data);
-    } catch (error: any) {
-      // Exibe alerta amigável ao usuário em caso de erro
-      // (convenção: mensagem em português)
-      Alert.alert('Erro', 'Erro ao carregar estabelecimentos. Tente novamente mais tarde.');
-      console.log('Erro ao carregar estabelecimentos:', error?.message || error);
+      setError(false);
+      const data = await getAllActiveBusinesses(200);
+      setBusinesses(Array.isArray(data) ? data : []);
+    } catch {
+      setError(true);
+      setBusinesses([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, []);
 
-  const filterBusinessesByCity = () => {
-    if (!businesses || businesses.length === 0) {
-      setFilteredBusinesses([]);
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  // cidade do cliente (quando nao veio da tela inicial)
+  const lat = userLocation ? userLocation.latitude : undefined;
+  const lon = userLocation ? userLocation.longitude : undefined;
+  useEffect(() => {
+    if (city || typeof lat !== 'number' || typeof lon !== 'number') {
       return;
     }
+    let active = true;
+    getCityFromCoordinates(lat, lon).then((p) => {
+      if (active && p && p.city) {
+        setCity(p.city);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [city, lat, lon]);
 
-    // Se tem cidade do usuário, filtra por ela
-    if (userCity) {
-      const filtered = businesses.filter(business => {
-        // Verifica se o endereço contém a cidade
-        return business.address?.toLowerCase().includes(userCity.toLowerCase());
-      });
-      setFilteredBusinesses(filtered);
-    } else if (userCoordinates) {
-      // Se tem coordenadas, filtra por proximidade (raio de 20km)
-      const MAX_DISTANCE_KM = 20;
-      const filtered = businesses.filter(business => {
-        if (!business.location?.latitude || !business.location?.longitude) { return false; }
-
-        const distance = calculateDistance(
-          userCoordinates.latitude,
-          userCoordinates.longitude,
-          business.location.latitude,
-          business.location.longitude,
-        );
-
-        return distance <= MAX_DISTANCE_KM;
-      });
-      setFilteredBusinesses(filtered);
-    } else {
-      // Se não tem nem cidade nem coordenadas, mostra todos
-      setFilteredBusinesses(businesses);
+  const list = useMemo(() => {
+    let out = filterByScope(businesses, filters.scope, { city, lat, lon });
+    out = applyExtraFilters(out, filters);
+    if (listType === 'promotions') {
+      out = out.filter((b) => b.hasActivePromotions === true);
     }
-  };
-
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // Raio da Terra em km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    loadBusinesses();
-  };
-
-  const getTitle = () => {
-    switch (listType) {
-      case 'recent':
-        return 'Estabelecimentos Recentes';
-      case 'topRated':
-        return 'Mais Bem Avaliados';
-      case 'promotions':
-        return 'Promoções';
-      default:
-        return 'Todos os Estabelecimentos';
+    if (listType === 'recent') {
+      return sortRecent(out);
     }
-  };
+    if (listType === 'topRated') {
+      return sortTopRated(out);
+    }
+    return [...out].sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
+  }, [businesses, filters, city, lat, lon, listType]);
 
-  const renderBusinessItem = ({ item }: { item: Business }) => (
-    <TouchableOpacity
-      style={styles.businessCard}
-      onPress={() => navigation.navigate('BusinessDetails', { businessId: item.id })}
-    >
-      <CachedImage
-        storagePath={item.coverImage || item.imageUrl || item.logo}
-        style={styles.businessImage}
-        defaultSource={defaultPlaceholderImage}
-      />
-      <View style={styles.businessInfo}>
-        <Text style={styles.businessName} numberOfLines={1}>{item.name}</Text>
-        <Text style={styles.businessCategory} numberOfLines={1}>
-          {getCategoryById(item.category)?.name || 'Serviços'}
-        </Text>
-        {item.address && (
-          <View style={styles.addressContainer}>
-            <Icon name="location-on" size={14} color={colors.lightText} />
-            <Text style={styles.businessAddress} numberOfLines={2}>
-              {item.address}
-            </Text>
-          </View>
-        )}
-        {item.reviewCount > 0 && (
-          <View style={styles.ratingContainer}>
-            <Icon name="star" size={16} color="#FFD700" />
-            <Text style={styles.ratingText}>
-              {item.rating?.toFixed(1) || '0.0'} ({item.reviewCount} avaliações)
-            </Text>
-          </View>
-        )}
-        {listType === 'promotions' && item.hasActivePromotions && (
-          <View style={styles.promotionBadge}>
-            <Text style={styles.promotionText}>
-              PROMOÇÃO
-            </Text>
-          </View>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
-
-  if (loading) {
+  const renderItem = ({ item }: { item: Business }) => {
+    const category = getCategoryById(item.category);
+    const address = [item.address, item.addressNumber].filter(Boolean).join(', ');
+    const place = [item.neighborhood, item.city].filter(Boolean).join(' - ');
+    const rating = Number(item.rating) || 0;
+    const reviews = Number(item.reviewCount) || 0;
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Carregando estabelecimentos...</Text>
-      </View>
+      <TouchableOpacity
+        style={styles.card}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('BusinessDetails', { businessId: item.id })}
+      >
+        <CachedImage
+          storagePath={item.coverImage || item.logo || item.imageUrl || null}
+          style={styles.image}
+          defaultSource={defaultPlaceholderImage}
+        />
+        <View style={styles.info}>
+          <Text style={styles.name} numberOfLines={1}>{item.name || 'Estabelecimento'}</Text>
+          <Text style={styles.category} numberOfLines={1}>{(category && category.name) || 'Serviços'}</Text>
+          {address || place ? (
+            <View style={styles.addressRow}>
+              <Icon name="location-on" size={14} color={colors.lightText} />
+              <Text style={styles.address} numberOfLines={2}>{[address, place].filter(Boolean).join(' · ')}</Text>
+            </View>
+          ) : null}
+          {rating > 0 ? (
+            <View style={styles.ratingRow}>
+              <Icon name="star" size={16} color="#FFD700" />
+              <Text style={styles.ratingText}>
+                {rating.toFixed(1).replace('.', ',')}{reviews > 0 ? ` (${reviews} avaliações)` : ''}
+              </Text>
+            </View>
+          ) : null}
+          {item.hasActivePromotions ? (
+            <View style={styles.promoBadge}>
+              <Text style={styles.promoText}>PROMOÇÃO</Text>
+            </View>
+          ) : null}
+        </View>
+      </TouchableOpacity>
     );
-  }
+  };
+
+  const setScope = (scope: Scope) => setFilters((f) => ({ ...f, scope }));
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{getTitle()}</Text>
+        <Text style={styles.headerTitle}>{TITLES[listType]}</Text>
       </View>
 
-      {userCity && (
-        <View style={styles.filterInfo}>
-          <Icon name="location-on" size={16} color={colors.primary} />
-          <Text style={styles.filterText}>
-            Mostrando estabelecimentos em {userCity}
-          </Text>
+      <View style={styles.filterBar}>
+        <View style={styles.chipsRow}>
+          {SCOPES.map((s) => (
+            <TouchableOpacity
+              key={s.key}
+              style={[styles.chip, filters.scope === s.key && styles.chipActive]}
+              onPress={() => setScope(s.key)}
+            >
+              <Text style={[styles.chipText, filters.scope === s.key && styles.chipTextActive]}>{s.label}</Text>
+            </TouchableOpacity>
+          ))}
+          <TouchableOpacity
+            style={[styles.chip, filters.minRating >= 4 && styles.chipActive]}
+            onPress={() => setFilters((f) => ({ ...f, minRating: f.minRating >= 4 ? 0 : 4 }))}
+          >
+            <Text style={[styles.chipText, filters.minRating >= 4 && styles.chipTextActive]}>Nota 4+</Text>
+          </TouchableOpacity>
         </View>
-      )}
+        <Text style={styles.scopeText}>{scopeLabel(filters, city)}</Text>
+      </View>
 
-      <FlatList
-        data={filteredBusinesses}
-        renderItem={renderBusinessItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[colors.primary]}
-          />
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Icon name="business" size={64} color={colors.lightText} />
-            <Text style={styles.emptyTitle}>
-              {userCity
-                ? `Nenhum estabelecimento encontrado em ${userCity}`
-                : 'Nenhum estabelecimento encontrado na sua região'
-              }
-            </Text>
-            <Text style={styles.emptyText}>
-              Tente ajustar sua localização ou buscar em outras cidades próximas.
-            </Text>
-          </View>
-        }
-      />
+      {loading ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.loadingText}>Carregando estabelecimentos...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={list}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => {
+                setRefreshing(true);
+                load();
+              }}
+              colors={[colors.primary]}
+            />
+          }
+          ListEmptyComponent={
+            <View style={styles.empty}>
+              <Icon name={error ? 'cloud-off' : 'storefront'} size={56} color={colors.lightText} />
+              <Text style={styles.emptyTitle}>
+                {error
+                  ? 'Não foi possível carregar os estabelecimentos.'
+                  : filters.scope === 'city' && city
+                    ? `Nenhum estabelecimento encontrado em ${city}.`
+                    : 'Nenhum estabelecimento encontrado.'}
+              </Text>
+              {!error && filters.scope !== 'all' ? (
+                <TouchableOpacity style={styles.emptyButton} onPress={() => setScope('all')}>
+                  <Text style={styles.emptyButtonText}>Ver de todas as cidades</Text>
+                </TouchableOpacity>
+              ) : null}
+              {error ? (
+                <TouchableOpacity style={styles.emptyButton} onPress={load}>
+                  <Text style={styles.emptyButtonText}>Tentar novamente</Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+          }
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 20,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.lightGray,
-  },
-  backButton: {
-    marginRight: 15,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-  },
-  filterInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: colors.lightGray,
-  },
-  filterText: {
-    marginLeft: 5,
-    fontSize: 14,
-    color: colors.text,
-  },
-  listContent: {
-    padding: 20,
-  },
-  businessCard: {
-    flexDirection: 'row',
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    marginBottom: 15,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  businessImage: {
-    width: 100,
-    height: 100,
-  },
-  businessInfo: {
-    flex: 1,
-    padding: 12,
-  },
-  businessName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  businessCategory: {
-    fontSize: 14,
-    color: colors.lightText,
-    marginBottom: 4,
-  },
-  addressContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 4,
-  },
-  businessAddress: {
-    fontSize: 12,
-    color: colors.lightText,
-    marginLeft: 4,
-    flex: 1,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  ratingText: {
-    fontSize: 14,
-    color: colors.text,
-    marginLeft: 4,
-  },
-  promotionBadge: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: colors.error,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  promotionText: {
-    color: colors.white,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: colors.text,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 80,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginTop: 20,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  emptyText: {
-    fontSize: 14,
-    color: colors.lightText,
-    textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: 40,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: colors.white, borderBottomWidth: 1, borderBottomColor: colors.lightGray },
+  backButton: { marginRight: 14 },
+  headerTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text },
+  filterBar: { backgroundColor: colors.white, paddingHorizontal: 12, paddingBottom: 10, paddingTop: 8, borderBottomWidth: 1, borderBottomColor: colors.lightGray },
+  chipsRow: { flexDirection: 'row', flexWrap: 'wrap' },
+  chip: { borderWidth: 1, borderColor: colors.primary, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6, marginRight: 8, marginBottom: 6 },
+  chipActive: { backgroundColor: colors.primary },
+  chipText: { fontSize: 13, color: colors.primary, fontWeight: '600' },
+  chipTextActive: { color: colors.white },
+  scopeText: { fontSize: 12, color: colors.lightText, marginTop: 2 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  loadingText: { marginTop: 10, fontSize: 15, color: colors.text },
+  listContent: { padding: 16, flexGrow: 1 },
+  card: { flexDirection: 'row', backgroundColor: colors.white, borderRadius: 12, marginBottom: 12, overflow: 'hidden', elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 },
+  image: { width: 100, height: 100 },
+  info: { flex: 1, padding: 12 },
+  name: { fontSize: 16, fontWeight: 'bold', color: colors.text, marginBottom: 2, marginRight: 70 },
+  category: { fontSize: 13, color: colors.lightText, marginBottom: 4 },
+  addressRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 4 },
+  address: { flex: 1, fontSize: 12, color: colors.lightText, marginLeft: 4 },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
+  ratingText: { fontSize: 13, color: colors.text, marginLeft: 4 },
+  promoBadge: { position: 'absolute', top: 10, right: 10, backgroundColor: colors.error, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
+  promoText: { color: colors.white, fontSize: 11, fontWeight: 'bold' },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 60, paddingHorizontal: 30 },
+  emptyTitle: { fontSize: 16, fontWeight: 'bold', color: colors.text, marginTop: 14, textAlign: 'center' },
+  emptyButton: { marginTop: 16, borderWidth: 1, borderColor: colors.primary, borderRadius: 10, paddingHorizontal: 18, paddingVertical: 10 },
+  emptyButtonText: { color: colors.primary, fontWeight: 'bold' },
 });
 
 export default AllBusinessesScreen;

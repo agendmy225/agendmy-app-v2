@@ -11,6 +11,10 @@ export type HomeStackParamList = {
   AllBusinesses: {
     listType: 'recent' | 'topRated' | 'promotions' | 'all';
     userCity?: string;
+    scope?: 'city' | 'radius10' | 'radius30' | 'all';
+    city?: string;
+    minRating?: number;
+    onlyPromotions?: boolean;
   };
 };
 
@@ -72,6 +76,7 @@ export type AppStackParamList = {
     appointmentId?: string; // Tornar opcional para permitir avaliações gerais
   };
   Favorites: undefined; // Adicionar tela de Favoritos
+  AppointmentDetails: { appointmentId: string }; // Detalhes do agendamento
   EditProfile: undefined; // Adicionar tela de Edição de Perfil
   PaymentMethods: undefined; // Tela de métodos de pagamento
   AddPaymentMethod: undefined; // Tela para adicionar cartão

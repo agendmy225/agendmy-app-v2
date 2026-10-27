@@ -25,7 +25,7 @@ const generateAvailableDays = () => {
   const days = [];
   const today = new Date();
 
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 60; i++) {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
 
@@ -325,6 +325,7 @@ const AppointmentDateTimeScreen: React.FC = () => {
               </TouchableOpacity>
             ))}
           </ScrollView>
+          <Text style={styles.scrollHint}>Deslize para o lado para ver mais datas (até 2 meses)</Text>
         </View>
 
         {selectedDate && (
@@ -476,6 +477,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+  },
+  scrollHint: {
+    fontSize: 12,
+    color: colors.lightText,
+    marginTop: 6,
   },
   dayOffCard: {
     opacity: 0.35,

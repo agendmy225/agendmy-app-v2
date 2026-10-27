@@ -22,6 +22,7 @@ import AllBusinessesScreen from '../features/business/AllBusinessesScreen';
 import AppointmentsScreen from '../features/appointment/AppointmentsScreen';
 import AppointmentDateTimeScreen from '../features/appointment/AppointmentDateTimeScreen';
 import BookingConfirmationScreen from '../features/appointment/BookingConfirmationScreen';
+import AppointmentDetailsScreen from '../features/appointment/AppointmentDetailsScreen';
 import ProfileScreen from '../features/user/profile/ProfileScreen';
 import EditProfileScreen from '../features/user/profile/EditProfileScreen';
 import PaymentMethodsScreen from '../features/user/profile/PaymentMethodsScreen';
@@ -180,6 +181,7 @@ const AppNavigator: React.FC = () => {
               <Stack.Screen name="BusinessDetails" component={BusinessDetailsScreen} />
               <Stack.Screen name="AppointmentDateTime" component={AppointmentDateTimeScreen} />
               <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
+              <Stack.Screen name="AppointmentDetails" component={AppointmentDetailsScreen} />
               <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
               <Stack.Screen name="ProfessionalAppointmentsScreen" component={ProfessionalAppointmentsScreen} />
               <Stack.Screen name="FinancialReportsScreen" component={FinancialReportsScreen} />
@@ -224,6 +226,7 @@ const AppNavigator: React.FC = () => {
               <Stack.Screen name="Announcements" component={AnnouncementsScreen} />
               <Stack.Screen name="AppointmentDateTime" component={AppointmentDateTimeScreen} />
               <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
+              <Stack.Screen name="AppointmentDetails" component={AppointmentDetailsScreen} />
               <Stack.Screen name="Review" component={ReviewScreen} />
               <Stack.Screen name="EditProfile" component={EditProfileScreen} />
               <Stack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
