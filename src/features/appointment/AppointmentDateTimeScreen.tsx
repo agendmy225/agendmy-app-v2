@@ -16,6 +16,7 @@ import { getServiceById } from '../../services/services';
 import { getBusinessById } from '../../services/businesses';
 import { toLocalDateString, parseLocalDate } from '../../utils/localDate';
 import { getFreeSlots, getProfessionalData, parseDurationMin, resolveDayWindow } from '../../services/professionalSchedule';
+import AgendaCalendar, { ymd } from '../professionalArea/AgendaCalendar';
 
 type AppointmentDateTimeScreenRouteProp = RouteProp<AppStackParamList, 'AppointmentDateTime'>;
 type AppointmentDateTimeScreenNavigationProp = StackNavigationProp<AppStackParamList, 'AppointmentDateTime'>;
@@ -80,6 +81,8 @@ const AppointmentDateTimeScreen: React.FC = () => {
   const [business, setBusiness] = useState<any>(null);
   const [serviceDuration, setServiceDuration] = useState(60);
   const [profData, setProfData] = useState<Record<string, any> | null>(null);
+  const [calYear, setCalYear] = useState(() => new Date().getFullYear());
+  const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
 
   // Generate available days (next 30 days)
   const availableDays = generateAvailableDays();
@@ -288,44 +291,47 @@ const AppointmentDateTimeScreen: React.FC = () => {
 
         <View style={styles.dateSection}>
           <Text style={styles.sectionTitle}>Selecione uma data</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.daysContainer}
-          >
-            {availableDays.map((day) => (
-              <TouchableOpacity
-                key={day.date}
-                style={[
-                  styles.dayCard,
-                  selectedDate === day.date && styles.selectedDayCard,
-                  isDayOff(day.date) && styles.dayOffCard,
-                ]}
-                onPress={() => handleDateSelect(day.date)}
-                disabled={isDayOff(day.date)}
-              >
-                <Text style={[
-                  styles.weekdayText,
-                  selectedDate === day.date && styles.selectedText,
-                ]}>
-                  {day.weekday}
-                </Text>
-                <Text style={[
-                  styles.dayText,
-                  selectedDate === day.date && styles.selectedText,
-                ]}>
-                  {day.day}
-                </Text>
-                <Text style={[
-                  styles.monthText,
-                  selectedDate === day.date && styles.selectedText,
-                ]}>
-                  {day.month}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-          <Text style={styles.scrollHint}>Deslize para o lado para ver mais datas (até 2 meses)</Text>
+          {(() => {
+            // dias que nao podem ser escolhidos: passados, alem de 2 meses e sem atendimento
+            const calToday = toLocalDateString(new Date());
+            const lastDay = availableDays.length ? availableDays[availableDays.length - 1].date : calToday;
+            const monthDays = new Date(calYear, calMonth + 1, 0).getDate();
+            const calendarOff: string[] = [];
+            for (let d = 1; d <= monthDays; d++) {
+              const ds = ymd(calYear, calMonth, d);
+              if (ds < calToday || ds > lastDay || isDayOff(ds)) {
+                calendarOff.push(ds);
+              }
+            }
+            return (
+              <>
+                <AgendaCalendar
+                  entries={[]}
+                  year={calYear}
+                  month={calMonth}
+                  onChangeMonth={(y: number, mo: number) => {
+                    const first = ymd(y, mo, 1);
+                    if (first < calToday.slice(0, 7) + '-01' || first > lastDay.slice(0, 7) + '-01') {
+                      return;
+                    }
+                    setCalYear(y);
+                    setCalMonth(mo);
+                  }}
+                  selectedDate={selectedDate || ''}
+                  onSelectDate={(ds: string) => {
+                    if (!calendarOff.includes(ds)) {
+                      handleDateSelect(ds);
+                    }
+                  }}
+                  today={calToday}
+                  offDates={calendarOff}
+                  statusColors={{}}
+                  showLegend={false}
+                />
+                <Text style={styles.scrollHint}>Dias apagados: sem atendimento ou fora do prazo de 2 meses.</Text>
+              </>
+            );
+          })()}
         </View>
 
         {selectedDate && (

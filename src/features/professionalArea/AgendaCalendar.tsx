@@ -19,6 +19,8 @@ interface Props {
   onSelectDate: (date: string) => void;
   today: string;
   blockedDates?: string[];
+  showLegend?: boolean;
+  offDates?: string[];
   statusColors: Record<string, string>;
 }
 
@@ -47,6 +49,8 @@ const AgendaCalendar: React.FC<Props> = ({
   onSelectDate,
   today,
   blockedDates = [],
+  showLegend = true,
+  offDates = [],
   statusColors,
 }) => {
   const byDate = useMemo(() => {
@@ -73,6 +77,7 @@ const AgendaCalendar: React.FC<Props> = ({
   }, [entries]);
 
   const blocked = useMemo(() => new Set(blockedDates), [blockedDates]);
+  const off = useMemo(() => new Set(offDates), [offDates]);
 
   const weeks = useMemo(() => {
     const firstWeekday = new Date(year, month, 1).getDay();
@@ -143,6 +148,7 @@ const AgendaCalendar: React.FC<Props> = ({
             const isToday = date === today;
             const isSelected = date === selectedDate;
             const isBlocked = blocked.has(date);
+            const isOff = !isBlocked && off.has(date);
             const isPast = date < today;
             return (
               <TouchableOpacity
@@ -162,6 +168,7 @@ const AgendaCalendar: React.FC<Props> = ({
                     style={[
                       styles.dayText,
                       isPast && styles.pastText,
+                      isOff && styles.offText,
                       isBlocked && styles.blockedText,
                       isSelected && styles.selectedText,
                     ]}
@@ -190,6 +197,7 @@ const AgendaCalendar: React.FC<Props> = ({
         </View>
       ))}
 
+      {showLegend ? (
       <View style={styles.legend}>
         {LEGEND.map((l) => (
           <View key={l.key} style={styles.legendItem}>
@@ -198,10 +206,15 @@ const AgendaCalendar: React.FC<Props> = ({
           </View>
         ))}
         <View style={styles.legendItem}>
+          <Text style={[styles.legendText, styles.offText]}>12</Text>
+          <Text style={styles.legendText}> Folga</Text>
+        </View>
+        <View style={styles.legendItem}>
           <Text style={[styles.legendText, styles.blockedText]}>12</Text>
           <Text style={styles.legendText}> Bloqueado</Text>
         </View>
       </View>
+      ) : null}
     </View>
   );
 };
@@ -221,6 +234,7 @@ const styles = StyleSheet.create({
   selectedCircle: { backgroundColor: colors.primary, borderColor: colors.primary },
   dayText: { fontSize: 15, color: colors.text, fontWeight: '500' },
   pastText: { color: colors.lightText },
+  offText: { color: colors.lightText, opacity: 0.45 },
   blockedText: { color: colors.lightText, textDecorationLine: 'line-through' },
   selectedText: { color: colors.white, fontWeight: 'bold' },
   countBadge: { position: 'absolute', top: -4, right: -6, minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 4, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },

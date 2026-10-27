@@ -9,6 +9,20 @@ import {
   Image,
 } from 'react-native';
 import { colors } from '../../constants/colors';
+import { useResolvedFirebaseUrl } from '../../hooks/useResolvedFirebaseUrl';
+
+// foto do profissional (caminho do Storage ou link)
+const ProfessionalAvatar: React.FC<{ path?: string; name?: string; style: any }> = ({ path, name, style }) => {
+  const uri = useResolvedFirebaseUrl(path || null);
+  if (uri) {
+    return <Image source={{ uri }} style={style} />;
+  }
+  return (
+    <View style={[style, { backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }]}>
+      <Text style={{ color: colors.white, fontSize: 22, fontWeight: 'bold' }}>{(name || '?').charAt(0).toUpperCase()}</Text>
+    </View>
+  );
+};
 
 type ProfessionalType = {
   id: string;
@@ -79,13 +93,13 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
         ]}
         onPress={() => setSelectedProfessional(professional.id)}
       >
-        <Image source={{ uri: professional.image }} style={styles.professionalImage} />
+        <ProfessionalAvatar path={professional.image} name={professional.name} style={styles.professionalImage} />
         <View style={styles.professionalInfo}>
           <Text style={styles.professionalName}>{professional.name}</Text>
           <Text style={styles.professionalSpecialty}>{professional.specialty}</Text>
           <View style={styles.ratingContainer}>
             <Text style={styles.ratingIcon}>{'⭐'}</Text>
-            <Text style={styles.ratingText}>{professional.rating.toFixed(1)}</Text>
+            <Text style={styles.ratingText}>{(Number(professional.rating) || 0).toFixed(1).replace('.', ',')}</Text>
           </View>
         </View>
         <View style={styles.selectionIndicator}>

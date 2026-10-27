@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   View,
@@ -18,7 +18,22 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../constants/colors';
 import { Professional } from '../../services/professionals';
+import { WebView } from 'react-native-webview';
 import { storage, ref, getDownloadURL } from '../../config/firebase';
+
+// links de YouTube, Instagram, Vimeo etc. abrem direto no app deles
+const isExternalVideoLink = (url: string): boolean =>
+  /youtube\.com|youtu\.be|instagram\.com|vimeo\.com|tiktok\.com|facebook\.com|fb\.watch/i.test(url || '');
+
+// player do proprio aparelho (video HTML5 com os controles nativos do Android/iPhone)
+const videoHtml = (url: string): string => {
+  const safe = String(url).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  return '<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />' +
+    '<style>html,body{margin:0;padding:0;height:100%;background:#000;}' +
+    'body{display:flex;align-items:center;justify-content:center;}' +
+    'video{width:100%;max-height:100%;background:#000;}</style></head><body>' +
+    '<video src="' + safe + '" controls playsinline preload="metadata"></video></body></html>';
+};
 
 const { width, height } = Dimensions.get('window');
 
@@ -57,6 +72,7 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
     const itemsToLoad = [
       ...currentPhotos.map((p: string) => ({ type: 'photo' as const, storagePath: p })),
       ...(currentVideo ? [{ type: 'video' as const, storagePath: currentVideo }] : []),
+      ...(professional?.image ? [{ type: 'photo' as const, storagePath: professional.image }] : []),
     ];
     
     const loadUrls = async () => {
@@ -78,7 +94,17 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
       setUrls(newUrls);
     };
     loadUrls();
-  }, [visible, professional?.id, professional?.portfolioVideo, professional?.portfolioImages]);
+  }, [visible, professional?.id, professional?.portfolioVideo, professional?.portfolioImages, professional?.image]);
+
+  // mostra a barra de rolagem ao abrir, para o cliente ver que da para rolar
+  const scrollRef = useRef<ScrollView>(null);
+  useEffect(() => {
+    if (!visible || viewMode !== 'grid') {
+      return;
+    }
+    const t = setTimeout(() => scrollRef.current?.flashScrollIndicators(), 500);
+    return () => clearTimeout(t);
+  }, [visible, viewMode]);
 
   useEffect(() => {
     if (!visible) {
@@ -99,10 +125,10 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
       return;
     }
     try {
+      // abre no app que o celular usa para esse tipo de link (player, YouTube, Instagram ou navegador)
       await Linking.openURL(url);
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Erro desconhecido';
-      Alert.alert('Erro ao abrir vídeo', errorMsg);
+    } catch {
+      Alert.alert('Não foi possível abrir o vídeo', 'Nenhum aplicativo do celular conseguiu abrir este vídeo.');
     }
   };
 
@@ -149,11 +175,32 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
                   <Text style={stylesFullscreen.emptyText}>Carregando...</Text>
                 )
               ) : (
-                <TouchableOpacity style={stylesFullscreen.videoContainer} onPress={handleOpenVideo}>
-                  <Text style={stylesFullscreen.videoIcon}>▶</Text>
-                  <Text style={stylesFullscreen.videoLabel}>Vídeo do profissional</Text>
-                  <Text style={stylesFullscreen.videoHint}>Toque para reproduzir</Text>
-                </TouchableOpacity>
+                !urls[currentItem.storagePath] ? (
+                  <Text style={stylesFullscreen.emptyText}>Carregando vídeo...</Text>
+                ) : isExternalVideoLink(urls[currentItem.storagePath]) ? (
+                  <TouchableOpacity style={stylesFullscreen.videoContainer} onPress={handleOpenVideo}>
+                    <Text style={stylesFullscreen.videoIcon}>▶</Text>
+                    <Text style={stylesFullscreen.videoLabel}>Vídeo do profissional</Text>
+                    <Text style={stylesFullscreen.videoHint}>Toque para abrir no aplicativo</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={stylesFullscreen.playerWrapper}>
+                    <WebView
+                      source={{ html: videoHtml(urls[currentItem.storagePath]) }}
+                      style={stylesFullscreen.player}
+                      originWhitelist={['*']}
+                      allowsInlineMediaPlayback
+                      allowsFullscreenVideo
+                      mediaPlaybackRequiresUserAction={false}
+                      javaScriptEnabled
+                      scrollEnabled={false}
+                      bounces={false}
+                    />
+                    <TouchableOpacity style={stylesFullscreen.openOutsideButton} onPress={handleOpenVideo}>
+                      <Text style={stylesFullscreen.openOutsideText}>Abrir no app de vídeo do celular</Text>
+                    </TouchableOpacity>
+                  </View>
+                )
               )
             ) : null}
           </View>
@@ -192,11 +239,26 @@ const ProfessionalPortfolioModal: React.FC<ProfessionalPortfolioModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={true} bounces={true}>
+          <ScrollView
+            ref={scrollRef}
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={true}
+            persistentScrollbar={true}
+            indicatorStyle="black"
+            nestedScrollEnabled={true}
+            bounces={true}
+          >
             {/* Info do profissional */}
             <View style={styles.profileSection}>
               {professional.image ? (
-                <Image source={{ uri: professional.image.startsWith('http') ? professional.image : undefined }} style={styles.profileImage} />
+                urls[professional.image] ? (
+                  <Image source={{ uri: urls[professional.image] }} style={styles.profileImage} />
+                ) : (
+                  <View style={[styles.profileImage, styles.profileImagePlaceholder]}>
+                    <Icon name="person" size={40} color={colors.lightText} />
+                  </View>
+                )
               ) : (
                 <View style={[styles.profileImage, styles.profileImagePlaceholder]}>
                   <Icon name="person" size={40} color={colors.lightText} />
@@ -307,6 +369,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
     fontWeight: 'bold',
+  },
+  scroll: {
+    flex: 1,
   },
   scrollContent: {
     paddingBottom: 80,
@@ -521,6 +586,30 @@ const stylesFullscreen = StyleSheet.create({
   emptyText: {
     color: 'rgba(255,255,255,0.5)',
     fontSize: 16,
+  },
+  playerWrapper: {
+    width: '100%',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  player: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#000',
+  },
+  openOutsideButton: {
+    alignSelf: 'center',
+    marginVertical: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.6)',
+  },
+  openOutsideText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   navigationRow: {
     flexDirection: 'row',

@@ -21,6 +21,7 @@ import { updateAppointmentStatus } from '../../services/appointments';
 import { formatLocalDate, toLocalDateString } from '../../utils/localDate';
 import { ManualBookingModal, RescheduleModal } from './AgendaModals';
 import AgendaCalendar, { MONTH_NAMES, ymd } from './AgendaCalendar';
+import { resolveDayWindow } from '../../services/professionalSchedule';
 
 type Status = 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
 type FilterKey = 'today' | 'upcoming' | 'pending' | 'history';
@@ -89,6 +90,8 @@ const ProfessionalAgendaScreen: React.FC = () => {
   const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
   const [selectedDate, setSelectedDate] = useState(() => toLocalDateString(new Date()));
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
+  const [profData, setProfData] = useState<Record<string, any>>({});
+  const [encaixeDate, setEncaixeDate] = useState<string | undefined>(undefined);
 
   // horario e nome do estabelecimento
   useEffect(() => {
@@ -112,6 +115,7 @@ const ProfessionalAgendaScreen: React.FC = () => {
         setHasAccess(data.appAccess === true && data.accessUserId === user?.uid);
         setProfessionalName(data.name || '');
         setBlockedDates(Array.isArray(data.blockedDates) ? data.blockedDates : []);
+        setProfData(data);
       },
       () => undefined,
     );
@@ -163,6 +167,22 @@ const ProfessionalAgendaScreen: React.FC = () => {
         return items.filter((i) => i.date < today || !isOpen(i.status)).reverse();
     }
   }, [items, filter, today]);
+
+  // folgas da semana no mes visivel (dias sem atendimento que nao sao bloqueios)
+  const offDates = useMemo(() => {
+    if (!business) {
+      return [];
+    }
+    const out: string[] = [];
+    const days = new Date(calYear, calMonth + 1, 0).getDate();
+    for (let d = 1; d <= days; d++) {
+      const date = ymd(calYear, calMonth, d);
+      if (!blockedDates.includes(date) && resolveDayWindow(profData, business.workingHours, date) === null) {
+        out.push(date);
+      }
+    }
+    return out;
+  }, [business, profData, blockedDates, calYear, calMonth]);
 
   const dayItems = useMemo(() => items.filter((i) => i.date === selectedDate), [items, selectedDate]);
 
@@ -283,13 +303,21 @@ const ProfessionalAgendaScreen: React.FC = () => {
     (dayActive === 1 ? '1 agendamento' : `${dayActive} agendamentos`) +
     (dayCancelled > 0 ? `  -  ${dayCancelled} cancelado${dayCancelled > 1 ? 's' : ''}` : '');
   const selectedBlocked = blockedDates.includes(selectedDate);
+  const selectedOff = offDates.includes(selectedDate);
+  const canEncaixe = selectedDate >= today && !selectedBlocked && !selectedOff;
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Minha Agenda</Text>
         <Text style={styles.headerSubtitle}>{professionalName}</Text>
-        <TouchableOpacity style={styles.addButton} onPress={() => setManualOpen(true)}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => {
+            setEncaixeDate(undefined);
+            setManualOpen(true);
+          }}
+        >
           <Icon name="add" size={18} color={colors.primary} />
           <Text style={styles.addButtonText}>Encaixe</Text>
         </TouchableOpacity>
@@ -351,6 +379,7 @@ const ProfessionalAgendaScreen: React.FC = () => {
             onSelectDate={setSelectedDate}
             today={today}
             blockedDates={blockedDates}
+            offDates={offDates}
             statusColors={STATUS_COLORS}
           />
 
@@ -358,6 +387,26 @@ const ProfessionalAgendaScreen: React.FC = () => {
             <Text style={styles.dayTitle}>{dayTitle(selectedDate)}</Text>
             <Text style={styles.daySubtitle}>{daySummary}</Text>
           </View>
+
+          {selectedOff ? (
+            <View style={styles.blockedNote}>
+              <Icon name="event-busy" size={16} color={colors.lightText} />
+              <Text style={styles.blockedNoteText}>Folga: voce nao atende neste dia</Text>
+            </View>
+          ) : null}
+
+          {canEncaixe ? (
+            <TouchableOpacity
+              style={styles.dayEncaixe}
+              onPress={() => {
+                setEncaixeDate(selectedDate);
+                setManualOpen(true);
+              }}
+            >
+              <Icon name="add" size={18} color={colors.white} />
+              <Text style={styles.dayEncaixeText}>Encaixe neste dia</Text>
+            </TouchableOpacity>
+          ) : null}
 
           {selectedBlocked ? (
             <View style={styles.blockedNote}>
@@ -390,6 +439,7 @@ const ProfessionalAgendaScreen: React.FC = () => {
         businessName={business?.name || ''}
         businessWorkingHours={business?.workingHours}
         userId={user?.uid || ''}
+        initialDate={encaixeDate}
       />
     </View>
   );
@@ -420,6 +470,8 @@ const styles = StyleSheet.create({
   dayTitle: { fontSize: 17, fontWeight: 'bold', color: colors.text },
   daySubtitle: { fontSize: 13, color: colors.lightText, marginTop: 2 },
   blockedNote: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card, borderRadius: 8, padding: 10, marginBottom: 10 },
+  dayEncaixe: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary, borderRadius: 10, paddingVertical: 10, marginBottom: 12 },
+  dayEncaixeText: { color: colors.white, fontWeight: 'bold', fontSize: 14, marginLeft: 4 },
   blockedNoteText: { fontSize: 13, color: colors.lightText, marginLeft: 6 },
   card: { backgroundColor: colors.card, borderRadius: 12, padding: 14, marginBottom: 10 },
   cardTop: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
