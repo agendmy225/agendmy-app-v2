@@ -155,8 +155,11 @@ service cloud.firestore {
 
     // ---------- agendamentos ----------
     match /appointments/{appointmentId} {
-      // leitura aberta para logados: o cliente precisa ver os horarios ocupados
-      allow read: if signedIn();
+      // cada um le so os proprios agendamentos; os horarios livres vem da funcao horariosLivres
+      allow read: if isAdmin() ||
+        (signedIn() && resource.data.clientId == request.auth.uid) ||
+        isBusinessOwner(resource.data.businessId) ||
+        isProfessional(resource.data.professionalId);
       // cliente: so no proprio nome e sempre aguardando a confirmacao do estabelecimento
       allow create: if signedIn() &&
         ((request.resource.data.clientId == request.auth.uid &&
@@ -173,6 +176,11 @@ service cloud.firestore {
           (request.resource.data.status == 'cancelled' &&
            resource.data.status in ['scheduled', 'confirmed'])));
       allow delete: if isAdmin() || isBusinessOwner(resource.data.businessId);
+    }
+
+    // ---------- travas de horario (so a funcao criarAgendamento usa) ----------
+    match /slotLocks/{lockId} {
+      allow read, write: if false;
     }
 
     // ---------- convites de profissionais ----------
