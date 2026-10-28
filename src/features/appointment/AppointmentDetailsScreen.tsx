@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { collection, doc, firebaseDb, getDoc, getDocs, query, where } from '../../config/firebase';
+import { collection, doc, firebaseDb, getDoc, getDocs, query, updateDoc, where } from '../../config/firebase';
 import { colors } from '../../constants/colors';
 import { useAuth } from '../auth/context/AuthContext';
 import { cancelAppointment } from '../../services/appointments';
@@ -74,6 +74,15 @@ const AppointmentDetailsScreen: React.FC = () => {
       }
       list.sort((x, y) => String(x.date + x.time).localeCompare(String(y.date + y.time)));
       setSessions(list);
+
+      // ao abrir os detalhes, a novidade conta como vista (some o numero da aba)
+      const unreadIds = list
+        .filter((s) => s.clientUnread === true && !!user?.uid && s.clientId === user.uid)
+        .map((s) => s.id);
+      if (unreadIds.length > 0) {
+        Promise.all(unreadIds.map((id) => updateDoc(doc(firebaseDb, 'appointments', id), { clientUnread: false })))
+          .catch(() => undefined);
+      }
 
       if (a.businessId) {
         try {

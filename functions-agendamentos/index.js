@@ -5,6 +5,8 @@
 //     duplo; preco, duracao e nomes vem do banco, nao do aparelho
 // Ficam separadas das outras funcoes (Python e comunicados), sem afeta-las.
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 
 admin.initializeApp();
@@ -165,6 +167,7 @@ const loadProfessionalAndHours = async (professionalId) => {
 
 // ---------- horarios livres ----------
 exports.horariosLivres = onCall({ region: REGION }, async (req) => {
+  console.log('horariosLivres chamada', JSON.stringify({ logado: !!req.auth, dados: req.data || null }));
   if (!req.auth) {
     throw new HttpsError('unauthenticated', 'Faça login para ver os horários.');
   }
@@ -184,11 +187,16 @@ exports.horariosLivres = onCall({ region: REGION }, async (req) => {
     prof, wh, date, durationMin, stepMin,
     busy: busyFromDocs(snap.docs, ignoreId),
   });
+  console.log('horariosLivres', JSON.stringify({
+    uid: req.auth.uid, professionalId: professionalId, date: date,
+    durationMin: durationMin, livres: slots.length,
+  }));
   return { slots };
 });
 
 // ---------- criar agendamento do cliente ----------
 exports.criarAgendamento = onCall({ region: REGION }, async (req) => {
+  console.log('criarAgendamento chamada', JSON.stringify({ logado: !!req.auth }));
   if (!req.auth) {
     throw new HttpsError('unauthenticated', 'Faça login para agendar.');
   }
@@ -323,6 +331,191 @@ exports.criarAgendamento = onCall({ region: REGION }, async (req) => {
     return created;
   });
 
+  console.log('criarAgendamento', JSON.stringify({ uid: uid, professionalId: professionalId, ids: ids }));
   return { ids: ids };
 });
 
+// ---------- avisos ao cliente quando o agendamento muda ----------
+const NOTICE_TYPES = ['confirmed', 'cancelled', 'completed', 'no_show'];
+const INVALID_TOKEN_CODES = [
+  'messaging/registration-token-not-registered',
+  'messaging/invalid-registration-token',
+];
+
+const pushToUser = async (uid, title, body, data) => {
+  try {
+    const snap = await db.collection('users').doc(uid).collection('tokens').get();
+    const entries = snap.docs
+      .map((d) => ({ token: d.get('token') || d.id, ref: d.ref }))
+      .filter((e) => !!e.token);
+    if (!entries.length) {
+      return;
+    }
+    const res = await admin.messaging().sendEachForMulticast({
+      tokens: entries.map((e) => e.token),
+      notification: { title: title, body: body },
+      data: data || {},
+      android: { priority: 'high', notification: { channelId: 'default', sound: 'default' } },
+    });
+    await Promise.all(res.responses.map((r, i) =>
+      (!r.success && r.error && INVALID_TOKEN_CODES.includes(r.error.code)
+        ? entries[i].ref.delete().catch(() => null)
+        : null)));
+  } catch (err) {
+    console.error('pushToUser', uid, err);
+  }
+};
+
+exports.avisosAgendamento = onDocumentUpdated({ document: 'appointments/{id}', region: REGION }, async (event) => {
+  const before = (event.data && event.data.before && event.data.before.data()) || {};
+  const after = (event.data && event.data.after && event.data.after.data()) || {};
+  const statusChanged = before.status !== after.status;
+  const timeChanged = before.date !== after.date || before.time !== after.time;
+  // so interessa mudanca de status ou de horario (as gravacoes desta funcao nao mexem nisso)
+  if (!statusChanged && !timeChanged) {
+    return;
+  }
+  // encaixe feito pelo profissional: o "cliente" e o proprio profissional
+  if (!after.clientId || after.createdBy === 'professional') {
+    return;
+  }
+  // o proprio cliente cancelou: nao precisa avisar ele
+  if (statusChanged && after.status === 'cancelled' && after.cancelledBy === 'client' && !timeChanged) {
+    return;
+  }
+  const type = timeChanged ? 'rescheduled' : after.status;
+  if (!timeChanged && !NOTICE_TYPES.includes(type)) {
+    return;
+  }
+
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const update = { clientUnread: true, clientNotice: { type: type, at: now } };
+  if (timeChanged) {
+    update.previousDate = before.date || null;
+    update.previousTime = before.time || null;
+    update.rescheduledAt = now;
+  }
+  await event.data.after.ref.update(update);
+  console.log('avisosAgendamento', JSON.stringify({ id: event.params.id, type: type }));
+
+  if (timeChanged) {
+    await pushToUser(
+      after.clientId,
+      'Horário alterado',
+      'Seu agendamento em ' + (after.businessName || 'o estabelecimento') + ' foi remarcado para ' +
+        formatBr(after.date) + ' às ' + after.time + '.',
+      { appointmentId: event.params.id, screen: 'Appointments', type: 'rescheduled' },
+    );
+  }
+});
+
+// ---------- lembretes do horario (cliente e profissional) ----------
+// Roda a cada 15 minutos. Cliente: lembrete antecipado (padrao 24h antes, ou o tempo que o
+// estabelecimento configurou) e outro 1h antes. Profissional com acesso ao app: 1h antes.
+const BRT_OFFSET_MIN = 180; // Brasilia = UTC-3
+
+const apptEpoch = (date, time) => {
+  const [y, m, d] = String(date).split('-').map(Number);
+  const [h, mi] = String(time || '00:00').split(':').map(Number);
+  if (!y || !m || !d) {
+    return NaN;
+  }
+  return Date.UTC(y, m - 1, d, h || 0, mi || 0) + BRT_OFFSET_MIN * 60000;
+};
+
+const addDays = (date, n) => {
+  const [y, m, d] = date.split('-').map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d + n));
+  return t.toISOString().slice(0, 10);
+};
+
+const dayLabel = (date, today) => {
+  if (date === today) {
+    return 'Hoje';
+  }
+  if (date === addDays(today, 1)) {
+    return 'Amanhã';
+  }
+  return 'Em ' + formatBr(date);
+};
+
+exports.lembretesAgendamento = onSchedule(
+  { schedule: 'every 15 minutes', timeZone: TZ, region: REGION },
+  async () => {
+    const now = Date.now();
+    const today = nowInBrazil().date;
+    const days = [today, addDays(today, 1), addDays(today, 2)];
+    const snap = await db.collection('appointments').where('date', 'in', days).get();
+    const bizCache = {};
+    const profCache = {};
+    let sent = 0;
+
+    for (const docSnap of snap.docs) {
+      const a = docSnap.data() || {};
+      if (!OPEN.includes(a.status)) {
+        continue;
+      }
+      const minutesUntil = (apptEpoch(a.date, a.time) - now) / 60000;
+      if (!(minutesUntil > 0)) {
+        continue;
+      }
+      try {
+        if (a.businessId && !(a.businessId in bizCache)) {
+          const b = await db.collection('businesses').doc(a.businessId).get();
+          bizCache[a.businessId] = b.exists ? b.data() || {} : {};
+        }
+        const biz = bizCache[a.businessId] || {};
+        const notif = biz.notifications || {};
+        const remindClient = notif.reminderEnabled !== false && a.createdBy !== 'professional' && !!a.clientId;
+        const earlyHours = Number(notif.reminderTime) > 1 ? Number(notif.reminderTime) : 24;
+        const where = (a.businessName || biz.name || 'o estabelecimento');
+        const what = (a.serviceName || 'seu atendimento');
+        const update = {};
+
+        // lembrete antecipado do cliente (janela de 1h depois de cruzar o tempo configurado)
+        if (remindClient && !a.reminderSent && minutesUntil <= earlyHours * 60 && minutesUntil > earlyHours * 60 - 60 &&
+            minutesUntil > 75) {
+          await pushToUser(a.clientId, 'Lembrete de agendamento',
+            dayLabel(a.date, today) + ' às ' + a.time + ': ' + what + ' em ' + where +
+              (a.professionalName ? ' com ' + a.professionalName : '') + '.',
+            { appointmentId: docSnap.id, screen: 'Appointments', type: 'reminder' });
+          update.reminderSent = true;
+          sent++;
+        }
+
+        // 1h antes: cliente
+        if (remindClient && !a.reminderSoonSent && minutesUntil <= 60) {
+          await pushToUser(a.clientId, 'Seu horário está chegando',
+            'Às ' + a.time + ': ' + what + ' em ' + where + '. Não se atrase!',
+            { appointmentId: docSnap.id, screen: 'Appointments', type: 'reminder_soon' });
+          update.reminderSoonSent = true;
+          update.reminderSent = true;
+          sent++;
+        }
+
+        // 1h antes: profissional (se ele tem acesso ao app)
+        if (a.professionalId && !a.professionalReminderSent && minutesUntil <= 60) {
+          if (!(a.professionalId in profCache)) {
+            const p = await db.collection('professionals').doc(a.professionalId).get();
+            profCache[a.professionalId] = p.exists ? p.data() || {} : {};
+          }
+          const prof = profCache[a.professionalId] || {};
+          if (prof.appAccess === true && prof.accessUserId) {
+            await pushToUser(prof.accessUserId, 'Próximo atendimento',
+              'Às ' + a.time + ': ' + (a.clientName || 'Cliente') + ' - ' + what + '.',
+              { appointmentId: docSnap.id, screen: 'ProfessionalAgenda', type: 'reminder_professional' });
+            sent++;
+          }
+          update.professionalReminderSent = true;
+        }
+
+        if (Object.keys(update).length) {
+          await docSnap.ref.update(update);
+        }
+      } catch (err) {
+        console.error('lembretesAgendamento', docSnap.id, err);
+      }
+    }
+    console.log('lembretesAgendamento', JSON.stringify({ verificados: snap.size, enviados: sent }));
+  },
+);

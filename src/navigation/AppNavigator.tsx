@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppStackParamList, ClientTabParamList, HomeStackParamList } from '../types/types';
 import { useAuth } from '../features/auth/context/AuthContext';
+import { useClientUnreadCount } from '../hooks/useClientUnreadCount';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import { colors } from '../constants/colors';
 
@@ -110,6 +111,9 @@ const HomeStackNavigator: React.FC = () => {
 
 // Navigator para clientes
 const ClientTabNavigator: React.FC = () => {
+  const { user: tabUser } = useAuth();
+  const unread = useClientUnreadCount(tabUser?.uid);
+
   return (
     <SafeAreaView style={styles.safeAreaContainer} edges={['top', 'bottom']}>
       <ClientTab.Navigator
@@ -139,6 +143,7 @@ const ClientTabNavigator: React.FC = () => {
           options={{
             tabBarLabel: 'Agendamentos',
             tabBarIcon: ScheduleIcon,
+            tabBarBadge: unread > 0 ? unread : undefined,
           }}
         />
         <ClientTab.Screen

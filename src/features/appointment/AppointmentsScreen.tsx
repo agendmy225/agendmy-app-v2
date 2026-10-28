@@ -242,12 +242,38 @@ const AppointmentsScreen: React.FC = () => {
 
   const openDetails = (item: AppointmentType) => navigation.navigate('AppointmentDetails', { appointmentId: item.id });
 
+  // novidade que o cliente ainda nao viu (confirmado, remarcado, cancelado...)
+  const NOTICE_LABELS: Record<string, string> = {
+    confirmed: 'agendamento confirmado',
+    rescheduled: 'horário alterado',
+    cancelled: 'cancelado pelo estabelecimento',
+    completed: 'atendimento concluído',
+    no_show: 'falta registrada',
+  };
+  const unreadNotice = (g: AppointmentGroup): string | null => {
+    if (isOwner) {
+      return null;
+    }
+    const s = g.sessions.find((x) => (x as any).clientUnread === true);
+    if (!s) {
+      return null;
+    }
+    const t = (s as any).clientNotice && (s as any).clientNotice.type;
+    return NOTICE_LABELS[t] || 'atualização';
+  };
+
   const renderAppointmentItem = ({ item: group }: { item: AppointmentGroup }) => {
     const item = group.main;
     const isPackage = group.sessions.length > 1;
     const packageTotal = group.sessions.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
+    const notice = unreadNotice(group);
     return (
     <View style={styles.appointmentCardContainer}>
+      {notice ? (
+        <View style={styles.newBanner}>
+          <Text style={styles.newBannerText}>{`Novo: ${notice}`}</Text>
+        </View>
+      ) : null}
       <TouchableOpacity
         style={styles.appointmentCard}
         onPress={() => openDetails(item)}
@@ -522,6 +548,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
+  },
+  newBanner: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  newBannerText: {
+    color: colors.white,
+    fontWeight: 'bold',
+    fontSize: 13,
   },
   packageBox: {
     marginTop: 6,

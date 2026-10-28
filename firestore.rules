@@ -171,7 +171,9 @@ service cloud.firestore {
         isProfessional(resource.data.professionalId) ||
         // cliente: so cancela (enquanto aberto) e marca como avaliado
         (signedIn() && resource.data.clientId == request.auth.uid &&
-         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reviewed', 'updatedAt']) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reviewed', 'updatedAt', 'clientUnread', 'cancelledBy']) &&
+         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['clientUnread']) || request.resource.data.clientUnread == false) &&
+         (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['cancelledBy']) || request.resource.data.cancelledBy == 'client') &&
          (request.resource.data.status == resource.data.status ||
           (request.resource.data.status == 'cancelled' &&
            resource.data.status in ['scheduled', 'confirmed'])));

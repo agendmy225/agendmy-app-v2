@@ -152,6 +152,7 @@ export const cancelAppointment = async (appointmentId: string): Promise<void> =>
     // Atualizar o status do agendamento para 'cancelled'
     await updateDoc(doc(firebaseDb, 'appointments', appointmentId), {
       status: 'cancelled',
+      cancelledBy: 'client',
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
@@ -279,7 +280,7 @@ export const getProfessionalAppointments = async (
       const snap2 = await getDocs(q2);
       const list = snap2.docs.map((d: FirebaseFirestoreTypes.QueryDocumentSnapshot) =>
         ({ id: d.id, ...d.data() } as Appointment));
-      return list.sort((x, y) =>
+      return list.sort((x: Appointment, y: Appointment) =>
         (y.date || '').localeCompare(x.date || '') || (x.time || '').localeCompare(y.time || ''));
     }
     let queryRef = query(
