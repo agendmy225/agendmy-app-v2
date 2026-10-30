@@ -62,6 +62,11 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
   useEffect(() => {
     // Filtrar profissionais que podem realizar este serviço
     const filtered = professionals.filter(professional => {
+      // o dono escolheu quem faz este servico (Gerenciar Servicos): vale essa lista
+      const allowed = (service as any).professionalIds;
+      if (Array.isArray(allowed) && allowed.length > 0) {
+        return allowed.includes(professional.id);
+      }
       // Se o profissional não tem serviços definidos, ele pode realizar todos os serviços
       if (!professional.services || professional.services.length === 0) {
         return true;

@@ -7,6 +7,7 @@ import { colors } from '../constants/colors';
 import { OwnerTabParamList } from '../types/types';
 import { useAuth } from '../features/auth/context/AuthContext';
 import { useChatUnreadCount } from '../hooks/useChatUnreadCount';
+import { useOwnerPendingCount } from '../hooks/useOwnerPendingCount';
 
 // Telas do proprietário
 // import DashboardScreen from '../screens/owner/DashboardScreen'; // Será acessado via BusinessHubScreen
@@ -37,6 +38,7 @@ const renderBusinessHubIcon = ({ color, size }: { color: string; size: number })
 const OwnerTabNavigator: React.FC = () => {
   const { user } = useAuth();
   const chatUnread = useChatUnreadCount(user?.uid);
+  const pending = useOwnerPendingCount(user?.businessId);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -74,6 +76,7 @@ const OwnerTabNavigator: React.FC = () => {
           options={{
             tabBarLabel: 'Agendamentos',
             tabBarIcon: renderAppointmentsIcon,
+            tabBarBadge: pending > 0 ? pending : undefined,
           }}
           listeners={({ navigation }) => ({
             tabPress: (_e) => {

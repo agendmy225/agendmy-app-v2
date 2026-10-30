@@ -17,6 +17,7 @@ import { useAuth } from '../auth/context/AuthContext';
 import { colors } from '../../constants/colors';
 import { AppStackParamList } from '../../types/types';
 import { Chat, getUserConversationsAsync } from '../../services/chat';
+import { doc, firebaseDb, getDoc } from '../../config/firebase';
 
 type ChatManagementNavigationProp = StackNavigationProp<AppStackParamList>;
 
@@ -26,6 +27,7 @@ const ChatManagementScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [conversations, setConversations] = useState<Chat[]>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
   const insets = useSafeAreaInsets();
 
   const loadConversations = useCallback(async () => {
@@ -43,6 +45,20 @@ const ChatManagementScreen: React.FC = () => {
         chat.ownerId === user.uid || chat.businessId,
       );
       setConversations(ownerConversations);
+      // nome de quem conversa (cliente)
+      const otherIds = Array.from(new Set(ownerConversations
+        .map((c) => (c.participants || []).find((p) => p !== user.uid))
+        .filter(Boolean))) as string[];
+      const found = await Promise.all(otherIds.map(async (id) => {
+        try {
+          const s = await getDoc(doc(firebaseDb, 'users', id));
+          const d: any = s.exists() ? s.data() || {} : {};
+          return [id, d.name || d.displayName || (d.email ? String(d.email).split('@')[0] : '')] as [string, string];
+        } catch {
+          return [id, ''] as [string, string];
+        }
+      }));
+      setNames(Object.fromEntries(found.filter(([, n]) => !!n)));
     } catch (error) {
       console.error('Erro ao carregar conversas:', error);
     } finally {
@@ -70,7 +86,7 @@ const ChatManagementScreen: React.FC = () => {
     navigation.navigate('Chat', {
       chatId: conversation.id,
       otherUserId: otherUserId,
-      otherUserName: conversation.businessName ? `Cliente - ${conversation.businessName}` : 'Cliente',
+      otherUserName: names[otherUserId] || 'Cliente',
       businessId: conversation.businessId,
       businessName: conversation.businessName,
     });
@@ -100,7 +116,7 @@ const ChatManagementScreen: React.FC = () => {
               styles.clientName,
               hasUnreadMessages && styles.unreadText,
             ]}>
-              {item.businessName ? `Cliente - ${item.businessName}` : `Cliente ${otherUserId?.slice(0, 8) || 'Desconhecido'}`}
+              {(otherUserId && names[otherUserId]) || 'Cliente'}
             </Text>
             <Text style={styles.messageTime}>
               {lastMessageTime.toLocaleDateString('pt-BR', {

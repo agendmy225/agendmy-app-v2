@@ -128,8 +128,8 @@ const ProfessionalManagementScreen: React.FC = () => {
     if (searchText) {
       const lowercasedText = searchText.toLowerCase();
       filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(lowercasedText) ||
-        p.specialty.toLowerCase().includes(lowercasedText)
+        (p.name || '').toLowerCase().includes(lowercasedText) ||
+        (p.specialty || '').toLowerCase().includes(lowercasedText)
       );
     }
 

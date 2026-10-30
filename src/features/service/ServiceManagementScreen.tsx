@@ -110,9 +110,9 @@ const ServiceManagementScreen: React.FC = () => {
       const searchLower = searchText.toLowerCase();
       filtered = filtered.filter(
         service =>
-          service.name.toLowerCase().includes(searchLower) ||
-          service.description.toLowerCase().includes(searchLower) ||
-          service.category.toLowerCase().includes(searchLower),
+          (service.name || '').toLowerCase().includes(searchLower) ||
+          (service.description || '').toLowerCase().includes(searchLower) ||
+          (service.category || '').toLowerCase().includes(searchLower),
       );
     }
 

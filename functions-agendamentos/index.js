@@ -241,6 +241,10 @@ exports.criarAgendamento = onCall({ region: REGION }, async (req) => {
   if (Array.isArray(prof.services) && prof.services.length > 0 && !prof.services.includes(serviceId)) {
     throw new HttpsError('failed-precondition', 'Este profissional não realiza esse serviço.');
   }
+  // o dono escolheu quem faz o servico (Gerenciar Servicos)
+  if (Array.isArray(svc.professionalIds) && svc.professionalIds.length > 0 && !svc.professionalIds.includes(professionalId)) {
+    throw new HttpsError('failed-precondition', 'Este profissional não realiza esse serviço.');
+  }
 
   const required = Number(svc.numSessions) > 1 ? Number(svc.numSessions) : 1;
   if (sessions.length !== required) {

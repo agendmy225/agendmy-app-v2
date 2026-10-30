@@ -377,7 +377,7 @@ ${appDownloadUrl}
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => navigation.navigate('AppointmentManagement')}
+            onPress={() => navigation.navigate('OwnerTabs', { screen: 'AppointmentManagement' })}
           >
             <Icon name="event" size={24} color={colors.primary} style={styles.actionIcon} />
             <Text style={styles.actionText}>Gerenciar Agendamentos</Text>

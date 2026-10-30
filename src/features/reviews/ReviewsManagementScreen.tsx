@@ -110,8 +110,8 @@ const ReviewsManagementScreen: React.FC = () => {
       const searchLower = searchText.toLowerCase();
       filtered = filtered.filter(
         review =>
-          review.userName.toLowerCase().includes(searchLower) ||
-          review.comment.toLowerCase().includes(searchLower) ||
+          (review.userName || '').toLowerCase().includes(searchLower) ||
+          (review.comment || '').toLowerCase().includes(searchLower) ||
           (review.professionalName && review.professionalName.toLowerCase().includes(searchLower)),
       );
     }

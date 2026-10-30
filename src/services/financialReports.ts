@@ -1,40 +1,46 @@
-// Following React Native Firebase v22 modular API patterns  
-// https://rnfirebase.io/migrating-to-v22
-import { 
-  firebaseDb, 
-  Timestamp, 
-  serverTimestamp, 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  where, 
-  query, 
-  addDoc, 
-  orderBy, 
-  limit as limitTo, 
-  deleteDoc 
+// src/services/financialReports.ts
+// Relatorios financeiros do estabelecimento: receita, comissao por profissional e receita por servico.
+// Os agendamentos guardam a data como texto 'AAAA-MM-DD', entao a busca compara texto com texto.
+// Comissao: taxa do profissional (commissionRate, se existir) ou a taxa padrao das configuracoes.
+// Following React Native Firebase v22 modular API patterns
+import {
+  firebaseDb,
+  Timestamp,
+  serverTimestamp,
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  where,
+  query,
+  addDoc,
+  orderBy,
+  limit as limitTo,
+  deleteDoc,
 } from '../config/firebase';
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { isRevenueStatus, isCanceledStatus, toValidPrice } from '../constants/reportConfig';
+import { toLocalDateString } from '../utils/localDate';
 
-// Tipos
 export interface FinancialReport {
   id?: string;
   businessId: string;
   period: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom';
-  startDate: Timestamp; // Timestamp
-  endDate: Timestamp; // Timestamp
+  startDate: Timestamp;
+  endDate: Timestamp;
   totalRevenue: number;
   totalAppointments: number;
   completedAppointments: number;
   canceledAppointments: number;
+  noShowAppointments?: number;
+  totalCommission?: number;
   professionalCommissions: {
     [professionalId: string]: {
       name: string;
       totalRevenue: number;
       appointmentsCount: number;
       commission: number;
+      commissionRate?: number;
     };
   };
   serviceRevenue: {
@@ -47,7 +53,6 @@ export interface FinancialReport {
   createdAt?: Timestamp;
 }
 
-// Tipos para parâmetros de geração de relatório
 export interface ReportParams {
   businessId: string;
   period: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom';
@@ -55,405 +60,192 @@ export interface ReportParams {
   endDate: Date;
 }
 
-// Gerar relatório financeiro
-export const generateFinancialReport = async (params: ReportParams): Promise<FinancialReport> => {
-  try {
-    console.log('🔵 Iniciando geração de relatório financeiro:', params);
-    const { businessId, period, startDate, endDate } = params;
+type AnyData = Record<string, any>;
 
-    // Validar parâmetros
-    if (!businessId || !period || !startDate || !endDate) {
-      throw new Error('Parâmetros obrigatórios não fornecidos para gerar o relatório.');
+// taxa guardada como fracao (0,5 = 50%); aceita tambem quem gravou 50
+const normalizeRate = (v: unknown): number => {
+  const n = Number(v);
+  if (!isFinite(n) || n <= 0) {
+    return 0;
+  }
+  return n > 1 ? n / 100 : n;
+};
+
+const loadAppointments = async (businessId: string, startDate: Date, endDate: Date): Promise<AnyData[]> => {
+  const snap = await getDocs(query(
+    collection(firebaseDb, 'appointments'),
+    where('businessId', '==', businessId),
+    where('date', '>=', toLocalDateString(startDate)),
+    where('date', '<=', toLocalDateString(endDate)),
+  ));
+  return snap.docs.map((d: FirebaseFirestoreTypes.QueryDocumentSnapshot) => ({ id: d.id, ...(d.data() || {}) }));
+};
+
+const loadProfessionals = async (ids: string[]): Promise<Record<string, AnyData>> => {
+  const out: Record<string, AnyData> = {};
+  await Promise.all(ids.map(async (id) => {
+    try {
+      const s = await getDoc(doc(firebaseDb, 'professionals', id));
+      out[id] = s.exists() ? s.data() || {} : {};
+    } catch {
+      out[id] = {};
     }
+  }));
+  return out;
+};
 
-    // Converter datas para Timestamp do firebaseDb
-    const startTimestamp = Timestamp.fromDate(startDate);
-    const endTimestamp = Timestamp.fromDate(endDate);
-    console.log('📅 Período do relatório:', { start: startDate, end: endDate });
-
-    // Buscar agendamentos no período - CORRIGIDO: usar coleção raiz 'appointments'
-    const appointmentsQuery = query(
-      collection(firebaseDb, 'appointments'),
-      where('businessId', '==', businessId),
-      where('date', '>=', startTimestamp),
-      where('date', '<=', endTimestamp)
-    );
-    const appointmentsSnapshot = await getDocs(appointmentsQuery);
-    console.log('📊 Agendamentos encontrados:', appointmentsSnapshot.size);
-
-    // Verificar se existe ao menos uma collection de appointments
-    if (!appointmentsSnapshot) {
-      throw new Error('Não foi possível acessar os dados de agendamentos.');
+const loadServiceNames = async (businessId: string, ids: string[]): Promise<Record<string, string>> => {
+  const out: Record<string, string> = {};
+  await Promise.all(ids.map(async (id) => {
+    try {
+      const s = await getDoc(doc(firebaseDb, 'businesses', businessId, 'services', id));
+      out[id] = (s.exists() && (s.data() || {}).name) || '';
+    } catch {
+      out[id] = '';
     }
+  }));
+  return out;
+};
 
-    // Inicializar dados do relatório
-    let totalRevenue = 0;
-    const totalAppointments = appointmentsSnapshot.size;
-    let completedAppointments = 0;
-    let canceledAppointments = 0;
+/** Calcula os numeros do periodo (sem salvar). */
+export const computeFinancialData = async (businessId: string, startDate: Date, endDate: Date) => {
+  const businessSnap = await getDoc(doc(firebaseDb, 'businesses', businessId));
+  if (!businessSnap.exists()) {
+    throw new Error('Estabelecimento não encontrado.');
+  }
+  const business = businessSnap.data() || {};
+  const defaultRate = normalizeRate(business.defaultCommissionRate);
 
-    const professionalCommissions: FinancialReport['professionalCommissions'] = {};
-    const serviceRevenue: FinancialReport['serviceRevenue'] = {};
+  const appointments = await loadAppointments(businessId, startDate, endDate);
+  const completed = appointments.filter((a) => isRevenueStatus(a.status));
+  const profIds = Array.from(new Set(completed.map((a) => a.professionalId).filter(Boolean))) as string[];
+  const serviceIds = Array.from(new Set(completed.map((a) => a.serviceId).filter(Boolean))) as string[];
+  const [profs, serviceNames] = await Promise.all([
+    loadProfessionals(profIds),
+    loadServiceNames(businessId, serviceIds),
+  ]);
 
-    // Cache para taxas de comissão dos profissionais para evitar buscas repetidas
-    const professionalRatesCache = new Map<string, number>();
+  let totalRevenue = 0;
+  let totalCommission = 0;
+  const professionalCommissions: FinancialReport['professionalCommissions'] = {};
+  const serviceRevenue: FinancialReport['serviceRevenue'] = {};
 
-    // Buscar configurações de comissão do estabelecimento
-    const businessDocRef = doc(firebaseDb, 'businesses', businessId);
-    const businessDoc = await getDoc(businessDocRef);
+  completed.forEach((a) => {
+    const price = toValidPrice(a.price);
+    totalRevenue += price;
 
-    if (!businessDoc.exists()) {
-      throw new Error('Estabelecimento não encontrado.');
-    }
-
-    const businessData = businessDoc.data() || {};
-    // IMPORTANTE: Sempre usar configuração do estabelecimento - nunca usar valor mockado
-    const defaultCommissionRate = businessData.defaultCommissionRate;
-
-    if (!defaultCommissionRate || defaultCommissionRate <= 0) {
-      throw new Error('Taxa de comissão não configurada para este estabelecimento. Configure nas configurações do negócio.');
-    }
-
-    // Processar cada agendamento
-    for (const appointmentDoc of appointmentsSnapshot.docs) {
-      const appointment = appointmentDoc.data();
-      console.log('📋 Processando agendamento:', {
-        id: appointmentDoc.id,
-        status: appointment.status,
-        price: appointment.price,
-        serviceId: appointment.serviceId,
-        professionalId: appointment.professionalId
-      });
-
-      if (isRevenueStatus(appointment.status)) {
-        completedAppointments++;
-
-        // CORRIGIDO: usar função de validação de preço
-        const price = toValidPrice(appointment.price);
-        if (price > 0) {
-          totalRevenue += price;
-          console.log('💰 Receita adicionada:', price, 'Total:', totalRevenue);
-        }
-
-        // Processar receita por serviço
-        if (appointment.serviceId && price > 0) {
-          if (!serviceRevenue[appointment.serviceId]) {
-            try {
-              // Buscar nome do serviço na subcoleção do business
-              const serviceDocRef = doc(firebaseDb, 'businesses', businessId, 'services', appointment.serviceId);
-              const serviceDoc = await getDoc(serviceDocRef);
-
-              let serviceName = 'Serviço Desconhecido';
-              if (serviceDoc.exists()) {
-                const serviceData = serviceDoc.data();
-                serviceName = serviceData?.name || 'Serviço Desconhecido';
-              } else {
-                // Tentar buscar na coleção raiz de services como fallback
-                try {
-                  const rootServiceRef = doc(firebaseDb, 'services', appointment.serviceId);
-                  const rootServiceDoc = await getDoc(rootServiceRef);
-                  if (rootServiceDoc.exists()) {
-                    const rootServiceData = rootServiceDoc.data();
-                    serviceName = rootServiceData?.name || 'Serviço Desconhecido';
-                  }
-                } catch {
-                  console.log('⚠️ Serviço não encontrado em nenhuma coleção:', appointment.serviceId);
-                }
-              }
-
-              serviceRevenue[appointment.serviceId] = {
-                name: serviceName,
-                totalRevenue: 0,
-                appointmentsCount: 0,
-              };
-            } catch (serviceError) {
-              console.error('❌ Erro ao buscar dados do serviço:', serviceError);
-              serviceRevenue[appointment.serviceId] = {
-                name: 'Serviço Desconhecido',
-                totalRevenue: 0,
-                appointmentsCount: 0,
-              };
-            }
-          }
-
-          serviceRevenue[appointment.serviceId].totalRevenue += price;
-          serviceRevenue[appointment.serviceId].appointmentsCount += 1;
-          console.log('🔧 Receita do serviço atualizada:', appointment.serviceId, serviceRevenue[appointment.serviceId]);
-        }
-
-        // Processar comissão por profissional
-        if (appointment.professionalId && price > 0) {
-          const profId = appointment.professionalId;
-          let rateForCalculation: number;
-
-          if (professionalRatesCache.has(profId)) {
-            rateForCalculation = professionalRatesCache.get(profId)!;
-          } else {
-            try {
-              // CORRIGIDO: Buscar profissional na subcoleção do business primeiro
-              let professionalDocRef = doc(firebaseDb, 'businesses', businessId, 'professionals', profId);
-              let professionalDoc = await getDoc(professionalDocRef);
-              let professionalData: any = null;
-
-              if (professionalDoc.exists()) {
-                professionalData = professionalDoc.data();
-              } else {
-                // Fallback: tentar buscar na coleção raiz professionals
-                professionalDocRef = doc(firebaseDb, 'professionals', profId);
-                professionalDoc = await getDoc(professionalDocRef);
-                if (professionalDoc.exists()) {
-                  professionalData = professionalDoc.data();
-                }
-              }
-
-              // IMPORTANTE: Usar taxa do profissional específico ou padrão do business
-              // NUNCA usar valor mockado - se não tiver configuração, alertar usuário
-              rateForCalculation = professionalData?.commissionRate || defaultCommissionRate;
-
-              if (!rateForCalculation || rateForCalculation <= 0) {
-                console.warn('⚠️ Taxa de comissão não configurada para profissional:', profId);
-                // Pular este profissional se não tiver configuração válida
-                continue;
-              }
-              professionalRatesCache.set(profId, rateForCalculation);
-
-              // Inicializar a entrada em professionalCommissions se for a primeira vez
-              if (!professionalCommissions[profId]) {
-                const professionalName = professionalData?.name || `Profissional ${profId.substring(0, 8)}`;
-                professionalCommissions[profId] = {
-                  name: professionalName,
-                  totalRevenue: 0,
-                  appointmentsCount: 0,
-                  commission: 0,
-                };
-                console.log('👤 Profissional adicionado:', professionalName, 'Taxa:', rateForCalculation);
-              }
-            } catch (profError) {
-              console.error('❌ Erro ao buscar dados do profissional:', profError);
-              // IMPORTANTE: Se não conseguir buscar dados do profissional, pular
-              // NÃO usar taxa mockada/padrão
-              console.warn('⚠️ Pulando profissional sem dados válidos:', profId);
-              continue;
-            }
-          }
-
-          professionalCommissions[profId].totalRevenue += price;
-          professionalCommissions[profId].appointmentsCount += 1;
-          const commissionAmount = price * rateForCalculation;
-          professionalCommissions[profId].commission += commissionAmount;
-          console.log('💼 Comissão calculada para', professionalCommissions[profId].name, ':', commissionAmount, 'Taxa:', rateForCalculation);
-        }
-      } else if (isCanceledStatus(appointment.status)) {
-        canceledAppointments++;
-        console.log('❌ Agendamento cancelado contabilizado');
+    if (a.serviceId) {
+      if (!serviceRevenue[a.serviceId]) {
+        serviceRevenue[a.serviceId] = {
+          name: serviceNames[a.serviceId] || a.serviceName || 'Serviço',
+          totalRevenue: 0,
+          appointmentsCount: 0,
+        };
       }
+      serviceRevenue[a.serviceId].totalRevenue += price;
+      serviceRevenue[a.serviceId].appointmentsCount += 1;
     }
 
-    console.log('📊 Resumo do relatório:', {
-      totalRevenue,
-      totalAppointments,
-      completedAppointments,
-      canceledAppointments,
-      professionalCommissionsCount: Object.keys(professionalCommissions).length,
-      serviceRevenueCount: Object.keys(serviceRevenue).length
-    });
-
-    // Criar o relatório
-    const report: FinancialReport = {
-      businessId,
-      period,
-      startDate: startTimestamp,
-      endDate: endTimestamp,
-      totalRevenue,
-      totalAppointments,
-      completedAppointments,
-      canceledAppointments,
-      professionalCommissions,
-      serviceRevenue,
-      createdAt: serverTimestamp() as Timestamp,
-    };
-
-    // Salvar o relatório no firebaseDb
-    const reportsCollectionRef = collection(firebaseDb, 'businesses', businessId, 'financialReports');
-    const reportRef = await addDoc(reportsCollectionRef, report);
-    console.log('✅ Relatório salvo com ID:', reportRef.id);
-
-    return {
-      ...report,
-      id: reportRef.id,
-    };
-  } catch (error) {
-    console.error('❌ Erro ao gerar relatório financeiro:', error);
-    if (error instanceof Error) {
-      throw error; // Re-throw se já é um Error com mensagem específica
+    if (a.professionalId) {
+      const prof = profs[a.professionalId] || {};
+      const rate = normalizeRate(prof.commissionRate) || defaultRate;
+      if (!professionalCommissions[a.professionalId]) {
+        professionalCommissions[a.professionalId] = {
+          name: prof.name || a.professionalName || 'Profissional',
+          totalRevenue: 0,
+          appointmentsCount: 0,
+          commission: 0,
+          commissionRate: rate,
+        };
+      }
+      const entry = professionalCommissions[a.professionalId];
+      entry.totalRevenue += price;
+      entry.appointmentsCount += 1;
+      const c = Math.round(price * rate * 100) / 100;
+      entry.commission = Math.round((entry.commission + c) * 100) / 100;
+      totalCommission += c;
     }
-    throw new Error('Erro desconhecido ao gerar relatório financeiro. Tente novamente.');
+  });
+
+  return {
+    defaultRate,
+    totalRevenue: Math.round(totalRevenue * 100) / 100,
+    totalCommission: Math.round(totalCommission * 100) / 100,
+    totalAppointments: appointments.length,
+    completedAppointments: completed.length,
+    canceledAppointments: appointments.filter((a) => isCanceledStatus(a.status)).length,
+    noShowAppointments: appointments.filter((a) => a.status === 'no_show').length,
+    professionalCommissions,
+    serviceRevenue,
+  };
+};
+
+// Gerar relatorio financeiro (calcula e salva)
+export const generateFinancialReport = async (params: ReportParams): Promise<FinancialReport> => {
+  const { businessId, period, startDate, endDate } = params;
+  if (!businessId || !period || !startDate || !endDate) {
+    throw new Error('Parâmetros obrigatórios não fornecidos para gerar o relatório.');
+  }
+  const data = await computeFinancialData(businessId, startDate, endDate);
+  const report: FinancialReport = {
+    businessId,
+    period,
+    startDate: Timestamp.fromDate(startDate),
+    endDate: Timestamp.fromDate(endDate),
+    totalRevenue: data.totalRevenue,
+    totalCommission: data.totalCommission,
+    totalAppointments: data.totalAppointments,
+    completedAppointments: data.completedAppointments,
+    canceledAppointments: data.canceledAppointments,
+    noShowAppointments: data.noShowAppointments,
+    professionalCommissions: data.professionalCommissions,
+    serviceRevenue: data.serviceRevenue,
+    createdAt: serverTimestamp() as Timestamp,
+  };
+  try {
+    const ref = await addDoc(collection(firebaseDb, 'businesses', businessId, 'financialReports'), report);
+    return { ...report, id: ref.id };
+  } catch {
+    // se nao conseguir salvar, mostra mesmo assim
+    return report;
   }
 };
 
-// Buscar relatórios financeiros de um estabelecimento
+// Buscar relatorios financeiros salvos
 export const getFinancialReports = async (businessId: string, limit = 10): Promise<FinancialReport[]> => {
-  try {
-    const reportsCollectionRef = collection(firebaseDb, 'businesses', businessId, 'financialReports');
-    const reportsQuery = query(
-      reportsCollectionRef,
-      orderBy('createdAt', 'desc'),
-      limitTo(limit)
-    );
-    const reportsSnapshot = await getDocs(reportsQuery);
-
-    const reports: FinancialReport[] = [];
-
-    reportsSnapshot.forEach((docSnapshot: FirebaseFirestoreTypes.QueryDocumentSnapshot) => {
-      reports.push({
-        id: docSnapshot.id,
-        ...docSnapshot.data() as FinancialReport,
-      });
-    });
-
-    return reports;
-  } catch (error) {
-    throw error;
-  }
+  const snap = await getDocs(query(
+    collection(firebaseDb, 'businesses', businessId, 'financialReports'),
+    orderBy('createdAt', 'desc'),
+    limitTo(limit),
+  ));
+  return snap.docs.map((d: FirebaseFirestoreTypes.QueryDocumentSnapshot) => ({
+    id: d.id,
+    ...(d.data() as FinancialReport),
+  }));
 };
 
-// Buscar um relatório financeiro específico
 export const getFinancialReportById = async (businessId: string, reportId: string): Promise<FinancialReport | null> => {
-  try {
-    const reportDocRef = doc(firebaseDb, 'businesses', businessId, 'financialReports', reportId);
-    const reportDoc = await getDoc(reportDocRef);
-
-    if (!reportDoc.exists()) {
-      return null;
-    }
-
-    return {
-      id: reportDoc.id,
-      ...reportDoc.data() as FinancialReport,
-    };
-  } catch (error) {
-    throw error;
+  const s = await getDoc(doc(firebaseDb, 'businesses', businessId, 'financialReports', reportId));
+  if (!s.exists()) {
+    return null;
   }
+  return { id: s.id, ...(s.data() as FinancialReport) };
 };
 
-// Excluir um relatório financeiro
 export const deleteFinancialReport = async (businessId: string, reportId: string): Promise<void> => {
-  try {
-    const reportDocRef = doc(firebaseDb, 'businesses', businessId, 'financialReports', reportId);
-    await deleteDoc(reportDocRef);
-  } catch (error) {
-    throw error;
-  }
+  await deleteDoc(doc(firebaseDb, 'businesses', businessId, 'financialReports', reportId));
 };
 
-// Calcular comissões por período
+// Comissoes por periodo
 export const calculateCommissions = async (
   businessId: string,
   startDate: Date,
   endDate: Date,
 ): Promise<{ [professionalId: string]: { name: string; commission: number } }> => {
-  try {
-    console.log('🔵 Calculando comissões para período:', { businessId, startDate, endDate });
-
-    // Converter datas para Timestamp do firebaseDb
-    const startTimestamp = Timestamp.fromDate(startDate);
-    const endTimestamp = Timestamp.fromDate(endDate);
-
-    // CORRIGIDO: Buscar agendamentos na coleção raiz
-    const appointmentsQuery = query(
-      collection(firebaseDb, 'appointments'),
-      where('businessId', '==', businessId),
-      where('date', '>=', startTimestamp),
-      where('date', '<=', endTimestamp),
-      where('status', '==', 'completed')
-    );
-    const appointmentsSnapshot = await getDocs(appointmentsQuery);
-    console.log('📊 Agendamentos concluídos encontrados:', appointmentsSnapshot.size);
-
-    // Buscar configurações de comissão do estabelecimento
-    const businessDocRef = doc(firebaseDb, 'businesses', businessId);
-    const businessDoc = await getDoc(businessDocRef);
-
-    const businessData = businessDoc.data() || {};
-    // IMPORTANTE: Sempre usar configuração do estabelecimento - nunca usar valor mockado
-    const defaultCommissionRate = businessData.defaultCommissionRate;
-
-    if (!defaultCommissionRate || defaultCommissionRate <= 0) {
-      throw new Error('Taxa de comissão não configurada para este estabelecimento. Configure nas configurações do negócio.');
-    }
-
-    // Calcular comissões por profissional
-    const commissions: { [professionalId: string]: { name: string; commission: number } } = {};
-    const professionalRatesCache = new Map<string, number>(); // Cache para taxas
-
-    for (const appointmentDoc of appointmentsSnapshot.docs) {
-      const appointment = appointmentDoc.data();
-
-      if (appointment.professionalId && appointment.price) {
-        const profId = appointment.professionalId;
-        // CORRIGIDO: usar função de validação de preço
-        const price = toValidPrice(appointment.price);
-
-        if (price <= 0) continue;
-
-        let rateForCalculation: number;
-
-        if (professionalRatesCache.has(profId)) {
-          rateForCalculation = professionalRatesCache.get(profId)!;
-        } else {
-          try {
-            // CORRIGIDO: Buscar profissional na subcoleção do business primeiro
-            let professionalDocRef = doc(firebaseDb, 'businesses', businessId, 'professionals', profId);
-            let professionalDoc = await getDoc(professionalDocRef);
-            let professionalData: any = null;
-
-            if (professionalDoc.exists()) {
-              professionalData = professionalDoc.data();
-            } else {
-              // Fallback: tentar buscar na coleção raiz professionals
-              professionalDocRef = doc(firebaseDb, 'professionals', profId);
-              professionalDoc = await getDoc(professionalDocRef);
-              if (professionalDoc.exists()) {
-                professionalData = professionalDoc.data();
-              }
-            }
-
-            rateForCalculation = professionalData?.commissionRate || defaultCommissionRate;
-
-            if (!rateForCalculation || rateForCalculation <= 0) {
-              console.warn('⚠️ Taxa de comissão não configurada para profissional:', profId);
-              // Pular este profissional se não tiver configuração válida
-              continue;
-            }
-
-            professionalRatesCache.set(profId, rateForCalculation);
-
-            if (!commissions[profId]) {
-              const professionalName = professionalData?.name || `Profissional ${profId.substring(0, 8)}`;
-              commissions[profId] = {
-                name: professionalName,
-                commission: 0,
-              };
-            }
-          } catch (profError) {
-            console.error('❌ Erro ao buscar profissional:', profError);
-            // IMPORTANTE: Se não conseguir buscar dados do profissional, pular
-            // NÃO usar taxa mockada/padrão
-            console.warn('⚠️ Pulando profissional sem dados válidos:', profId);
-            continue;
-          }
-        }
-
-        const commissionAmount = price * rateForCalculation;
-        commissions[profId].commission += commissionAmount;
-        console.log('💼 Comissão calculada:', commissions[profId].name, commissionAmount);
-      }
-    }
-
-    console.log('✅ Cálculo de comissões concluído:', Object.keys(commissions).length, 'profissionais');
-    return commissions;
-  } catch (error) {
-    console.error('❌ Erro ao calcular comissões:', error);
-    throw error;
-  }
+  const data = await computeFinancialData(businessId, startDate, endDate);
+  const out: { [professionalId: string]: { name: string; commission: number } } = {};
+  Object.entries(data.professionalCommissions).forEach(([id, p]) => {
+    out[id] = { name: p.name, commission: p.commission };
+  });
+  return out;
 };

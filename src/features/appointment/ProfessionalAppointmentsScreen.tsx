@@ -154,8 +154,8 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
     // Filter professionals based on search text
     useEffect(() => {
         const filtered = professionals.filter(prof =>
-            prof.name.toLowerCase().includes(searchText.toLowerCase()) ||
-            prof.specialty.toLowerCase().includes(searchText.toLowerCase()) ||
+            (prof.name || '').toLowerCase().includes(searchText.toLowerCase()) ||
+            (prof.specialty || '').toLowerCase().includes(searchText.toLowerCase()) ||
             prof.appointments.some(apt =>
                 apt.clientName?.toLowerCase().includes(searchText.toLowerCase()) ||
                 apt.serviceName?.toLowerCase().includes(searchText.toLowerCase())
@@ -282,10 +282,30 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                 businessName: '', // Will be filled by the service
                 price: selectedService.price,
                 duration: selectedService.duration.toString(),
-                status: 'scheduled' as const,
+                status: 'confirmed' as const,
                 notes: notes.trim() || undefined,
             };
 
+            // confere se o profissional ja tem agendamento nesse horario (evita duplicados)
+            const dayAppts = await getProfessionalAppointments(selectedProfessional.id, undefined, appointmentData.date, businessId || undefined);
+            const toMin = (t: string) => { const [h, mi] = String(t || '0:0').split(':').map(Number); return (h || 0) * 60 + (mi || 0); };
+            const startMin = toMin(appointmentData.time);
+            const endMin = startMin + (parseInt(String(selectedService.duration), 10) || 60);
+            const clash = dayAppts.find((x) => (x.status === 'scheduled' || x.status === 'confirmed') &&
+              startMin < toMin(x.time) + (parseInt(String(x.duration), 10) || 60) && endMin > toMin(x.time));
+            if (clash) {
+              const proceed = await new Promise<boolean>((resolve) => Alert.alert(
+                'Horário ocupado',
+                `${selectedProfessional.name} já tem ${clash.clientName || 'um cliente'} às ${clash.time} nesse dia. Agendar mesmo assim?`,
+                [
+                  { text: 'Voltar', style: 'cancel', onPress: () => resolve(false) },
+                  { text: 'Agendar mesmo assim', onPress: () => resolve(true) },
+                ],
+              ));
+              if (!proceed) {
+                return;
+              }
+            }
             await saveAppointment(appointmentData);
             Alert.alert('Sucesso', 'Agendamento criado com sucesso.');
             setIsCreateModalVisible(false);

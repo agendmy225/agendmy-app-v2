@@ -180,6 +180,11 @@ service cloud.firestore {
       allow delete: if isAdmin() || isBusinessOwner(resource.data.businessId);
     }
 
+    // ---------- relatorios financeiros (so o dono e o admin) ----------
+    match /businesses/{businessId}/financialReports/{reportId} {
+      allow read, write: if isAdmin() || isBusinessOwner(businessId);
+    }
+
     // ---------- travas de horario (so a funcao criarAgendamento usa) ----------
     match /slotLocks/{lockId} {
       allow read, write: if false;
