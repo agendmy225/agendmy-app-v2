@@ -87,7 +87,7 @@ const filterByRadius = (businesses: Business[], userLat: number, userLon: number
 
 const HomeScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [userFriendlyLocation, setUserFriendlyLocation] = useState('Obtendo localizacao...');
+  const [userFriendlyLocation, setUserFriendlyLocation] = useState('Obtendo localização...');
   const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
   const userCoordsRef = useRef<{ lat: number; lon: number } | null>(null);
   const [mapRegion, setMapRegion] = useState<Region | null>(null);
@@ -256,7 +256,7 @@ const HomeScreen: React.FC = () => {
       {
         getAddressFromCoordinates(realTimeLocation.latitude, realTimeLocation.longitude, GOOGLE_MAPS_API_KEY)
           .then((address: string | null) => {
-            if (address) { setUserFriendlyLocation(address); } else { setUserFriendlyLocation('Sua localizacao atual'); }
+            if (address) { setUserFriendlyLocation(address); } else { setUserFriendlyLocation('Sua localização atual'); }
           })
           .catch(() => {
             setUserFriendlyLocation(`Lat: ${realTimeLocation.latitude.toFixed(4)}, Lon: ${realTimeLocation.longitude.toFixed(4)}`);
@@ -297,7 +297,7 @@ const HomeScreen: React.FC = () => {
   }, [applyLocationAndFilter]);
 
   const handleChangeLocation = async () => {
-    if (!newAddress.trim()) { Alert.alert('Endereco Invalido', 'Por favor, insira um endereco.'); return; }
+    if (!newAddress.trim()) { Alert.alert('Endereço Inválido', 'Por favor, insira um endereço.'); return; }
     setIsGeocoding(true);
     try {
       const coords = await getCoordinatesFromAddress(newAddress.trim(), GOOGLE_MAPS_API_KEY);
@@ -307,9 +307,9 @@ const HomeScreen: React.FC = () => {
         setIsChangeLocationModalVisible(false);
         setNewAddress('');
       } else {
-        Alert.alert('Erro', 'Nao foi possivel encontrar coordenadas para o endereco informado.');
+        Alert.alert('Erro', 'Não foi possível encontrar coordenadas para o endereço informado.');
       }
-    } catch { Alert.alert('Erro', 'Ocorreu um erro ao tentar alterar a localizacao.'); }
+    } catch { Alert.alert('Erro', 'Ocorreu um erro ao tentar alterar a localização.'); }
     finally { setIsGeocoding(false); }
   };
 
@@ -368,7 +368,7 @@ const HomeScreen: React.FC = () => {
           };
           setMapRegion(center);
           setMapKey(k => k + 1);
-          setUserFriendlyLocation('Negocios na area');
+          setUserFriendlyLocation('Negócios na área');
         }
       }
     } catch (error) {
@@ -384,7 +384,7 @@ const HomeScreen: React.FC = () => {
         } else {
           setMostRecent([]); setTopRated([]); setPromotions([]);
           setAllBusinessesLoaded([]); setBusinessesForMap([]);
-          setInitialLoadError('Nao foi possivel carregar os dados. Verifique sua conexao e tente novamente.');
+          setInitialLoadError('Não foi possível carregar os dados. Verifique sua conexão e tente novamente.');
         }
       }
     } finally { setIsLoadingInitialData(false); }
@@ -433,8 +433,8 @@ const HomeScreen: React.FC = () => {
       onPress={() => { if (item.id) { navigation.navigate('BusinessDetails', { businessId: item.id }); } }}
       style={styles.infoCardItem}>
       <CachedImage storagePath={item.coverImage || item.logo || null} style={styles.infoCardImage} defaultSource={require('../assets/images/banner-home.png')} />
-      <Text style={styles.infoCardTitle} numberOfLines={1}>{item.name || 'Nome nao disponivel'}</Text>
-      <Text style={styles.infoCardSubtitle} numberOfLines={1}>{getCategoryById(item.category)?.name || item.category || 'Servicos'}</Text>
+      <Text style={styles.infoCardTitle} numberOfLines={1}>{item.name || 'Nome não disponível'}</Text>
+      <Text style={styles.infoCardSubtitle} numberOfLines={1}>{getCategoryById(item.category)?.name || item.category || 'Serviços'}</Text>
       {item.rating ? (
         <Text style={{ fontSize: 12, color: colors.primary, fontWeight: 'bold', marginTop: 2 }}>{'\u2605 ' + Number(item.rating).toFixed(1)}</Text>
       ) : null}
@@ -448,11 +448,11 @@ const HomeScreen: React.FC = () => {
           <View style={styles.headerLocationContainer}>
             <Icon name="location-on" size={20} color={colors.primary} />
             <View style={styles.headerLocationInfo}>
-              <Text style={styles.headerLocationText} numberOfLines={1}>SUA LOCALIZACAO</Text>
+              <Text style={styles.headerLocationText} numberOfLines={1}>SUA LOCALIZAÇÃO</Text>
               <View style={styles.locationAddressContainer}>
                 {isLocationLoading && <ActivityIndicator size="small" color={colors.primary} style={styles.locationLoadingSpinner} />}
                 <Text style={styles.headerLocationAddress} numberOfLines={1}>
-                  {isLocationLoading ? 'Obtendo sua localizacao...' : (userFriendlyLocation || 'Localizacao nao disponivel')}
+                  {isLocationLoading ? 'Obtendo sua localização...' : (userFriendlyLocation || 'Localização não disponível')}
                 </Text>
               </View>
             </View>
@@ -470,8 +470,8 @@ const HomeScreen: React.FC = () => {
           onRequestClose={() => { setIsChangeLocationModalVisible(false); setNewAddress(''); }}>
           <View style={styles.modalCenteredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>Alterar Localizacao</Text>
-              <TextInput style={styles.modalInput} placeholder="Digite o novo endereco"
+              <Text style={styles.modalText}>Alterar Localização</Text>
+              <TextInput style={styles.modalInput} placeholder="Digite o novo endereço"
                 placeholderTextColor={colors.lightText} value={newAddress} onChangeText={setNewAddress} />
               {isGeocoding && <ActivityIndicator size="small" color={colors.primary} style={styles.geocodingSpinner} />}
               <View style={styles.modalButtonContainer}>
@@ -547,7 +547,7 @@ const HomeScreen: React.FC = () => {
             nestedScrollEnabled={true} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContentContainer}>
             <View style={styles.searchBarContainer}>
               <Icon name="search" size={20} color={colors.lightText} />
-              <TextInput style={styles.searchInput} placeholder="Buscar estabelecimentos ou servicos"
+              <TextInput style={styles.searchInput} placeholder="Buscar estabelecimentos ou serviços"
                 placeholderTextColor={colors.lightText} value={searchQuery}
                 onChangeText={(text) => { setSearchQuery(text); setSelectedCategoryFilter(null); }} />
               {isSearching && <ActivityIndicator size="small" color={colors.primary} style={styles.searchSpinner} />}
@@ -571,7 +571,7 @@ const HomeScreen: React.FC = () => {
                       onPress={() => { if (item.id) { navigation.navigate('BusinessDetails', { businessId: item.id }); } }}>
                       <CachedImage storagePath={item.coverImage || item.logo} style={styles.bannerImage} resizeMode="cover" />
                       <View style={styles.bannerTextContainer}>
-                        <Text style={styles.bannerTitle} numberOfLines={1}>{item.name || 'Nome nao disponivel'}</Text>
+                        <Text style={styles.bannerTitle} numberOfLines={1}>{item.name || 'Nome não disponível'}</Text>
                       </View>
                     </TouchableOpacity>
                   ))}
@@ -588,7 +588,7 @@ const HomeScreen: React.FC = () => {
                   </TouchableOpacity>
                   <View style={styles.searchTitleContainer}>
                     <Text style={styles.sectionTitle}>
-                      {searchQuery.trim() ? `Resultados para "${searchQuery}"` : `Negocios em "${selectedCategoryFilter}"`}
+                      {searchQuery.trim() ? `Resultados para "${searchQuery}"` : `Negócios em "${selectedCategoryFilter}"`}
                     </Text>
                     {filteredSearchResults.length > 0 && <Text style={styles.resultsCount}>{filteredSearchResults.length} encontrados</Text>}
                   </View>
@@ -622,7 +622,7 @@ const HomeScreen: React.FC = () => {
                   ) : (
                     <View style={[styles.map, styles.loadingContainer]}>
                       <ActivityIndicator size="large" color={colors.primary} />
-                      <Text style={styles.loadingText}>Obtendo sua localizacao...</Text>
+                      <Text style={styles.loadingText}>Obtendo sua localização...</Text>
                     </View>
                   )}
                 </View>
@@ -653,7 +653,7 @@ const HomeScreen: React.FC = () => {
                   ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhum estabelecimento encontrado.</Text> : null} />
 
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Os top 10 mais avaliados da regiao</Text>
+                  <Text style={styles.sectionTitle}>Os top 10 mais avaliados da região</Text>
                   <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'topRated', ...allListParams })}>
                     <Text style={styles.seeAllText}>Ver todos</Text>
                   </TouchableOpacity>
@@ -664,7 +664,7 @@ const HomeScreen: React.FC = () => {
                   ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhum estabelecimento encontrado.</Text> : null} />
 
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Estabelecimentos com promocoes</Text>
+                  <Text style={styles.sectionTitle}>Estabelecimentos com promoções</Text>
                   <TouchableOpacity onPress={() => navigation.navigate('AllBusinesses', { listType: 'promotions', ...allListParams })}>
                     <Text style={styles.seeAllText}>Ver todas</Text>
                   </TouchableOpacity>
@@ -672,7 +672,7 @@ const HomeScreen: React.FC = () => {
                 <FlatList data={cityPromotions} renderItem={renderInfoCard} keyExtractor={(item) => item.id} horizontal
                   showsHorizontalScrollIndicator={false} style={styles.horizontalList} contentContainerStyle={styles.horizontalListContent}
                   removeClippedSubviews={false} scrollEnabled={true} nestedScrollEnabled={true}
-                  ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhuma promocao encontrada.</Text> : null} />
+                  ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhuma promoção encontrada.</Text> : null} />
               </>
             )}
           </ScrollView>

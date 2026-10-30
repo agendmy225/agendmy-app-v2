@@ -47,7 +47,7 @@ const ProfessionalTabNavigator: React.FC = () => (
       <Tab.Screen
         name="ProfessionalSchedule"
         component={ProfessionalScheduleScreen}
-        options={{ tabBarLabel: 'Meus Horarios', tabBarIcon: ScheduleIcon }}
+        options={{ tabBarLabel: 'Meus Horários', tabBarIcon: ScheduleIcon }}
       />
       <Tab.Screen
         name="ProfessionalProfile"

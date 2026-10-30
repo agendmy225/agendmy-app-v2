@@ -97,7 +97,7 @@ const AdminCategoriesScreen: React.FC = () => {
 
   const handleSave = async () => {
     if (!formName.trim()) {
-      Alert.alert('Atencao', 'Informe o nome da categoria.');
+      Alert.alert('Atenção', 'Informe o nome da categoria.');
       return;
     }
     try {
@@ -105,7 +105,7 @@ const AdminCategoriesScreen: React.FC = () => {
       await saveCategory({ id: editingId || undefined, name: formName, icon: formIcon });
       setModalVisible(false);
     } catch {
-      Alert.alert('Erro', 'Nao foi possivel salvar a categoria.');
+      Alert.alert('Erro', 'Não foi possível salvar a categoria.');
     } finally {
       setSaving(false);
     }
@@ -132,7 +132,7 @@ const AdminCategoriesScreen: React.FC = () => {
       setBusyId(c.id);
       await setCategoryActive(c.id, !c.active);
     } catch {
-      Alert.alert('Erro', 'Nao foi possivel alterar a categoria.');
+      Alert.alert('Erro', 'Não foi possível alterar a categoria.');
     } finally {
       setBusyId(null);
     }
@@ -143,7 +143,7 @@ const AdminCategoriesScreen: React.FC = () => {
       setBusyId(c.id);
       await moveCategory(c.id, direction);
     } catch {
-      Alert.alert('Erro', 'Nao foi possivel mudar a ordem.');
+      Alert.alert('Erro', 'Não foi possível mudar a ordem.');
     } finally {
       setBusyId(null);
     }
@@ -171,7 +171,7 @@ const AdminCategoriesScreen: React.FC = () => {
           <View style={styles.infoBox}>
             <Icon name="info-outline" size={18} color={colors.warning} />
             <Text style={styles.infoText}>
-              As categorias ainda sao as padrao do app. Na primeira alteracao, elas serao
+              As categorias ainda são as padrao do app. Na primeira alteração, elas serão
               copiadas para o banco automaticamente e passam a ser controladas por aqui.
             </Text>
           </View>
@@ -194,7 +194,7 @@ const AdminCategoriesScreen: React.FC = () => {
               <View style={styles.cardInfo}>
                 <Text style={styles.cardName} numberOfLines={1}>{c.name}</Text>
                 <Text style={styles.cardMeta} numberOfLines={1}>
-                  {count} estabelecimento(s) - codigo: {c.id}
+                  {count} estabelecimento(s) - código: {c.id}
                 </Text>
                 <Text style={[styles.cardStatus, { color: c.active ? colors.success : colors.lightText }]}>
                   {c.active ? 'Ativa' : 'Desativada'}
@@ -241,8 +241,8 @@ const AdminCategoriesScreen: React.FC = () => {
         })}
 
         <Text style={styles.footerNote}>
-          Categorias desativadas somem dos filtros e do cadastro de negocios, mas os
-          estabelecimentos que ja usam continuam com ela. As mudancas aparecem nos celulares na hora.
+          Categorias desativadas somem dos filtros e do cadastro de negócios, mas os
+          estabelecimentos que já usam continuam com ela. As mudanças aparecem nos celulares na hora.
         </Text>
       </ScrollView>
 

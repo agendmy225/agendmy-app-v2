@@ -101,7 +101,7 @@ const AdminOverdueScreen: React.FC = () => {
             await updateDoc(doc(firebaseDb, 'businesses', row.business.id), data);
             await load(true);
           } catch {
-            Alert.alert('Erro', 'Nao foi possivel atualizar este negocio.');
+            Alert.alert('Erro', 'Não foi possível atualizar este negócio.');
           } finally {
             setBusyId(null);
           }
@@ -137,7 +137,7 @@ const AdminOverdueScreen: React.FC = () => {
       ? runAction(row, 'Remover isencao', `"${row.business.name}" volta a pagar mensalidade. Confirmar?`, {
         'subscription.exempt': false,
       })
-      : runAction(row, 'Isentar', `"${row.business.name}" nao vai pagar mensalidade nem ser suspenso. Confirmar?`, {
+      : runAction(row, 'Isentar', `"${row.business.name}" não vai pagar mensalidade nem ser suspenso. Confirmar?`, {
         'subscription.exempt': true,
         'subscription.overdueSince': null,
         suspendedForPayment: false,
@@ -189,7 +189,7 @@ const AdminOverdueScreen: React.FC = () => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={[colors.primary]} />}
         >
           {filtered.length === 0 ? (
-            <Text style={styles.emptyText}>Nenhum negocio nesta situacao.</Text>
+            <Text style={styles.emptyText}>Nenhum negócio nesta situação.</Text>
           ) : (
             filtered.map((row) => {
               const v = row.view;
@@ -203,11 +203,11 @@ const AdminOverdueScreen: React.FC = () => {
                     </View>
                   </View>
                   <Text style={styles.meta} numberOfLines={1}>
-                    {row.owner ? `${row.owner.name || 'Sem nome'} - ${row.owner.email}` : 'Dono nao encontrado'}
+                    {row.owner ? `${row.owner.name || 'Sem nome'} - ${row.owner.email}` : 'Dono não encontrado'}
                   </Text>
                   {row.business.phone ? <Text style={styles.meta}>Tel: {row.business.phone}</Text> : null}
                   {v.status === 'trial' && !v.exempt && (
-                    <Text style={styles.detail}>Teste ate {formatDate(v.trialEndsAt)} ({v.daysLeft} dia(s))</Text>
+                    <Text style={styles.detail}>Teste até {formatDate(v.trialEndsAt)} ({v.daysLeft} dia(s))</Text>
                   )}
                   {v.status === 'past_due' && !v.exempt && (
                     <Text style={[styles.detail, { color: colors.warning }]}>{v.overdueDays} dia(s) de atraso</Text>
@@ -240,7 +240,7 @@ const AdminOverdueScreen: React.FC = () => {
             })
           )}
           <Text style={styles.footerNote}>
-            A rotina automatica roda todo dia as 8h: avisa os donos, marca atraso e suspende apos a tolerancia.
+            A rotina automática roda todo dia as 8h: avisa os donos, marca atraso e suspende após a tolerância.
           </Text>
         </ScrollView>
       )}

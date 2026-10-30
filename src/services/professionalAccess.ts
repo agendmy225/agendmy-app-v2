@@ -107,6 +107,6 @@ export const removeAppAccess = async (professionalId: string): Promise<void> => 
 };
 
 export const buildInviteMessage = (professionalName: string, businessName: string, code: string): string =>
-  `Ola, ${professionalName}! Voce foi convidado(a) para ver sua agenda do ${businessName} no app AgendMy.\n\n` +
+  `Olá, ${professionalName}! Você foi convidado(a) para ver sua agenda do ${businessName} no app AgendMy.\n\n` +
   '1. Baixe o AgendMy\n2. Escolha PROFISSIONAL\n3. Toque em "Cadastrar agora!"\n' +
-  `4. Use o codigo de convite: ${code}`;
+  `4. Use o código de convite: ${code}`;

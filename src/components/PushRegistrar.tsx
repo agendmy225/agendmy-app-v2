@@ -24,7 +24,7 @@ const askAndroidNotificationPermission = async (): Promise<void> => {
     try {
       await PermissionsAndroid.request('android.permission.POST_NOTIFICATIONS' as any);
     } catch (err) {
-      console.warn('[PushRegistrar] permissao de notificacao:', err);
+      console.warn('[PushRegistrar] permissão de notificação:', err);
     }
   }
 };

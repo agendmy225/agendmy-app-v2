@@ -40,11 +40,11 @@ interface AgendaItem {
 }
 
 const STATUS_INFO: Record<Status, { label: string; color: string }> = {
-  scheduled: { label: 'Aguardando confirmacao', color: colors.warning },
+  scheduled: { label: 'Aguardando confirmação', color: colors.warning },
   confirmed: { label: 'Confirmado', color: colors.success },
-  completed: { label: 'Concluido', color: colors.primary },
+  completed: { label: 'Concluído', color: colors.primary },
   cancelled: { label: 'Cancelado', color: colors.error },
-  no_show: { label: 'Nao compareceu', color: colors.lightText },
+  no_show: { label: 'Não compareceu', color: colors.lightText },
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -57,12 +57,12 @@ const STATUS_COLORS: Record<string, string> = {
 
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'today', label: 'Hoje' },
-  { key: 'upcoming', label: 'Proximos' },
+  { key: 'upcoming', label: 'Próximos' },
   { key: 'pending', label: 'A confirmar' },
-  { key: 'history', label: 'Historico' },
+  { key: 'history', label: 'Histórico' },
 ];
 
-const WEEKDAY_NAMES = ['Domingo', 'Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado'];
+const WEEKDAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 const dayTitle = (date: string) => {
   const [y, m, d] = date.split('-').map((n) => parseInt(n, 10));
@@ -212,7 +212,7 @@ const ProfessionalAgendaScreen: React.FC = () => {
             setBusyId(item.id);
             await updateAppointmentStatus(item.id, status);
           } catch {
-            Alert.alert('Erro', 'Nao foi possivel atualizar o agendamento.');
+            Alert.alert('Erro', 'Não foi possível atualizar o agendamento.');
           } finally {
             setBusyId(null);
           }
@@ -257,11 +257,11 @@ const ProfessionalAgendaScreen: React.FC = () => {
               )}
               {item.status === 'confirmed' && (
                 <>
-                  <TouchableOpacity style={[styles.btn, styles.btnOk]} onPress={() => changeStatus(item, 'completed', 'Marcar como concluido')}>
+                  <TouchableOpacity style={[styles.btn, styles.btnOk]} onPress={() => changeStatus(item, 'completed', 'Marcar como concluído')}>
                     <Text style={styles.btnTextLight}>Concluir</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.btn} onPress={() => changeStatus(item, 'no_show', 'Cliente nao compareceu')}>
-                    <Text style={styles.btnText}>Nao veio</Text>
+                  <TouchableOpacity style={styles.btn} onPress={() => changeStatus(item, 'no_show', 'Cliente não compareceu')}>
+                    <Text style={styles.btnText}>Não veio</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -288,7 +288,7 @@ const ProfessionalAgendaScreen: React.FC = () => {
         <Icon name="lock" size={56} color={colors.lightText} />
         <Text style={styles.deniedTitle}>Sem acesso a agenda</Text>
         <Text style={styles.deniedText}>
-          O estabelecimento removeu seu acesso ao app. Fale com o responsavel para receber um novo convite.
+          O estabelecimento removeu seu acesso ao app. Fale com o responsável para receber um novo convite.
         </Text>
         <TouchableOpacity style={styles.primaryButton} onPress={() => signOut()}>
           <Text style={styles.primaryButtonText}>Sair</Text>
@@ -336,7 +336,7 @@ const ProfessionalAgendaScreen: React.FC = () => {
           onPress={() => setViewMode('calendar')}
         >
           <Icon name="date-range" size={18} color={viewMode === 'calendar' ? colors.white : colors.primary} />
-          <Text style={[styles.toggleText, viewMode === 'calendar' && styles.toggleTextActive]}>Calendario</Text>
+          <Text style={[styles.toggleText, viewMode === 'calendar' && styles.toggleTextActive]}>Calendário</Text>
         </TouchableOpacity>
       </View>
 
@@ -391,7 +391,7 @@ const ProfessionalAgendaScreen: React.FC = () => {
           {selectedOff ? (
             <View style={styles.blockedNote}>
               <Icon name="event-busy" size={16} color={colors.lightText} />
-              <Text style={styles.blockedNoteText}>Folga: voce nao atende neste dia</Text>
+              <Text style={styles.blockedNoteText}>Folga: você não atende neste dia</Text>
             </View>
           ) : null}
 
@@ -411,7 +411,7 @@ const ProfessionalAgendaScreen: React.FC = () => {
           {selectedBlocked ? (
             <View style={styles.blockedNote}>
               <Icon name="block" size={16} color={colors.lightText} />
-              <Text style={styles.blockedNoteText}>Dia bloqueado em Meus Horarios</Text>
+              <Text style={styles.blockedNoteText}>Dia bloqueado em Meus Horários</Text>
             </View>
           ) : null}
 

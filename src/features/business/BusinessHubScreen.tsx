@@ -7,6 +7,7 @@ import { colors } from '../../constants/colors';
 import { AppStackParamList } from '../../types/types';
 import { useAuth } from '../auth/context/AuthContext';
 import CreateBusinessCard from './components/CreateBusinessCard';
+import { useChatUnreadCount } from '../../hooks/useChatUnreadCount';
 
 type BusinessHubNavigationProp = StackNavigationProp<AppStackParamList>;
 
@@ -25,6 +26,7 @@ const menuItems = [
 const BusinessHubScreen: React.FC = () => {
   const navigation = useNavigation<BusinessHubNavigationProp>();
   const { user, refreshUser, signOut, isAdmin } = useAuth();
+  const chatUnread = useChatUnreadCount(user?.uid);
   const handleBusinessCreated = () => {
     if (refreshUser) {
       refreshUser();
@@ -74,6 +76,11 @@ const BusinessHubScreen: React.FC = () => {
           >
             <Icon name={item.icon} size={24} color={colors.primary} style={styles.menuIcon} />
             <Text style={styles.menuText}>{item.label}</Text>
+            {item.id === 'chats' && chatUnread > 0 ? (
+              <View style={styles.menuBadge}>
+                <Text style={styles.menuBadgeText}>{chatUnread > 99 ? '99+' : chatUnread}</Text>
+              </View>
+            ) : null}
             <Icon name="chevron-right" size={24} color={colors.lightText} />
           </TouchableOpacity>
         ))}
@@ -132,6 +139,21 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+  },
+  menuBadge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    paddingHorizontal: 6,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  menuBadgeText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   menuIcon: {
     marginRight: 15,

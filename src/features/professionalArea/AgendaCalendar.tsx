@@ -33,7 +33,7 @@ const STATUS_ORDER = ['scheduled', 'confirmed', 'completed', 'no_show', 'cancell
 const LEGEND: { key: string; label: string }[] = [
   { key: 'scheduled', label: 'A confirmar' },
   { key: 'confirmed', label: 'Confirmado' },
-  { key: 'completed', label: 'Concluido' },
+  { key: 'completed', label: 'Concluído' },
   { key: 'cancelled', label: 'Cancelado' },
 ];
 

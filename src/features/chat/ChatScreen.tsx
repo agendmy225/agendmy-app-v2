@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../../constants/colors';
-import { Message, getChatMessages, sendMessage, createOrGetChat, deleteMessage } from '../../services/chat';
+import { Message, getChatMessages, sendMessage, createOrGetChat, deleteMessage, watchAndClearUnread } from '../../services/chat';
 import { useAuth } from '../auth/context/AuthContext';
 
 interface ChatScreenParams {
@@ -85,6 +85,14 @@ const ChatScreen: React.FC = () => {
 
     return () => unsubscribe();
   }, [chatId, isLoading]);
+
+  // conversa aberta: as mensagens dela contam como lidas
+  useEffect(() => {
+    if (!chatId || !user) {
+      return;
+    }
+    return watchAndClearUnread(chatId, user.uid);
+  }, [chatId, user]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !chatId || !user) return;

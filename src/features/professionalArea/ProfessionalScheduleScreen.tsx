@@ -76,7 +76,7 @@ const ProfessionalScheduleScreen: React.FC = () => {
         setForm(next);
         setBlocked(Array.isArray(prof.blockedDates) ? [...prof.blockedDates].sort() : []);
       } catch {
-        Alert.alert('Erro', 'Nao foi possivel carregar seus horarios.');
+        Alert.alert('Erro', 'Não foi possível carregar seus horários.');
       } finally {
         setLoading(false);
       }
@@ -92,14 +92,14 @@ const ProfessionalScheduleScreen: React.FC = () => {
       const d = form[day];
       if (!d || !d.on) { continue; }
       const label = DAY_LABELS[day];
-      if (!isValidTime(d.start) || !isValidTime(d.end)) { return `${label}: use horarios no formato 00:00.`; }
-      if (toMinutes(d.start) >= toMinutes(d.end)) { return `${label}: o inicio precisa ser antes do fim.`; }
+      if (!isValidTime(d.start) || !isValidTime(d.end)) { return `${label}: use horários no formato 00:00.`; }
+      if (toMinutes(d.start) >= toMinutes(d.end)) { return `${label}: o início precisa ser antes do fim.`; }
       const hasBreak = d.breakStart || d.breakEnd;
       if (hasBreak) {
         if (!isValidTime(d.breakStart) || !isValidTime(d.breakEnd)) { return `${label}: preencha o intervalo no formato 00:00 ou deixe vazio.`; }
         if (toMinutes(d.breakStart) >= toMinutes(d.breakEnd) ||
             toMinutes(d.breakStart) <= toMinutes(d.start) || toMinutes(d.breakEnd) >= toMinutes(d.end)) {
-          return `${label}: o intervalo precisa ficar dentro do horario de atendimento.`;
+          return `${label}: o intervalo precisa ficar dentro do horário de atendimento.`;
         }
       }
     }
@@ -110,7 +110,7 @@ const ProfessionalScheduleScreen: React.FC = () => {
     if (!professionalId) { return; }
     const err = validate();
     if (err) {
-      Alert.alert('Confira os horarios', err);
+      Alert.alert('Confira os horários', err);
       return;
     }
     const schedule: WeekSchedule = {};
@@ -129,10 +129,10 @@ const ProfessionalScheduleScreen: React.FC = () => {
       });
       setUsingBusinessHours(false);
       if (!nextBlocked) {
-        Alert.alert('Pronto', 'Seus horarios foram salvos. Os clientes ja veem os horarios novos.');
+        Alert.alert('Pronto', 'Seus horários foram salvos. Os clientes já veem os horários novos.');
       }
     } catch {
-      Alert.alert('Erro', 'Nao foi possivel salvar.');
+      Alert.alert('Erro', 'Não foi possível salvar.');
     } finally {
       setSaving(false);
     }
@@ -142,7 +142,7 @@ const ProfessionalScheduleScreen: React.FC = () => {
     if (!professionalId) { return; }
     const ds = toLocalDateString(date);
     if (ds < toLocalDateString(new Date())) {
-      Alert.alert('Data invalida', 'Escolha hoje ou uma data futura.');
+      Alert.alert('Data inválida', 'Escolha hoje ou uma data futura.');
       return;
     }
     if (blocked.includes(ds)) { return; }
@@ -150,7 +150,7 @@ const ProfessionalScheduleScreen: React.FC = () => {
     if (open > 0) {
       Alert.alert(
         'Existem agendamentos nesse dia',
-        `Voce tem ${open} agendamento(s) em ${formatLocalDate(ds)}. Remarque ou cancele antes de bloquear a data.`,
+        `Você tem ${open} agendamento(s) em ${formatLocalDate(ds)}. Remarque ou cancele antes de bloquear a data.`,
       );
       return;
     }
@@ -179,20 +179,20 @@ const ProfessionalScheduleScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Meus Horarios</Text>
-        <Text style={styles.headerSubtitle}>Os clientes so conseguem agendar nesses horarios</Text>
+        <Text style={styles.headerTitle}>Meus Horários</Text>
+        <Text style={styles.headerSubtitle}>Os clientes so conseguem agendar nesses horários</Text>
       </View>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {usingBusinessHours && (
           <View style={styles.info}>
             <Icon name="info-outline" size={18} color={colors.warning} />
             <Text style={styles.infoText}>
-              Voce ainda usa o horario do estabelecimento. Ajuste e salve para ter seu proprio horario.
+              Você ainda usa o horário do estabelecimento. Ajuste e salve para ter seu próprio horário.
             </Text>
           </View>
         )}
 
-        <Text style={styles.section}>Dias e horarios</Text>
+        <Text style={styles.section}>Dias e horários</Text>
         {WEEK_ORDER.map((day) => {
           const d = form[day] || emptyDay();
           return (
@@ -228,11 +228,11 @@ const ProfessionalScheduleScreen: React.FC = () => {
         })}
 
         <TouchableOpacity style={styles.saveButton} onPress={() => save()} disabled={saving}>
-          {saving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveText}>Salvar horarios</Text>}
+          {saving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveText}>Salvar horários</Text>}
         </TouchableOpacity>
 
         <Text style={styles.section}>Datas bloqueadas</Text>
-        <Text style={styles.hint}>Folgas, consultas, viagens... Nesses dias ninguem consegue agendar com voce.</Text>
+        <Text style={styles.hint}>Folgas, consultas, viagens... Nesses dias ninguém consegue agendar com você.</Text>
         {upcomingBlocked.length === 0 ? (
           <Text style={styles.empty}>Nenhuma data bloqueada.</Text>
         ) : (

@@ -65,7 +65,7 @@ const AdminEstablishmentsScreen: React.FC = () => {
                 )
               );
             } catch {
-              Alert.alert('Erro', 'Nao foi possivel atualizar o estabelecimento.');
+              Alert.alert('Erro', 'Não foi possível atualizar o estabelecimento.');
             } finally {
               setTogglingId(null);
             }

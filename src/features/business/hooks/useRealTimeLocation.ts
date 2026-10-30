@@ -106,8 +106,8 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
-            title: 'Permissao de Localizacao',
-            message: 'Este aplicativo precisa acessar sua localizacao para mostrar estabelecimentos proximos.',
+            title: 'Permissão de Localização',
+            message: 'Este aplicativo precisa acessar sua localização para mostrar estabelecimentos próximos.',
             buttonNeutral: 'Perguntar depois',
             buttonNegative: 'Cancelar',
             buttonPositive: 'OK',
@@ -117,7 +117,7 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
         setHasPermission(ok);
         log(`pedido perm ${ok ? 'OK' : 'NEGADA'}`);
         if (!ok) {
-          setError('Permissao de localizacao foi negada');
+          setError('Permissão de localização foi negada');
         }
         return ok;
       }
@@ -125,7 +125,7 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
         Geolocation.getCurrentPosition(
           () => { setHasPermission(true); resolve(true); },
           () => {
-            setError('Permissao de localizacao foi negada');
+            setError('Permissão de localização foi negada');
             setHasPermission(false);
             resolve(false);
           },
@@ -133,7 +133,7 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
         );
       });
     } catch (err) {
-      setError('Erro ao solicitar permissao de localizacao');
+      setError('Erro ao solicitar permissão de localização');
       setHasPermission(false);
       log('pedido perm ERRO');
       return false;
@@ -195,8 +195,8 @@ export const useRealTimeLocation = (): UseRealTimeLocationResult => {
     safetyTimerRef.current = setTimeout(() => {
       if (!hasLocationRef.current) {
         setIsLoading(false);
-        setError('Nao foi possivel obter sua localizacao. Toque em ALTERAR para informar.');
-        log('desistiu apos 30s');
+        setError('Não foi possível obter sua localização. Toque em ALTERAR para informar.');
+        log('desistiu após 30s');
       }
     }, SAFETY_TIMEOUT_MS);
 

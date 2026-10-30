@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppStackParamList, ClientTabParamList, HomeStackParamList } from '../types/types';
 import { useAuth } from '../features/auth/context/AuthContext';
 import { useClientUnreadCount } from '../hooks/useClientUnreadCount';
+import { useChatUnreadCount } from '../hooks/useChatUnreadCount';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import { colors } from '../constants/colors';
 
@@ -113,6 +114,7 @@ const HomeStackNavigator: React.FC = () => {
 const ClientTabNavigator: React.FC = () => {
   const { user: tabUser } = useAuth();
   const unread = useClientUnreadCount(tabUser?.uid);
+  const chatUnread = useChatUnreadCount(tabUser?.uid);
 
   return (
     <SafeAreaView style={styles.safeAreaContainer} edges={['top', 'bottom']}>
@@ -152,6 +154,7 @@ const ClientTabNavigator: React.FC = () => {
           options={{
             tabBarLabel: 'Perfil',
             tabBarIcon: PersonIcon,
+            tabBarBadge: chatUnread > 0 ? chatUnread : undefined,
           }}
         />
         {/* Adicione mais abas do cliente aqui quando necessário */}

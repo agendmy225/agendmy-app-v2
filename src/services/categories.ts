@@ -95,7 +95,7 @@ const startListening = () => {
       (error: unknown) => console.warn('[categories] erro no tempo real:', error),
     );
   } catch (error) {
-    console.warn('[categories] nao foi possivel iniciar tempo real:', error);
+    console.warn('[categories] não foi possível iniciar tempo real:', error);
   }
 };
 

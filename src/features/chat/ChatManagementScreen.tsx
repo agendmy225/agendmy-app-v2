@@ -77,8 +77,10 @@ const ChatManagementScreen: React.FC = () => {
   };
 
   const renderConversationItem = ({ item }: { item: Chat }) => {
-    const lastMessageTime = item.lastMessage?.createdAt ? new Date(item.lastMessage.createdAt) : new Date();
-    const hasUnreadMessages = (item.unreadCount || 0) > 0;
+    const created: any = item.lastMessage?.createdAt;
+    const lastMessageTime = created && typeof created.toDate === 'function' ? created.toDate() : created ? new Date(created) : new Date();
+    const unreadN = Number(((item as any).unread || {})[user?.uid || ''] || 0);
+    const hasUnreadMessages = unreadN > 0;
     const otherUserId = item.participants.find((p: string) => p !== user?.uid);
 
     return (
@@ -119,7 +121,7 @@ const ChatManagementScreen: React.FC = () => {
             </Text>
             {hasUnreadMessages && (
               <View style={styles.unreadBadge}>
-                <Text style={styles.unreadCount}>{item.unreadCount || 0}</Text>
+                <Text style={styles.unreadCount}>{unreadN > 99 ? '99+' : unreadN}</Text>
               </View>
             )}
           </View>

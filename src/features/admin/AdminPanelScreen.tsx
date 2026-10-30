@@ -14,11 +14,11 @@ type AdminPanelNavigationProp = StackNavigationProp<AppStackParamList>;
 const adminSections = [
   { id: 'establishments', label: 'Estabelecimentos', description: 'Listar, ativar e desativar', icon: 'store', screen: 'AdminEstablishments', ready: true },
   { id: 'overdue', label: 'Inadimplentes', description: 'Donos com pagamento pendente', icon: 'money-off', screen: 'AdminOverdue', ready: true },
-  { id: 'users', label: 'Usuarios', description: 'Clientes e proprietarios', icon: 'people', screen: 'AdminUsers', ready: true },
+  { id: 'users', label: 'Usuários', description: 'Clientes e proprietários', icon: 'people', screen: 'AdminUsers', ready: true },
   { id: 'analytics', label: 'Analytics', description: 'Por cidade e estado', icon: 'insights', screen: 'AdminAnalytics', ready: true },
-  { id: 'reviews', label: 'Avaliacoes', description: 'Moderacao global', icon: 'star-rate', screen: 'AdminReviews', ready: true },
-  { id: 'categories', label: 'Categorias', description: 'Gerenciar categorias de servico', icon: 'category', screen: 'AdminCategories', ready: true },
-  { id: 'notifications', label: 'Comunicados', description: 'Enviar notificacoes', icon: 'campaign', screen: 'AdminNotifications', ready: true },
+  { id: 'reviews', label: 'Avaliações', description: 'Moderacao global', icon: 'star-rate', screen: 'AdminReviews', ready: true },
+  { id: 'categories', label: 'Categorias', description: 'Gerenciar categorias de serviço', icon: 'category', screen: 'AdminCategories', ready: true },
+  { id: 'notifications', label: 'Comunicados', description: 'Enviar notificações', icon: 'campaign', screen: 'AdminNotifications', ready: true },
 ] as const;
 
 const AdminPanelScreen: React.FC = () => {
@@ -31,7 +31,7 @@ const AdminPanelScreen: React.FC = () => {
       <ScrollView style={styles.container} contentContainerStyle={styles.centerContainer}>
         <Icon name="lock" size={64} color={colors.lightText} />
         <Text style={styles.deniedTitle}>Acesso restrito</Text>
-        <Text style={styles.deniedText}>Esta area e exclusiva para administradores.</Text>
+        <Text style={styles.deniedText}>Esta área e exclusiva para administradores.</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Text style={styles.backButtonText}>Voltar</Text>
         </TouchableOpacity>
@@ -89,7 +89,7 @@ const AdminPanelScreen: React.FC = () => {
       </View>
 
       <Text style={styles.footerNote}>
-        As secoes serao habilitadas conforme forem implementadas.
+        As secoes serão habilitadas conforme forem implementadas.
       </Text>
     </ScrollView>
   );

@@ -60,7 +60,7 @@ const isSameCity = (businessAddress: string, userCity: string): boolean => {
 
 const OwnerHomeScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [userFriendlyLocation, setUserFriendlyLocation] = useState('Obtendo localizacao...');
+  const [userFriendlyLocation, setUserFriendlyLocation] = useState('Obtendo localização...');
   const [userCity, setUserCity] = useState('');
   const [, setUserCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [mapRegion, setMapRegion] = useState<Region>({
@@ -237,7 +237,7 @@ const OwnerHomeScreen: React.FC = () => {
 
   const handleChangeLocation = async () => {
     if (!newAddress.trim()) {
-      Alert.alert('Endereco Invalido', 'Por favor, insira um endereco.');
+      Alert.alert('Endereço Inválido', 'Por favor, insira um endereço.');
       return;
     }
     setIsGeocoding(true);
@@ -248,10 +248,10 @@ const OwnerHomeScreen: React.FC = () => {
         setIsChangeLocationModalVisible(false);
         setNewAddress('');
       } else {
-        Alert.alert('Erro', 'Nao foi possivel encontrar coordenadas para o endereco informado.');
+        Alert.alert('Erro', 'Não foi possível encontrar coordenadas para o endereço informado.');
       }
     } catch {
-      Alert.alert('Erro', 'Ocorreu um erro ao tentar alterar a localizacao.');
+      Alert.alert('Erro', 'Ocorreu um erro ao tentar alterar a localização.');
     } finally {
       setIsGeocoding(false);
     }
@@ -332,7 +332,7 @@ const OwnerHomeScreen: React.FC = () => {
           setPromotions([]);
           setAllBusinessesLoaded([]);
           setBusinessesForMap([]);
-          setInitialLoadError('Nao foi possivel carregar os dados. Verifique sua conexao e tente novamente.');
+          setInitialLoadError('Não foi possível carregar os dados. Verifique sua conexão e tente novamente.');
         }
       }
     } finally {
@@ -414,7 +414,7 @@ const OwnerHomeScreen: React.FC = () => {
         defaultSource={defaultPlaceholderImage}
       />
       <Text style={styles.infoCardTitle} numberOfLines={1}>{item.name}</Text>
-      <Text style={styles.infoCardSubtitle} numberOfLines={1}>{getCategoryById(item.category)?.name || item.category || 'Servicos'}</Text>
+      <Text style={styles.infoCardSubtitle} numberOfLines={1}>{getCategoryById(item.category)?.name || item.category || 'Serviços'}</Text>
     </TouchableOpacity>
   );
 
@@ -424,9 +424,9 @@ const OwnerHomeScreen: React.FC = () => {
         <View style={styles.headerLocationContainer}>
           <Icon name="location-on" size={20} color={colors.primary} />
           <View style={styles.headerLocationInfo}>
-            <Text style={styles.headerLocationText} numberOfLines={1}>SUA LOCALIZACAO</Text>
+            <Text style={styles.headerLocationText} numberOfLines={1}>SUA LOCALIZAÇÃO</Text>
             <Text style={styles.headerLocationAddress} numberOfLines={1}>
-              {isLocationLoading ? 'Obtendo sua localizacao...' : (userFriendlyLocation || 'Localizacao nao disponivel')}
+              {isLocationLoading ? 'Obtendo sua localização...' : (userFriendlyLocation || 'Localização não disponível')}
             </Text>
           </View>
           <TouchableOpacity onPress={handleLocationPermission}>
@@ -449,10 +449,10 @@ const OwnerHomeScreen: React.FC = () => {
       >
         <View style={styles.modalCenteredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Alterar Localizacao</Text>
+            <Text style={styles.modalText}>Alterar Localização</Text>
             <TextInput
               style={styles.modalInput}
-              placeholder="Digite o novo endereco"
+              placeholder="Digite o novo endereço"
               placeholderTextColor={colors.lightText}
               value={newAddress}
               onChangeText={setNewAddress}
@@ -483,7 +483,7 @@ const OwnerHomeScreen: React.FC = () => {
 
             <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 8 }}>Ordenar por</Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
-              {([['rating', 'Avaliacao'], ['recent', 'Recentes'], ['name', 'Nome']] as const).map(([key, label]) => (
+              {([['rating', 'Avaliação'], ['recent', 'Recentes'], ['name', 'Nome']] as const).map(([key, label]) => (
                 <TouchableOpacity
                   key={key}
                   onPress={() => setFilterSortBy(key)}
@@ -494,7 +494,7 @@ const OwnerHomeScreen: React.FC = () => {
               ))}
             </View>
 
-            <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 8 }}>Avaliacao minima</Text>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 8 }}>Avaliação mínima</Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 24 }}>
               {[0, 3, 4, 4.5].map(r => (
                 <TouchableOpacity
@@ -545,7 +545,7 @@ const OwnerHomeScreen: React.FC = () => {
             <Icon name="search" size={20} color={colors.lightText} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Buscar estabelecimentos ou servicos"
+              placeholder="Buscar estabelecimentos ou serviços"
               placeholderTextColor={colors.lightText}
               value={searchQuery}
               onChangeText={(text) => { setSearchQuery(text); setSelectedCategoryFilter(null); }}
@@ -587,7 +587,7 @@ const OwnerHomeScreen: React.FC = () => {
                 </TouchableOpacity>
                 <View style={styles.resultsHeaderContent}>
                   <Text style={styles.sectionTitle}>
-                    {searchQuery.trim() ? `Resultados para "${searchQuery}"` : `Negocios em "${selectedCategoryFilter}"`}
+                    {searchQuery.trim() ? `Resultados para "${searchQuery}"` : `Negócios em "${selectedCategoryFilter}"`}
                   </Text>
                   {searchResults.length > 0 && <Text style={styles.resultsCount}>{searchResults.length} encontrados</Text>}
                 </View>
@@ -670,7 +670,7 @@ const OwnerHomeScreen: React.FC = () => {
               />
 
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Os top 10 mais avaliados da regiao</Text>
+                <Text style={styles.sectionTitle}>Os top 10 mais avaliados da região</Text>
                 <TouchableOpacity><Text style={styles.seeAllText}>Ver todos</Text></TouchableOpacity>
               </View>
               <FlatList
@@ -685,7 +685,7 @@ const OwnerHomeScreen: React.FC = () => {
               />
 
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Estabelecimentos com promocoes</Text>
+                <Text style={styles.sectionTitle}>Estabelecimentos com promoções</Text>
                 <TouchableOpacity><Text style={styles.seeAllText}>Ver todas</Text></TouchableOpacity>
               </View>
               <FlatList
@@ -696,7 +696,7 @@ const OwnerHomeScreen: React.FC = () => {
                 showsHorizontalScrollIndicator={false}
                 style={styles.horizontalList}
                 contentContainerStyle={styles.horizontalListContent}
-                ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhuma promocao encontrada.</Text> : null}
+                ListEmptyComponent={!isLoadingInitialData ? <Text style={styles.emptyListText}>Nenhuma promoção encontrada.</Text> : null}
               />
             </>
           )}

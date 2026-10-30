@@ -5,6 +5,8 @@ import { StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Importar Icon
 import { colors } from '../constants/colors';
 import { OwnerTabParamList } from '../types/types';
+import { useAuth } from '../features/auth/context/AuthContext';
+import { useChatUnreadCount } from '../hooks/useChatUnreadCount';
 
 // Telas do proprietário
 // import DashboardScreen from '../screens/owner/DashboardScreen'; // Será acessado via BusinessHubScreen
@@ -33,6 +35,9 @@ const renderBusinessHubIcon = ({ color, size }: { color: string; size: number })
 );
 
 const OwnerTabNavigator: React.FC = () => {
+  const { user } = useAuth();
+  const chatUnread = useChatUnreadCount(user?.uid);
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <Tab.Navigator
@@ -83,6 +88,7 @@ const OwnerTabNavigator: React.FC = () => {
           options={{
             tabBarLabel: 'Meu Negócio',
             tabBarIcon: renderBusinessHubIcon,
+            tabBarBadge: chatUnread > 0 ? chatUnread : undefined,
           }}
           listeners={({ navigation }) => ({
             tabPress: (_e) => {

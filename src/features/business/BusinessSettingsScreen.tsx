@@ -348,7 +348,7 @@ const BusinessSettingsScreen: React.FC = () => {
             fullAddress += ` - ${settings.state.trim()}`;
           }
 
-          console.log('[BusinessSettings] geocoding endereco:', fullAddress);
+          console.log('[BusinessSettings] geocoding endereço:', fullAddress);
           const coordinates = await getCoordinatesFromAddress(fullAddress);
           console.log('[BusinessSettings] coordinates recebidas:', coordinates);
           if (coordinates) {
@@ -465,7 +465,7 @@ const BusinessSettingsScreen: React.FC = () => {
 
   const handleCropConfirm = async (croppedUri: string) => {
     if (!cropConfig) {
-      console.error('[handleCropConfirm] cropConfig esta nulo no inicio');
+      console.error('[handleCropConfirm] cropConfig esta nulo no início');
       return;
     }
     // Salvar referencias antes de limpar state (evita race condition)
@@ -481,7 +481,7 @@ const BusinessSettingsScreen: React.FC = () => {
       const downloadURL = await uploadImageToFirebase(croppedUri, {
         storageKey: storageKey,
       });
-      console.log('[handleCropConfirm] Upload concluido, downloadURL:', downloadURL);
+      console.log('[handleCropConfirm] Upload concluído, downloadURL:', downloadURL);
       console.log('[handleCropConfirm] Tipo de onSuccess:', typeof onSuccess);
       
       if (typeof onSuccess === 'function') {
@@ -491,7 +491,7 @@ const BusinessSettingsScreen: React.FC = () => {
         console.error('[handleCropConfirm] onSuccess nao eh function:', onSuccess);
       }
     } catch (err) {
-      Alert.alert('Erro', 'Nao foi possivel fazer upload da imagem.');
+      Alert.alert('Erro', 'Não foi possível fazer upload da imagem.');
       console.error('[Crop] Erro no upload:', err);
     } finally {
       setCropImageUri(null);
@@ -569,7 +569,7 @@ const BusinessSettingsScreen: React.FC = () => {
           console.log('[Cover] Tipo de updateSettings:', typeof updateSettings);
           console.log('[Cover] Chamando updateSettings com path:', path);
           updateSettings('coverImage', path);
-          console.log('[Cover] updateSettings concluido');
+          console.log('[Cover] updateSettings concluído');
           Alert.alert('Sucesso', 'Imagem de capa atualizada com sucesso!');
         } catch (err) {
           console.error('[Cover] Erro no callback onSuccess:', err);
@@ -646,7 +646,7 @@ const BusinessSettingsScreen: React.FC = () => {
           state: result.state || prev.state,
         }));
       } else {
-        Alert.alert('CEP nao encontrado', 'Verifique o CEP ou preencha o endereco manualmente.');
+        Alert.alert('CEP não encontrado', 'Verifique o CEP ou preencha o endereço manualmente.');
       }
     } catch (e) {
       console.warn('[buscarCep] erro:', e);

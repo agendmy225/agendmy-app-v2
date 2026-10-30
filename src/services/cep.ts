@@ -21,7 +21,7 @@ export interface CepResult {
 export const getAddressFromCep = async (cep: string): Promise<CepResult | null> => {
   const cleaned = (cep || '').replace(/\D/g, '');
   if (cleaned.length !== 8) {
-    console.warn('[ViaCEP] CEP invalido (precisa de 8 digitos):', cep);
+    console.warn('[ViaCEP] CEP inválido (precisa de 8 digitos):', cep);
     return null;
   }
   try {
@@ -34,7 +34,7 @@ export const getAddressFromCep = async (cep: string): Promise<CepResult | null> 
     const data = await response.json();
     // ViaCEP retorna { erro: true } quando o CEP nao existe
     if (data.erro) {
-      console.warn('[ViaCEP] CEP nao encontrado:', cleaned);
+      console.warn('[ViaCEP] CEP não encontrado:', cleaned);
       return null;
     }
     return {

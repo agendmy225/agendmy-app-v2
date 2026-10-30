@@ -244,7 +244,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const invite = inviteSnap && inviteSnap.exists() ? inviteSnap.data() : null;
         if (!invite || invite.status !== 'pending' || !invite.businessId || !invite.professionalId) {
           try { await firebaseAuthUser.delete(); } catch { /* ignora */ }
-          throw new Error('Codigo de convite invalido ou ja utilizado. Peca um novo codigo ao estabelecimento.');
+          throw new Error('Código de convite inválido ou já utilizado. Peca um novo código ao estabelecimento.');
         }
         professionalLink = { businessId: invite.businessId, professionalId: invite.professionalId, code };
       }

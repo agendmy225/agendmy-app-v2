@@ -63,7 +63,7 @@ export const getSubscriptionView = (business: Record<string, any> | null | undef
   const base = { status, trialEndsAt, exempt, paidCount, daysLeft: null, overdueDays: null };
 
   if (exempt) {
-    return { ...base, label: 'Isento', color: colors.success, icon: 'verified', description: 'Este negocio nao paga mensalidade.' };
+    return { ...base, label: 'Isento', color: colors.success, icon: 'verified', description: 'Este negócio não paga mensalidade.' };
   }
   if (status === 'active') {
     return { ...base, label: 'Em dia', color: colors.success, icon: 'check-circle', description: 'Sua assinatura esta ativa.' };
@@ -78,8 +78,8 @@ export const getSubscriptionView = (business: Record<string, any> | null | undef
       color: colors.warning,
       icon: 'warning',
       description: left > 0
-        ? `Ative sua assinatura em ate ${left} dia(s) para seu negocio continuar aparecendo no app.`
-        : 'Ative sua assinatura para seu negocio continuar aparecendo no app.',
+        ? `Ative sua assinatura em até ${left} dia(s) para seu negócio continuar aparecendo no app.`
+        : 'Ative sua assinatura para seu negócio continuar aparecendo no app.',
     };
   }
   if (status === 'suspended') {
@@ -88,7 +88,7 @@ export const getSubscriptionView = (business: Record<string, any> | null | undef
       label: 'Suspenso',
       color: colors.error,
       icon: 'block',
-      description: 'Seu negocio nao esta aparecendo para os clientes. Ative a assinatura para voltar.',
+      description: 'Seu negócio não está aparecendo para os clientes. Ative a assinatura para voltar.',
     };
   }
   if (status === 'cancelled') {
@@ -99,12 +99,12 @@ export const getSubscriptionView = (business: Record<string, any> | null | undef
   return {
     ...base,
     daysLeft,
-    label: 'Teste gratis',
+    label: 'Teste grátis',
     color: colors.primary,
     icon: 'card-giftcard',
     description: trialEndsAt
-      ? `Seu teste gratis termina em ${daysLeft} dia(s), no dia ${formatDate(trialEndsAt)}.`
-      : `Voce tem ${PLAN.trialDays} dias de teste gratis.`,
+      ? `Seu teste grátis termina em ${daysLeft} dia(s), no dia ${formatDate(trialEndsAt)}.`
+      : `Você tem ${PLAN.trialDays} dias de teste grátis.`,
   };
 };
 

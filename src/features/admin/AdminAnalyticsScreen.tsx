@@ -144,7 +144,7 @@ const AdminAnalyticsScreen: React.FC = () => {
       </TouchableOpacity>
       <Icon name="insights" size={30} color={colors.white} />
       <Text style={styles.headerTitle}>Analytics</Text>
-      <Text style={styles.headerSubtitle}>Visao geral do AgendMy</Text>
+      <Text style={styles.headerSubtitle}>Visão geral do AgendMy</Text>
     </View>
   );
 
@@ -154,7 +154,7 @@ const AdminAnalyticsScreen: React.FC = () => {
         {header}
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Calculando numeros...</Text>
+          <Text style={styles.loadingText}>Calculando números...</Text>
         </View>
       </View>
     );
@@ -166,7 +166,7 @@ const AdminAnalyticsScreen: React.FC = () => {
         {header}
         <View style={styles.center}>
           <Icon name="error-outline" size={48} color={colors.error} />
-          <Text style={styles.loadingText}>Nao foi possivel carregar os dados.</Text>
+          <Text style={styles.loadingText}>Não foi possível carregar os dados.</Text>
           <TouchableOpacity style={styles.primaryButton} onPress={() => load(false)}>
             <Text style={styles.primaryButtonText}>Tentar novamente</Text>
           </TouchableOpacity>
@@ -180,9 +180,9 @@ const AdminAnalyticsScreen: React.FC = () => {
   const statusRows: { label: string; value: number; color: string }[] = [
     { label: 'Agendados', value: appointments.scheduled, color: colors.warning },
     { label: 'Confirmados', value: appointments.confirmed, color: colors.primary },
-    { label: 'Concluidos', value: appointments.completed, color: colors.success },
+    { label: 'Concluídos', value: appointments.completed, color: colors.success },
     { label: 'Cancelados', value: appointments.cancelled, color: colors.error },
-    { label: 'Nao compareceu', value: appointments.noShow, color: colors.lightText },
+    { label: 'Não compareceu', value: appointments.noShow, color: colors.lightText },
   ];
 
   return (
@@ -209,7 +209,7 @@ const AdminAnalyticsScreen: React.FC = () => {
           />
           <StatCard
             icon="people"
-            label="Usuarios"
+            label="Usuários"
             value={users.total}
             sub={`${users.clients} clientes - ${users.owners} donos`}
           />
@@ -217,11 +217,11 @@ const AdminAnalyticsScreen: React.FC = () => {
             icon="event"
             label="Agendamentos"
             value={appointments.total}
-            sub={`${appointments.newLast30} nos ultimos 30 dias`}
+            sub={`${appointments.newLast30} nos últimos 30 dias`}
           />
           <StatCard
             icon="person-add"
-            label="Novos usuarios (30d)"
+            label="Novos usuários (30d)"
             value={users.newLast30}
             sub={`${businesses.newLast30} novos estabelecimentos`}
           />
@@ -240,7 +240,7 @@ const AdminAnalyticsScreen: React.FC = () => {
           <View style={styles.divider} />
           <View style={styles.statusRow}>
             <Icon name="payments" size={18} color={colors.success} style={styles.moneyIcon} />
-            <Text style={styles.statusLabel}>Valor em servicos concluidos</Text>
+            <Text style={styles.statusLabel}>Valor em serviços concluídos</Text>
             <Text style={[styles.statusValue, { color: colors.success }]}>
               {formatMoney(appointments.completedValue)}
             </Text>
@@ -273,8 +273,8 @@ const AdminAnalyticsScreen: React.FC = () => {
             </Text>
             <View style={[styles.box, styles.warningBox]}>
               <Text style={styles.warningText}>
-                Estes estabelecimentos nao aparecem nos rankings por regiao. O dono precisa
-                preencher o CEP em Configuracoes do Negocio.
+                Estes estabelecimentos não aparecem nos rankings por região. O dono precisa
+                preencher o CEP em Configurações do Negócio.
               </Text>
               {data.withoutCity.map((name, idx) => (
                 <Text key={`${name}-${idx}`} style={styles.withoutCityItem} numberOfLines={1}>

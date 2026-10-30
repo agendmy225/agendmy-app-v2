@@ -272,7 +272,7 @@ const BusinessDetailsScreen: React.FC = () => {
 
   const handleScheduleService = (professionalId: string) => {
     if (business && (business as any).active === false) {
-      Alert.alert('Estabelecimento indisponivel', 'Este estabelecimento nao esta recebendo agendamentos no momento.');
+      Alert.alert('Estabelecimento indisponível', 'Este estabelecimento não está recebendo agendamentos no momento.');
       return;
     }
     if (selectedService) {
@@ -289,7 +289,7 @@ const BusinessDetailsScreen: React.FC = () => {
 
   const handleBookNow = () => {
     if (business && (business as any).active === false) {
-      Alert.alert('Estabelecimento indisponivel', 'Este estabelecimento nao esta recebendo agendamentos no momento.');
+      Alert.alert('Estabelecimento indisponível', 'Este estabelecimento não está recebendo agendamentos no momento.');
       return;
     }
     // Se houver apenas um serviço, abre a seleção de profissional diretamente

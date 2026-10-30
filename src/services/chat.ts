@@ -179,6 +179,20 @@ export const getChatList = (userId: string, callback: (chats: Chat[]) => void): 
   return unsubscribe;
 };
 
+// Enquanto a conversa estiver aberta, zera as nao lidas de quem esta vendo.
+export const watchAndClearUnread = (chatId: string, uid: string): (() => void) => {
+  const chatRef = doc(firebaseDb, 'chats', chatId);
+  return onSnapshot(
+    chatRef,
+    (snap: FirebaseFirestoreTypes.DocumentSnapshot) => {
+      const unread = (snap.data() || {}).unread;
+      if (unread && Number(unread[uid]) > 0) {
+        updateDoc(chatRef, { [`unread.${uid}`]: 0 }).catch(() => undefined);
+      }
+    },
+    () => undefined,
+  );
+};
 // Alias for compatibility
 export const getOrCreateConversation = createOrGetChat;
 export const getUserConversations = getChatList;

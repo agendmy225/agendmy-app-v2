@@ -5,7 +5,7 @@
 //     duplo; preco, duracao e nomes vem do banco, nao do aparelho
 // Ficam separadas das outras funcoes (Python e comunicados), sem afeta-las.
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
-const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
+const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 
@@ -349,6 +349,7 @@ const pushToUser = async (uid, title, body, data) => {
       .map((d) => ({ token: d.get('token') || d.id, ref: d.ref }))
       .filter((e) => !!e.token);
     if (!entries.length) {
+      console.log('pushToUser', JSON.stringify({ uid: uid, titulo: title, aparelhos: 0 }));
       return;
     }
     const res = await admin.messaging().sendEachForMulticast({
@@ -357,6 +358,11 @@ const pushToUser = async (uid, title, body, data) => {
       data: data || {},
       android: { priority: 'high', notification: { channelId: 'default', sound: 'default' } },
     });
+    console.log('pushToUser', JSON.stringify({
+      uid: uid, titulo: title, aparelhos: entries.length,
+      entregues: res.successCount, falhas: res.failureCount,
+      erros: res.responses.filter((r) => !r.success).map((r) => (r.error && r.error.code) || '?'),
+    }));
     await Promise.all(res.responses.map((r, i) =>
       (!r.success && r.error && INVALID_TOKEN_CODES.includes(r.error.code)
         ? entries[i].ref.delete().catch(() => null)
@@ -517,5 +523,29 @@ exports.lembretesAgendamento = onSchedule(
       }
     }
     console.log('lembretesAgendamento', JSON.stringify({ verificados: snap.size, enviados: sent }));
+  },
+);
+
+// ---------- mensagens nao lidas do chat ----------
+// Cada mensagem nova soma 1 em chats/{id}.unread.{quem recebe}. Quem abre a conversa zera o seu.
+exports.mensagensNaoLidas = onDocumentCreated(
+  { document: 'chats/{chatId}/messages/{messageId}', region: REGION },
+  async (event) => {
+    const msg = (event.data && event.data.data()) || {};
+    const chatRef = db.collection('chats').doc(event.params.chatId);
+    const chat = await chatRef.get();
+    if (!chat.exists) {
+      return;
+    }
+    const participants = (chat.data() || {}).participants || [];
+    const recipients = participants.filter((p) => p && p !== msg.senderId);
+    if (!recipients.length) {
+      return;
+    }
+    const update = { lastMessageSenderId: msg.senderId || null };
+    recipients.forEach((r) => {
+      update['unread.' + r] = admin.firestore.FieldValue.increment(1);
+    });
+    await chatRef.update(update);
   },
 );

@@ -22,16 +22,16 @@ const OwnerSubscriptionScreen: React.FC = () => {
   };
 
   const timeline = [
-    { icon: 'card-giftcard', title: `${PLAN.trialDays} dias gratis`, text: 'Use todas as funcoes sem pagar nada.' },
+    { icon: 'card-giftcard', title: `${PLAN.trialDays} dias grátis`, text: 'Use todas as funcoes sem pagar nada.' },
     {
       icon: 'local-offer',
-      title: `${formatMoney(PLAN.introPrice)} por mes`,
-      text: `Preco promocional nos ${PLAN.introMonths} primeiros meses.`,
+      title: `${formatMoney(PLAN.introPrice)} por mês`,
+      text: `Preço promocional nos ${PLAN.introMonths} primeiros meses.`,
     },
     {
       icon: 'autorenew',
-      title: `${formatMoney(PLAN.fullPrice)} por mes`,
-      text: `A partir do ${PLAN.introMonths + 1}o mes. Voce sera avisado antes da mudanca.`,
+      title: `${formatMoney(PLAN.fullPrice)} por mês`,
+      text: `A partir do ${PLAN.introMonths + 1}o mês. Você será avisado antes da mudança.`,
     },
   ];
 
@@ -64,7 +64,7 @@ const OwnerSubscriptionScreen: React.FC = () => {
             </View>
             <Text style={styles.statusText}>{view.description}</Text>
             {view.status === 'trial' && view.trialEndsAt && (
-              <Text style={styles.statusMeta}>Teste ate {formatDate(view.trialEndsAt)}</Text>
+              <Text style={styles.statusMeta}>Teste até {formatDate(view.trialEndsAt)}</Text>
             )}
             {view.paidCount > 0 && (
               <Text style={styles.statusMeta}>{view.paidCount} mensalidade(s) paga(s)</Text>
@@ -100,20 +100,20 @@ const OwnerSubscriptionScreen: React.FC = () => {
             <View style={styles.payRow}>
               <Icon name="credit-card" size={20} color={colors.success} />
               <Text style={styles.payText}>
-                <Text style={styles.bold}>Cartao de credito:</Text> cobrado automaticamente todo mes.
+                <Text style={styles.bold}>Cartão de crédito:</Text> cobrado automaticamente todo mês.
               </Text>
             </View>
             <View style={styles.payRow}>
               <Icon name="account-balance" size={20} color={colors.primary} />
               <Text style={styles.payText}>
-                <Text style={styles.bold}>PIX:</Text> a cobranca chega todo mes e voce paga pelo app do banco.
+                <Text style={styles.bold}>PIX:</Text> a cobrança chega todo mês e você paga pelo app do banco.
               </Text>
             </View>
           </View>
 
           <Text style={styles.footerNote}>
-            Se o pagamento atrasar, voce tem {PLAN.graceDays} dias de tolerancia. Depois disso, seu negocio
-            deixa de aparecer para os clientes ate a assinatura ser regularizada.
+            Se o pagamento atrasar, você tem {PLAN.graceDays} dias de tolerância. Depois disso, seu negócio
+            deixa de aparecer para os clientes até a assinatura ser regularizada.
           </Text>
         </ScrollView>
       )}

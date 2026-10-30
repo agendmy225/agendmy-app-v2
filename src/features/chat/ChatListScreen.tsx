@@ -69,6 +69,8 @@ const ChatListScreen: React.FC = () => {
     });
   };
 
+  const unreadForMe = (chat: Chat): number => Number(((chat as any).unread || {})[user?.uid || ''] || 0);
+
   const renderChatItem = (chat: Chat) => (
     <TouchableOpacity
       key={chat.id}
@@ -90,6 +92,11 @@ const ChatListScreen: React.FC = () => {
           {chat.lastMessage?.text || 'Clique para iniciar a conversa'}
         </Text>
       </View>
+      {unreadForMe(chat) > 0 ? (
+        <View style={styles.unreadBadge}>
+          <Text style={styles.unreadCount}>{unreadForMe(chat) > 99 ? '99+' : unreadForMe(chat)}</Text>
+        </View>
+      ) : null}
     </TouchableOpacity>
   );
 

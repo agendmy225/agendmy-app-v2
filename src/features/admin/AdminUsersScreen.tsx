@@ -29,7 +29,7 @@ const formatDate = (d: Date | null): string => {
 };
 
 const typeLabel = (t: AdminUser['userType']): string => {
-  if (t === 'owner') { return 'Proprietario'; }
+  if (t === 'owner') { return 'Proprietário'; }
   if (t === 'client') { return 'Cliente'; }
   return 'Sem tipo';
 };
@@ -86,7 +86,7 @@ const AdminUsersScreen: React.FC = () => {
   const filters: { key: FilterType; label: string; count: number }[] = [
     { key: 'all', label: 'Todos', count: users.length },
     { key: 'client', label: 'Clientes', count: totalClients },
-    { key: 'owner', label: 'Proprietarios', count: totalOwners },
+    { key: 'owner', label: 'Proprietários', count: totalOwners },
   ];
 
   return (
@@ -100,9 +100,9 @@ const AdminUsersScreen: React.FC = () => {
           <Icon name="arrow-back" size={26} color={colors.white} />
         </TouchableOpacity>
         <Icon name="people" size={30} color={colors.white} />
-        <Text style={styles.headerTitle}>Usuarios</Text>
+        <Text style={styles.headerTitle}>Usuários</Text>
         <Text style={styles.headerSubtitle}>
-          {users.length} no total - {totalClients} clientes, {totalOwners} proprietarios
+          {users.length} no total - {totalClients} clientes, {totalOwners} proprietários
         </Text>
       </View>
 
@@ -140,12 +140,12 @@ const AdminUsersScreen: React.FC = () => {
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Carregando usuarios...</Text>
+          <Text style={styles.loadingText}>Carregando usuários...</Text>
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.listContent}>
           {filtered.length === 0 ? (
-            <Text style={styles.emptyText}>Nenhum usuario encontrado.</Text>
+            <Text style={styles.emptyText}>Nenhum usuário encontrado.</Text>
           ) : (
             filtered.map((u) => (
               <View key={u.uid} style={styles.card}>
@@ -180,7 +180,7 @@ const AdminUsersScreen: React.FC = () => {
                         { color: u.businessId ? colors.success : colors.warning },
                       ]}
                     >
-                      {u.businessId ? 'Negocio cadastrado' : 'Ainda sem negocio'}
+                      {u.businessId ? 'Negócio cadastrado' : 'Ainda sem negócio'}
                     </Text>
                   )}
                 </View>

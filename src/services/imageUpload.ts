@@ -37,7 +37,7 @@ export const selectImage = (): Promise<ImagePickerResponse> => {
     };
     launchImageLibrary(options, (response) => {
       if (response.didCancel) {
-        reject(new Error('Selecao cancelada'));
+        reject(new Error('Seleção cancelada'));
       } else if (response.errorMessage) {
         reject(new Error(response.errorMessage));
       } else {
@@ -54,7 +54,7 @@ const uploadFileNative = async (
 ): Promise<string> => {
   const currentUser = auth.currentUser;
   if (!currentUser) {
-    throw new Error('Usuario nao autenticado');
+    throw new Error('Usuário não autenticado');
   }
 
   console.log('[uploadFileNative] Iniciando upload:', { uri, storageKey, contentType });
@@ -65,7 +65,7 @@ const uploadFileNative = async (
   try {
     // @ts-ignore - putFile is native Firebase RN method
     await storageRef.putFile(uri, { contentType });
-    console.log('[uploadFileNative] putFile concluido');
+    console.log('[uploadFileNative] putFile concluído');
     const downloadURL = await getDownloadURL(storageRef);
     console.log('[uploadFileNative] downloadURL:', downloadURL);
     return downloadURL;
@@ -86,7 +86,7 @@ export const uploadImageToFirebase = async (
     if (typeof error === 'object' && error !== null && 'code' in error) {
       const firebaseError = error as { code: string };
       if (firebaseError.code === 'storage/unauthorized') {
-        throw new Error('Usuario nao autorizado a fazer upload.');
+        throw new Error('Usuário não autorizado a fazer upload.');
       } else if (firebaseError.code === 'storage/canceled') {
         throw new Error('Upload cancelado.');
       }
@@ -113,7 +113,7 @@ export const selectAndUploadImage = async (
     };
   } catch (error) {
     if (error instanceof Error && error.message.includes('cancelada')) {
-      Alert.alert('Info', 'A selecao de imagem foi cancelada.');
+      Alert.alert('Info', 'A seleção de imagem foi cancelada.');
     }
     throw error;
   }
@@ -133,8 +133,8 @@ export const selectAndUploadVideo = async (
     };
     launchImageLibrary(options, async (response) => {
       if (response.didCancel) {
-        Alert.alert('Info', 'A selecao de video foi cancelada.');
-        reject(new Error('Selecao cancelada'));
+        Alert.alert('Info', 'A seleção de vídeo foi cancelada.');
+        reject(new Error('Seleção cancelada'));
         return;
       }
       if (response.errorMessage) {
@@ -143,17 +143,17 @@ export const selectAndUploadVideo = async (
       }
       const asset = response.assets?.[0];
       if (!asset?.uri) {
-        reject(new Error('Nenhum video selecionado'));
+        reject(new Error('Nenhum vídeo selecionado'));
         return;
       }
       const duration = asset.duration || 0;
       if (duration > 20) {
         Alert.alert(
-          'Video muito longo',
-          'Seu video tem ' + Math.round(duration) + ' segundos. O limite e 20 segundos.',
+          'Vídeo muito longo',
+          'Seu vídeo tem ' + Math.round(duration) + ' segundos. O limite e 20 segundos.',
           [{ text: 'OK' }],
         );
-        reject(new Error('Video muito longo'));
+        reject(new Error('Vídeo muito longo'));
         return;
       }
       try {
@@ -191,7 +191,7 @@ export const deleteImageFromFirebase = async (imageUrl: string): Promise<void> =
 export const showImagePickerDialog = (title: string, onConfirm: () => void): void => {
   Alert.alert(
     title,
-    'Escolha uma opcao:',
+    'Escolha uma opção:',
     [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Selecionar da Galeria', onPress: onConfirm },

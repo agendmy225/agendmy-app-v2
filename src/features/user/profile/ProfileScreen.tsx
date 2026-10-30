@@ -15,6 +15,7 @@ import { AppStackParamList } from '../../../types/types';
 import { useAuth } from '../../auth/context/AuthContext';
 import { colors } from '../../../constants/colors';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useChatUnreadCount } from '../../../hooks/useChatUnreadCount';
 
 type TabParamList = {
   Home: undefined;
@@ -30,6 +31,7 @@ type ProfileScreenNavigationProp = CompositeNavigationProp<
 const ProfileScreen: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigation = useNavigation<ProfileScreenNavigationProp>();
+  const chatUnread = useChatUnreadCount(user?.uid);
 
   const handleSignOut = async () => {
     try {
@@ -96,6 +98,11 @@ const ProfileScreen: React.FC = () => {
         >
           <Icon name="chat" size={24} color={colors.primary} style={styles.menuIcon} />
           <Text style={styles.menuText}>Minhas Conversas</Text>
+          {chatUnread > 0 ? (
+            <View style={styles.menuBadge}>
+              <Text style={styles.menuBadgeText}>{chatUnread > 99 ? '99+' : chatUnread}</Text>
+            </View>
+          ) : null}
           <Icon name="chevron-right" size={24} color={colors.lightText} />
         </TouchableOpacity>
 
@@ -203,6 +210,21 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: colors.text,
+  },
+  menuBadge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    paddingHorizontal: 6,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  menuBadgeText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   menuArrow: {
     fontSize: 20,

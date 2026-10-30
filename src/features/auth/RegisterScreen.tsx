@@ -56,7 +56,7 @@ const RegisterScreen: React.FC = () => {
       return;
     }
     if (userType === 'professional' && inviteCode.trim().length !== 6) {
-      Alert.alert('Erro', 'Informe o codigo de convite de 6 letras enviado pelo estabelecimento.');
+      Alert.alert('Erro', 'Informe o código de convite de 6 letras enviado pelo estabelecimento.');
       return;
     }
     if (userType === 'owner' && !establishmentName) {
@@ -136,10 +136,10 @@ const RegisterScreen: React.FC = () => {
 
             {userType === 'professional' && (
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>CODIGO DE CONVITE</Text>
+                <Text style={styles.inputLabel}>CÓDIGO DE CONVITE</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Codigo enviado pelo estabelecimento"
+                  placeholder="Código enviado pelo estabelecimento"
                   placeholderTextColor="#999"
                   autoCapitalize="characters"
                   maxLength={6}

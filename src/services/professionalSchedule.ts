@@ -10,8 +10,8 @@ import { parseLocalDate, toLocalDateString } from '../utils/localDate';
 
 export const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 export const DAY_LABELS: Record<string, string> = {
-  monday: 'Segunda', tuesday: 'Terca', wednesday: 'Quarta', thursday: 'Quinta',
-  friday: 'Sexta', saturday: 'Sabado', sunday: 'Domingo',
+  monday: 'Segunda', tuesday: 'Terça', wednesday: 'Quarta', thursday: 'Quinta',
+  friday: 'Sexta', saturday: 'Sábado', sunday: 'Domingo',
 };
 export const WEEK_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 

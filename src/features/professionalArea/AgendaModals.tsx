@@ -84,11 +84,11 @@ const SlotPicker: React.FC<{
       </ScrollView>
       {date && (
         <>
-          <Text style={styles.label}>Horario</Text>
+          <Text style={styles.label}>Horário</Text>
           {loading ? (
             <ActivityIndicator color={colors.primary} />
           ) : slots.length === 0 ? (
-            <Text style={styles.empty}>Sem horarios livres nesse dia.</Text>
+            <Text style={styles.empty}>Sem horários livres nesse dia.</Text>
           ) : (
             <View style={styles.slotGrid}>
               {slots.map((s) => (
@@ -142,7 +142,7 @@ export const RescheduleModal: React.FC<{
       });
       onClose();
     } catch {
-      Alert.alert('Erro', 'Nao foi possivel remarcar.');
+      Alert.alert('Erro', 'Não foi possível remarcar.');
     } finally {
       setSaving(false);
     }
@@ -251,7 +251,7 @@ export const ManualBookingModal: React.FC<{
       });
       p.onClose();
     } catch {
-      Alert.alert('Erro', 'Nao foi possivel salvar o encaixe.');
+      Alert.alert('Erro', 'Não foi possível salvar o encaixe.');
     } finally {
       setSaving(false);
     }
@@ -269,10 +269,10 @@ export const ManualBookingModal: React.FC<{
             <Text style={styles.label}>Telefone (opcional)</Text>
             <TextInput style={styles.input} value={clientPhone} onChangeText={setClientPhone} placeholder="(00) 00000-0000" keyboardType="phone-pad" placeholderTextColor={colors.placeholderText} />
 
-            <Text style={styles.label}>Servico</Text>
+            <Text style={styles.label}>Serviço</Text>
             <View style={styles.slotGrid}>
               {services.length === 0 ? (
-                <Text style={styles.empty}>Nenhum servico cadastrado.</Text>
+                <Text style={styles.empty}>Nenhum serviço cadastrado.</Text>
               ) : services.map((s) => (
                 <TouchableOpacity
                   key={s.id}

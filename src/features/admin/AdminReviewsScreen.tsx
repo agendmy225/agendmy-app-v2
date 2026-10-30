@@ -85,7 +85,7 @@ const AdminReviewsScreen: React.FC = () => {
     const acao = status === 'approved' ? 'aprovar' : 'rejeitar';
     Alert.alert(
       'Confirmar',
-      `Deseja ${acao} a avaliacao de ${review.userName} em "${review.businessName}"?`,
+      `Deseja ${acao} a avaliação de ${review.userName} em "${review.businessName}"?`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -99,7 +99,7 @@ const AdminReviewsScreen: React.FC = () => {
                 prev.map((r) => (r.path === review.path ? { ...r, status } : r))
               );
             } catch {
-              Alert.alert('Erro', 'Nao foi possivel atualizar a avaliacao.');
+              Alert.alert('Erro', 'Não foi possível atualizar a avaliação.');
             } finally {
               setBusyId(null);
             }
@@ -157,7 +157,7 @@ const AdminReviewsScreen: React.FC = () => {
           <Icon name="arrow-back" size={26} color={colors.white} />
         </TouchableOpacity>
         <Icon name="star-rate" size={30} color={colors.white} />
-        <Text style={styles.headerTitle}>Avaliacoes</Text>
+        <Text style={styles.headerTitle}>Avaliações</Text>
         <Text style={styles.headerSubtitle}>
           {reviews.length} no total - {count('pending')} pendentes
         </Text>
@@ -183,7 +183,7 @@ const AdminReviewsScreen: React.FC = () => {
           style={styles.searchInput}
           value={search}
           onChangeText={setSearch}
-          placeholder="Buscar estabelecimento, cliente ou comentario"
+          placeholder="Buscar estabelecimento, cliente ou comentário"
           placeholderTextColor={colors.placeholderText}
         />
         {search.length > 0 && (
@@ -196,12 +196,12 @@ const AdminReviewsScreen: React.FC = () => {
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Carregando avaliacoes...</Text>
+          <Text style={styles.loadingText}>Carregando avaliações...</Text>
         </View>
       ) : error ? (
         <View style={styles.center}>
           <Icon name="error-outline" size={48} color={colors.error} />
-          <Text style={styles.loadingText}>Nao foi possivel carregar as avaliacoes.</Text>
+          <Text style={styles.loadingText}>Não foi possível carregar as avaliações.</Text>
           <TouchableOpacity style={styles.primaryButton} onPress={() => load(false)}>
             <Text style={styles.primaryButtonText}>Tentar novamente</Text>
           </TouchableOpacity>
@@ -219,7 +219,7 @@ const AdminReviewsScreen: React.FC = () => {
           }
         >
           {filtered.length === 0 ? (
-            <Text style={styles.emptyText}>Nenhuma avaliacao encontrada.</Text>
+            <Text style={styles.emptyText}>Nenhuma avaliação encontrada.</Text>
           ) : (
             filtered.map((r) => {
               const st = statusInfo(r.status);
@@ -251,11 +251,11 @@ const AdminReviewsScreen: React.FC = () => {
                   ) : null}
 
                   <Text style={styles.comment}>
-                    {r.comment ? r.comment : 'Sem comentario.'}
+                    {r.comment ? r.comment : 'Sem comentário.'}
                   </Text>
 
                   {r.hasResponse && (
-                    <Text style={styles.responseTag}>O estabelecimento ja respondeu</Text>
+                    <Text style={styles.responseTag}>O estabelecimento já respondeu</Text>
                   )}
 
                   <View style={styles.actions}>

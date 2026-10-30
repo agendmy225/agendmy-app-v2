@@ -22,7 +22,7 @@ const WelcomeScreen: React.FC = () => {
           </View>
           <View style={styles.buttonsContainer}>
             <TouchableOpacity style={styles.userTypeButton} onPress={() => navigation.navigate('Login', { userType: 'owner' })}>
-              <Text style={styles.buttonText}>PROPRIETARIO</Text>
+              <Text style={styles.buttonText}>PROPRIETÁRIO</Text>
             </TouchableOpacity>
             <Text style={styles.orText}>OU</Text>
             <TouchableOpacity style={styles.userTypeButton} onPress={() => navigation.navigate('Login', { userType: 'client' })}>

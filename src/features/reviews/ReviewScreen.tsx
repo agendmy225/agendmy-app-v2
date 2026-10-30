@@ -124,14 +124,14 @@ const ReviewScreen: React.FC = () => {
           if (hasActiveReview) {
             setIsSubmitting(false);
             Alert.alert(
-              'Avaliacao ja realizada',
-              appointmentId ? 'Voce ja avaliou este atendimento.' : 'Voce ja fez uma avaliacao geral deste estabelecimento.',
+              'Avaliação já realizada',
+              appointmentId ? 'Você já avaliou este atendimento.' : 'Você já fez uma avaliação geral deste estabelecimento.',
               [{ text: 'OK', onPress: () => navigation.goBack() }]
             );
             return;
           }
         } catch (checkErr) {
-          console.warn('Erro ao verificar avaliacoes anteriores:', checkErr);
+          console.warn('Erro ao verificar avaliações anteriores:', checkErr);
         }
       }
 
@@ -140,7 +140,7 @@ const ReviewScreen: React.FC = () => {
       const reviewData: any = {
         businessId,
         userId: user?.uid || 'anonymous',
-        userName: user?.displayName || user?.email?.split('@')[0] || 'Usuario Anonimo',
+        userName: user?.displayName || user?.email?.split('@')[0] || 'Usuário Anônimo',
         rating, // Nota do estabelecimento
         comment: comment.trim(),
       };
@@ -160,13 +160,13 @@ const ReviewScreen: React.FC = () => {
         try {
           await updateDoc(doc(firestore, 'appointments', appointmentId), { reviewed: true });
         } catch (markErr) {
-          console.warn('Nao foi possivel marcar o agendamento como avaliado:', markErr);
+          console.warn('Não foi possível marcar o agendamento como avaliado:', markErr);
         }
       }
 
       Alert.alert(
         'Avaliação enviada!',
-        'Avaliacao enviada! Aguardando aprovacao do estabelecimento. Apos aprovada, ela aparecera na pagina.',
+        'Avaliação enviada! Aguardando aprovação do estabelecimento. Após aprovada, ela aparecera na página.',
         [
           {
             text: 'OK',
@@ -212,7 +212,7 @@ const ReviewScreen: React.FC = () => {
 
         {/* Avaliacao por estrelas - Estabelecimento */}
         <View style={styles.ratingSection}>
-          <Text style={styles.sectionTitle}>Como foi sua experiencia no estabelecimento?</Text>
+          <Text style={styles.sectionTitle}>Como foi sua experiência no estabelecimento?</Text>
           <View style={styles.starsContainer}>
             {renderStars(rating, setRating)}
           </View>

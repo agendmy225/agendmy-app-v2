@@ -357,7 +357,7 @@ export const updateProfessionalRating = async (
     const professionalRef = doc(firebaseDb, 'professionals', professionalId);
     const professionalSnap = await getDoc(professionalRef);
     if (!professionalSnap.exists()) {
-      console.warn('[updateProfessionalRating] profissional nao encontrado:', professionalId);
+      console.warn('[updateProfessionalRating] profissional não encontrado:', professionalId);
       return 0;
     }
     const businessId = (professionalSnap.data() as any)?.businessId;

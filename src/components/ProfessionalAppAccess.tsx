@@ -77,11 +77,11 @@ const ProfessionalAppAccess: React.FC<Props> = ({ businessId, professionalId, pr
         Alert.alert(
           'Limite do plano',
           err.limit >= 10
-            ? 'Voce ja tem 10 profissionais com acesso ao app, que e o maximo permitido.'
-            : `Seu plano permite ate ${err.limit} profissionais com acesso ao app. Para convidar mais, e preciso o plano Plus (ate 10 profissionais).`,
+            ? 'Você já tem 10 profissionais com acesso ao app, que e o máximo permitido.'
+            : `Seu plano permite até ${err.limit} profissionais com acesso ao app. Para convidar mais, e preciso o plano Plus (até 10 profissionais).`,
         );
       } else {
-        Alert.alert('Erro', 'Nao foi possivel criar o convite. Tente novamente.');
+        Alert.alert('Erro', 'Não foi possível criar o convite. Tente novamente.');
       }
     } finally {
       setBusy(false);
@@ -92,12 +92,12 @@ const ProfessionalAppAccess: React.FC<Props> = ({ businessId, professionalId, pr
     if (!pendingCode) {
       return;
     }
-    Alert.alert('Cancelar convite', 'O codigo deixa de funcionar. Deseja cancelar?', [
+    Alert.alert('Cancelar convite', 'O código deixa de funcionar. Deseja cancelar?', [
       { text: 'Voltar', style: 'cancel' },
       {
         text: 'Cancelar convite',
         style: 'destructive',
-        onPress: () => revokeInvite(pendingCode).catch(() => Alert.alert('Erro', 'Nao foi possivel cancelar.')),
+        onPress: () => revokeInvite(pendingCode).catch(() => Alert.alert('Erro', 'Não foi possível cancelar.')),
       },
     ]);
   };
@@ -105,13 +105,13 @@ const ProfessionalAppAccess: React.FC<Props> = ({ businessId, professionalId, pr
   const handleRemove = () => {
     Alert.alert(
       'Remover acesso',
-      `${professionalName} nao vai mais conseguir entrar no app. Os agendamentos dele continuam normais. Deseja remover?`,
+      `${professionalName} não vai mais conseguir entrar no app. Os agendamentos dele continuam normais. Deseja remover?`,
       [
         { text: 'Voltar', style: 'cancel' },
         {
           text: 'Remover',
           style: 'destructive',
-          onPress: () => removeAppAccess(professionalId).catch(() => Alert.alert('Erro', 'Nao foi possivel remover.')),
+          onPress: () => removeAppAccess(professionalId).catch(() => Alert.alert('Erro', 'Não foi possível remover.')),
         },
       ],
     );

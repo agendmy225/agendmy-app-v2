@@ -107,7 +107,7 @@ const AdminNotificationsScreen: React.FC = () => {
     }
     Alert.alert(
       'Enviar comunicado',
-      `Enviar "${title.trim()}" para: ${audienceLabel(audience)}?\n\nIsso dispara uma notificacao no celular das pessoas e nao pode ser desfeito.`,
+      `Enviar "${title.trim()}" para: ${audienceLabel(audience)}?\n\nIsso dispara uma notificação no celular das pessoas e não pode ser desfeito.`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -120,7 +120,7 @@ const AdminNotificationsScreen: React.FC = () => {
               setBody('');
               setAudience('all');
             } catch {
-              Alert.alert('Erro', 'Nao foi possivel colocar o comunicado na fila.');
+              Alert.alert('Erro', 'Não foi possível colocar o comunicado na fila.');
             } finally {
               setSending(false);
             }
@@ -143,7 +143,7 @@ const AdminNotificationsScreen: React.FC = () => {
         <Icon name="campaign" size={30} color={colors.white} />
         <Text style={styles.headerTitle}>Comunicados</Text>
         <Text style={styles.headerSubtitle}>
-          {devices === null ? 'Contando aparelhos...' : `${devices} aparelho(s) com notificacao registrada`}
+          {devices === null ? 'Contando aparelhos...' : `${devices} aparelho(s) com notificação registrada`}
         </Text>
       </View>
 
@@ -151,7 +151,7 @@ const AdminNotificationsScreen: React.FC = () => {
         {/* FORMULARIO */}
         <Text style={styles.sectionTitle}>Novo comunicado</Text>
         <View style={styles.box}>
-          <Text style={styles.inputLabel}>Titulo</Text>
+          <Text style={styles.inputLabel}>Título</Text>
           <TextInput
             style={styles.input}
             value={title}
@@ -167,7 +167,7 @@ const AdminNotificationsScreen: React.FC = () => {
             style={[styles.input, styles.textArea]}
             value={body}
             onChangeText={setBody}
-            placeholder="Escreva a mensagem que vai aparecer na notificacao"
+            placeholder="Escreva a mensagem que vai aparecer na notificação"
             placeholderTextColor={colors.placeholderText}
             maxLength={BODY_MAX}
             multiline
@@ -192,7 +192,7 @@ const AdminNotificationsScreen: React.FC = () => {
             <View style={styles.preview}>
               <Icon name="notifications" size={18} color={colors.primary} />
               <View style={styles.previewTextBox}>
-                <Text style={styles.previewTitle} numberOfLines={1}>{title.trim() || 'Titulo'}</Text>
+                <Text style={styles.previewTitle} numberOfLines={1}>{title.trim() || 'Título'}</Text>
                 <Text style={styles.previewBody} numberOfLines={3}>{body.trim() || 'Mensagem'}</Text>
               </View>
             </View>
@@ -215,7 +215,7 @@ const AdminNotificationsScreen: React.FC = () => {
         </View>
 
         {/* HISTORICO */}
-        <Text style={styles.sectionTitle}>Historico</Text>
+        <Text style={styles.sectionTitle}>Histórico</Text>
         {!historyLoaded ? (
           <ActivityIndicator size="small" color={colors.primary} />
         ) : history.length === 0 ? (
