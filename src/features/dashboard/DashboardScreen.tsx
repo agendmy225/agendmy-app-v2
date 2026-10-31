@@ -19,6 +19,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { collection, doc, getDoc, getDocs, limit, onSnapshot, query, where } from '@react-native-firebase/firestore';
 import { firebaseDb } from '../../config/firebase';
 import { colors } from '../../constants/colors';
@@ -30,7 +31,7 @@ import { getServicesByBusiness } from '../../services/services';
 import { formatLocalDate, toLocalDateString } from '../../utils/localDate';
 
 type Nav = StackNavigationProp<AppStackParamList, 'DashboardScreen'>;
-type Period = 'today' | 'week' | 'month' | 'lastMonth';
+type Period = 'today' | 'week' | 'month' | 'next30' | 'lastMonth' | 'custom';
 type Tab = 'overview' | 'losses';
 
 interface Appt {
@@ -48,15 +49,25 @@ const PERIODS: { key: Period; label: string }[] = [
   { key: 'today', label: 'Hoje' },
   { key: 'week', label: '7 dias' },
   { key: 'month', label: 'Este mês' },
+  { key: 'next30', label: 'Próximos 30 dias' },
   { key: 'lastMonth', label: 'Mês passado' },
+  { key: 'custom', label: 'Escolher datas' },
 ];
 
 const brl = (v: number) => `R$ ${(Number(v) || 0).toFixed(2).replace('.', ',')}`;
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
-const periodRange = (p: Period): { start: string; end: string } => {
+const periodRange = (p: Period, customStart: Date, customEnd: Date): { start: string; end: string } => {
   const now = new Date();
   const today = toLocalDateString(now);
+  if (p === 'custom') {
+    const a = toLocalDateString(customStart);
+    const b = toLocalDateString(customEnd);
+    return a <= b ? { start: a, end: b } : { start: b, end: a };
+  }
+  if (p === 'next30') {
+    return { start: today, end: toLocalDateString(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 29)) };
+  }
   if (p === 'today') {
     return { start: today, end: today };
   }
@@ -86,6 +97,12 @@ const DashboardScreen: React.FC = () => {
   const [counts, setCounts] = useState({ professionals: 0, services: 0 });
   const [period, setPeriod] = useState<Period>('month');
   const [tab, setTab] = useState<Tab>('overview');
+  const [customStart, setCustomStart] = useState(() => {
+    const n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), 1);
+  });
+  const [customEnd, setCustomEnd] = useState(() => new Date());
+  const [picker, setPicker] = useState<'start' | 'end' | null>(null);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [showProfessionalModal, setShowProfessionalModal] = useState(false);
 
@@ -162,12 +179,14 @@ const DashboardScreen: React.FC = () => {
     return {
       count: active.length,
       pending: list.filter((a) => a.status === 'scheduled').length,
+      // todos os que aguardam confirmacao, de hoje em diante (qualquer data)
+      pendingAll: appointments.filter((a) => a.status === 'scheduled' && a.date >= today).length,
       expected: active.filter((a) => a.status !== 'no_show').reduce((s, a) => s + a.price, 0),
       done: list.filter((a) => a.status === 'completed').reduce((s, a) => s + a.price, 0),
     };
   }, [appointments, today]);
 
-  const range = periodRange(period);
+  const range = periodRange(period, customStart, customEnd);
   const periodStats = useMemo(() => {
     const list = appointments.filter((a) => a.date >= range.start && a.date <= range.end);
     const completed = list.filter((a) => a.status === 'completed');
@@ -284,7 +303,7 @@ const DashboardScreen: React.FC = () => {
         <Text style={styles.sectionTitle}>{`Hoje, ${formatLocalDate(today)}`}</Text>
         <View style={styles.statsGrid}>
           <Stat value={todayStats.count} label="Agendamentos" />
-          <Stat value={todayStats.pending} label="A confirmar" color={todayStats.pending ? colors.warning : undefined} />
+          <Stat value={todayStats.pendingAll} label="A confirmar (todas as datas)" color={todayStats.pendingAll ? colors.warning : undefined} />
           <Stat value={brl(todayStats.expected)} label="Previsto hoje" />
           <Stat value={brl(todayStats.done)} label="Recebido hoje" color={colors.success} />
         </View>
@@ -298,6 +317,42 @@ const DashboardScreen: React.FC = () => {
           </TouchableOpacity>
         ))}
       </View>
+
+      {period === 'custom' ? (
+        <View style={styles.customRow}>
+          <TouchableOpacity style={styles.dateButton} onPress={() => setPicker('start')}>
+            <Icon name="date-range" size={18} color={colors.primary} />
+            <Text style={styles.dateButtonText}>{`De ${customStart.toLocaleDateString('pt-BR')}`}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.dateButton} onPress={() => setPicker('end')}>
+            <Icon name="date-range" size={18} color={colors.primary} />
+            <Text style={styles.dateButtonText}>{`Até ${customEnd.toLocaleDateString('pt-BR')}`}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+      <Text style={styles.rangeText}>
+        {range.start === range.end
+          ? `Atendimentos do dia ${formatLocalDate(range.start)}`
+          : `Atendimentos marcados de ${formatLocalDate(range.start)} a ${formatLocalDate(range.end)}`}
+      </Text>
+      {picker ? (
+        <DateTimePicker
+          value={picker === 'start' ? customStart : customEnd}
+          mode="date"
+          display="default"
+          onChange={(event: any, d?: Date) => {
+            const which = picker;
+            setPicker(null);
+            if (event?.type === 'set' && d) {
+              if (which === 'start') {
+                setCustomStart(d);
+              } else {
+                setCustomEnd(d);
+              }
+            }
+          }}
+        />
+      ) : null}
 
       <View style={styles.tabs}>
         <TouchableOpacity style={[styles.tab, tab === 'overview' && styles.tabActive]} onPress={() => setTab('overview')}>
@@ -315,7 +370,7 @@ const DashboardScreen: React.FC = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Estatísticas</Text>
             <View style={styles.statsGrid}>
-              <Stat value={periodStats.total} label="Total" />
+              <Stat value={periodStats.total} label="Total (todos os status)" />
               <Stat value={periodStats.pending} label="A confirmar" color={periodStats.pending ? colors.warning : undefined} />
               <Stat value={periodStats.confirmed} label="Confirmados" color={colors.primary} />
               <Stat value={periodStats.completed} label="Concluídos" color={colors.success} />
@@ -441,6 +496,10 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { fontSize: 13, color: colors.text },
   chipTextActive: { color: colors.white, fontWeight: '600' },
+  customRow: { flexDirection: 'row', paddingHorizontal: 12, marginTop: 4 },
+  dateButton: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, borderRadius: 10, borderWidth: 1, borderColor: colors.primary, paddingHorizontal: 10, paddingVertical: 9, marginRight: 8 },
+  dateButtonText: { color: colors.primary, fontWeight: '600', marginLeft: 6 },
+  rangeText: { fontSize: 12, color: colors.lightText, marginHorizontal: 14, marginTop: 6 },
   tabs: { flexDirection: 'row', marginHorizontal: 12, marginTop: 6, backgroundColor: colors.white, borderRadius: 10, padding: 4 },
   tab: { flex: 1, paddingVertical: 9, borderRadius: 8, alignItems: 'center' },
   tabActive: { backgroundColor: colors.primary },
