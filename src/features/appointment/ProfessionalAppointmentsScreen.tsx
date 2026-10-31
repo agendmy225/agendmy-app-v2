@@ -72,6 +72,21 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [notes, setNotes] = useState('');
+    // pacote: uma data e um horario para cada sessao (a sessao 1 usa a data e o horario principais)
+    const [extraSessions, setExtraSessions] = useState<{ date: Date; time: Date }[]>([]);
+    const [pickerIndex, setPickerIndex] = useState(-1);
+    const sessionsCount = Math.max(1, Number((selectedService as any)?.numSessions) || 1);
+    useEffect(() => {
+        if (sessionsCount <= 1) {
+            setExtraSessions([]);
+            return;
+        }
+        setExtraSessions((prev) => Array.from({ length: sessionsCount - 1 }, (_, i) => prev[i] || {
+            date: new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 7 * (i + 1)),
+            time: selectedTime,
+        }));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sessionsCount]);
 
     // Fetch business ID
     const fetchBusinessId = useCallback(async () => {
@@ -257,6 +272,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
         setSelectedDate(new Date());
         setSelectedTime(new Date());
         setNotes('');
+        setExtraSessions([]); // limpa o pacote
     };
 
     // Handle create appointment
@@ -265,53 +281,83 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
             Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
             return;
         }
-
+        const sessions = [{ date: selectedDate, time: selectedTime }, ...(sessionsCount > 1 ? extraSessions : [])];
+        const duration = parseInt(String(selectedService.duration), 10) || 60;
+        const toMin = (t: string) => { const [h, mi] = String(t || '0:0').split(':').map(Number); return (h || 0) * 60 + (mi || 0); };
+        const hhmm = (d: Date) => d.toTimeString().slice(0, 5);
         try {
-            const appointmentData = {
-                businessId: businessId!,
-                serviceId: selectedService.id,
-                professionalId: selectedProfessional.id,
-                clientId: 'owner-created', // Special ID for owner-created appointments
-                clientName: clientName.trim(),
-                clientEmail: clientEmail.trim() || undefined,
-                clientPhone: clientPhone.trim() || undefined,
-                date: toLocalDateString(selectedDate),
-                time: selectedTime.toTimeString().slice(0, 5),
-                serviceName: selectedService.name,
-                professionalName: selectedProfessional.name,
-                businessName: '', // Will be filled by the service
-                price: selectedService.price,
-                duration: selectedService.duration.toString(),
-                status: 'confirmed' as const,
-                notes: notes.trim() || undefined,
-            };
-
-            // confere se o profissional ja tem agendamento nesse horario (evita duplicados)
-            const dayAppts = await getProfessionalAppointments(selectedProfessional.id, undefined, appointmentData.date, businessId || undefined);
-            const toMin = (t: string) => { const [h, mi] = String(t || '0:0').split(':').map(Number); return (h || 0) * 60 + (mi || 0); };
-            const startMin = toMin(appointmentData.time);
-            const endMin = startMin + (parseInt(String(selectedService.duration), 10) || 60);
-            const clash = dayAppts.find((x) => (x.status === 'scheduled' || x.status === 'confirmed') &&
-              startMin < toMin(x.time) + (parseInt(String(x.duration), 10) || 60) && endMin > toMin(x.time));
-            if (clash) {
-              const proceed = await new Promise<boolean>((resolve) => Alert.alert(
-                'Horário ocupado',
-                `${selectedProfessional.name} já tem ${clash.clientName || 'um cliente'} às ${clash.time} nesse dia. Agendar mesmo assim?`,
-                [
-                  { text: 'Voltar', style: 'cancel', onPress: () => resolve(false) },
-                  { text: 'Agendar mesmo assim', onPress: () => resolve(true) },
-                ],
-              ));
-              if (!proceed) {
-                return;
-              }
+            // sessoes do mesmo pacote nao podem se sobrepor
+            for (let i = 0; i < sessions.length; i++) {
+                for (let j = i + 1; j < sessions.length; j++) {
+                    if (toLocalDateString(sessions[i].date) === toLocalDateString(sessions[j].date) &&
+                        Math.abs(toMin(hhmm(sessions[i].time)) - toMin(hhmm(sessions[j].time))) < duration) {
+                        Alert.alert('Sessões no mesmo horário', `As sessões ${i + 1} e ${j + 1} estão no mesmo horário. Ajuste antes de salvar.`);
+                        return;
+                    }
+                }
             }
-            await saveAppointment(appointmentData);
-            Alert.alert('Sucesso', 'Agendamento criado com sucesso.');
+
+            // confere se o profissional ja tem agendamento nesses horarios (evita duplicados)
+            const clashes: string[] = [];
+            for (const s of sessions) {
+                const day = toLocalDateString(s.date);
+                const dayAppts = await getProfessionalAppointments(selectedProfessional.id, undefined, day, businessId || undefined);
+                const startMin = toMin(hhmm(s.time));
+                const endMin = startMin + duration;
+                const clash = dayAppts.find((x) => (x.status === 'scheduled' || x.status === 'confirmed') &&
+                    startMin < toMin(x.time) + (parseInt(String(x.duration), 10) || 60) && endMin > toMin(x.time));
+                if (clash) {
+                    clashes.push(`${s.date.toLocaleDateString('pt-BR')} às ${clash.time} (${clash.clientName || 'cliente'})`);
+                }
+            }
+            if (clashes.length > 0) {
+                const proceed = await new Promise<boolean>((resolve) => Alert.alert(
+                    'Horário ocupado',
+                    `${selectedProfessional.name} já tem atendimento em:\n${clashes.join('\n')}\n\nAgendar mesmo assim?`,
+                    [
+                        { text: 'Voltar', style: 'cancel', onPress: () => resolve(false) },
+                        { text: 'Agendar mesmo assim', onPress: () => resolve(true) },
+                    ],
+                ));
+                if (!proceed) {
+                    return;
+                }
+            }
+
+            const svcAny = selectedService as any;
+            const fullPrice = Number(svcAny.isPromotionActive && svcAny.promotionalPrice ? svcAny.promotionalPrice : selectedService.price) || 0;
+            const unitPrice = Math.round((fullPrice / sessions.length) * 100) / 100;
+            const packageId = sessions.length > 1 ? `pkg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}` : null;
+            for (const s of sessions) {
+                const appointmentData: any = {
+                    businessId: businessId!,
+                    serviceId: selectedService.id,
+                    professionalId: selectedProfessional.id,
+                    clientId: 'owner-created',
+                    clientName: clientName.trim(),
+                    clientEmail: clientEmail.trim() || '',
+                    clientPhone: clientPhone.trim() || '',
+                    date: toLocalDateString(s.date),
+                    time: hhmm(s.time),
+                    serviceName: selectedService.name,
+                    professionalName: selectedProfessional.name,
+                    businessName: '',
+                    price: unitPrice,
+                    duration: String(duration),
+                    status: 'confirmed',
+                    notes: notes.trim() || '',
+                    createdBy: 'owner',
+                };
+                if (packageId) {
+                    appointmentData.packageId = packageId;
+                }
+                await saveAppointment(appointmentData);
+            }
+            Alert.alert('Sucesso', sessions.length > 1 ? `${sessions.length} sessões agendadas.` : 'Agendamento criado com sucesso.');
             setIsCreateModalVisible(false);
+            resetForm();
             onRefresh();
         } catch (error) {
-            console.error('Error creating appointment:', error);
             Alert.alert('Erro', 'Não foi possível criar o agendamento.');
         }
     };
@@ -550,7 +596,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                                 <Text style={styles.inputLabel}>Data *</Text>
                                 <TouchableOpacity
                                     style={styles.dateTimeButton}
-                                    onPress={() => setShowDatePicker(true)}
+                                    onPress={() => { setPickerIndex(-1); setShowDatePicker(true); }}
                                 >
                                     <Text style={styles.dateTimeText}>
                                         {selectedDate.toLocaleDateString('pt-BR')}
@@ -563,7 +609,7 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                                 <Text style={styles.inputLabel}>Horário *</Text>
                                 <TouchableOpacity
                                     style={styles.dateTimeButton}
-                                    onPress={() => setShowTimePicker(true)}
+                                    onPress={() => { setPickerIndex(-1); setShowTimePicker(true); }}
                                 >
                                     <Text style={styles.dateTimeText}>
                                         {selectedTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
@@ -572,6 +618,30 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                                 </TouchableOpacity>
                             </View>
                         </View>
+
+                        {!isEdit && sessionsCount > 1 ? (
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.inputLabel}>{`Pacote com ${sessionsCount} sessões (a data acima é a sessão 1)`}</Text>
+                                {extraSessions.map((s, i) => (
+                                    <View key={i} style={styles.dateTimeContainer}>
+                                        <View style={styles.dateTimeItem}>
+                                            <Text style={styles.inputLabel}>{`Sessão ${i + 2}`}</Text>
+                                            <TouchableOpacity style={styles.dateTimeButton} onPress={() => { setPickerIndex(i); setShowDatePicker(true); }}>
+                                                <Text style={styles.dateTimeText}>{s.date.toLocaleDateString('pt-BR')}</Text>
+                                                <Icon name="date-range" size={20} color={colors.primary} />
+                                            </TouchableOpacity>
+                                        </View>
+                                        <View style={styles.dateTimeItem}>
+                                            <Text style={styles.inputLabel}>Horário</Text>
+                                            <TouchableOpacity style={styles.dateTimeButton} onPress={() => { setPickerIndex(i); setShowTimePicker(true); }}>
+                                                <Text style={styles.dateTimeText}>{s.time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</Text>
+                                                <Icon name="access-time" size={20} color={colors.primary} />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                ))}
+                            </View>
+                        ) : null}
 
                         <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>Observações</Text>
@@ -607,12 +677,12 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
 
             {showDatePicker && (
                 <DateTimePicker
-                    value={selectedDate}
+                    value={pickerIndex >= 0 && extraSessions[pickerIndex] ? extraSessions[pickerIndex].date : selectedDate}
                     mode="date"
                     display="default"
                     onChange={(event, date) => {
                         setShowDatePicker(false);
-                        if (date) setSelectedDate(date);
+                        if (date) { if (pickerIndex >= 0) { setExtraSessions((prev) => prev.map((x, k) => (k === pickerIndex ? { ...x, date } : x))); } else { setSelectedDate(date); } }
                     }}
                     minimumDate={new Date()}
                 />
@@ -620,12 +690,12 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
 
             {showTimePicker && (
                 <DateTimePicker
-                    value={selectedTime}
+                    value={pickerIndex >= 0 && extraSessions[pickerIndex] ? extraSessions[pickerIndex].time : selectedTime}
                     mode="time"
                     display="default"
                     onChange={(event, time: Date | undefined) => {
                         setShowTimePicker(false);
-                        if (time) setSelectedTime(time);
+                        if (time) { if (pickerIndex >= 0) { setExtraSessions((prev) => prev.map((x, k) => (k === pickerIndex ? { ...x, time } : x))); } else { setSelectedTime(time); } }
                     }}
                 />
             )}

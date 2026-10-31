@@ -385,8 +385,8 @@ exports.avisosAgendamento = onDocumentUpdated({ document: 'appointments/{id}', r
   if (!statusChanged && !timeChanged) {
     return;
   }
-  // encaixe feito pelo profissional: o "cliente" e o proprio profissional
-  if (!after.clientId || after.createdBy === 'professional') {
+  // encaixe do profissional ou agendamento manual do dono: o "cliente" e quem marcou
+  if (!after.clientId || after.createdBy === 'professional' || after.createdBy === 'owner') {
     return;
   }
   // o proprio cliente cancelou: nao precisa avisar ele
@@ -476,7 +476,7 @@ exports.lembretesAgendamento = onSchedule(
         }
         const biz = bizCache[a.businessId] || {};
         const notif = biz.notifications || {};
-        const remindClient = notif.reminderEnabled !== false && a.createdBy !== 'professional' && !!a.clientId;
+        const remindClient = notif.reminderEnabled !== false && a.createdBy !== 'professional' && a.createdBy !== 'owner' && !!a.clientId;
         const earlyHours = Number(notif.reminderTime) > 1 ? Number(notif.reminderTime) : 24;
         const where = (a.businessName || biz.name || 'o estabelecimento');
         const what = (a.serviceName || 'seu atendimento');
