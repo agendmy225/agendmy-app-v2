@@ -337,7 +337,8 @@ const BusinessSettingsScreen: React.FC = () => {
       const dataToSave = {
         ...settings,
         updatedAt: serverTimestamp(),
-      };      // Geocodificação automática do endereço
+      };
+      let mapResult = ''; // onde o endereco foi achado no mapa      // Geocodificação automática do endereço
       if (settings.address && settings.address.trim()) {
         try {
           // Concatenar endereço completo para geocodificação
@@ -363,12 +364,9 @@ const BusinessSettingsScreen: React.FC = () => {
               latitude: coordinates.latitude,
               longitude: coordinates.longitude,
             };
+            mapResult = coordinates.address || 'encontrado';
           } else {
-            Alert.alert(
-              'Aviso',
-              'Não foi possível validar o endereço. O negócio pode não aparecer corretamente no mapa.',
-              [{ text: 'OK' }],
-            );
+            mapResult = 'nao-encontrado';
           }
         } catch (error) {
           console.error("Erro ao validar endereço:", error);
@@ -383,7 +381,7 @@ const BusinessSettingsScreen: React.FC = () => {
       await updateDoc(businessDocRef, dataToSave);
 
       setHasChanges(false);
-      Alert.alert('Sucesso', (dataToSave as any).location ? 'Configurações salvas! Seu endereço foi encontrado no mapa.' : 'Configurações salvas!');
+      if (mapResult && mapResult !== 'nao-encontrado') { Alert.alert('Configurações salvas', `Seu endereço foi encontrado no mapa:\n\n${mapResult}\n\nO mapa dos clientes atualiza em até 1 minuto.`); } else if (mapResult === 'nao-encontrado') { Alert.alert('Configurações salvas', 'Mas o endereço não foi encontrado no mapa. O pin continua no lugar anterior. Confira rua, número, bairro, cidade e UF.'); } else { Alert.alert('Sucesso', 'Configurações salvas!'); }
 
       setSaving(false);
     } catch (error) {

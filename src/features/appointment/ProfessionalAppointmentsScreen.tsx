@@ -29,6 +29,8 @@ import {
 import { getServicesByBusiness, Service } from '../../services/services';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { toLocalDateString, parseLocalDate } from '../../utils/localDate';
+import { getProfessionalData, resolveDayWindow } from '../../services/professionalSchedule';
+import { doc as fsDoc, getDoc as fsGetDoc } from '../../config/firebase';
 
 type ProfessionalAppointmentsScreenNavigationProp = StackNavigationProp<AppStackParamList, 'ProfessionalAppointmentsScreen'>;
 
@@ -310,10 +312,31 @@ const ProfessionalAppointmentsScreen: React.FC = () => {
                     clashes.push(`${s.date.toLocaleDateString('pt-BR')} às ${clash.time} (${clash.clientName || 'cliente'})`);
                 }
             }
+            // dia bloqueado, folga ou fora do horario do profissional
+            try {
+                const profData = await getProfessionalData(selectedProfessional.id);
+                const bizSnap = businessId ? await fsGetDoc(fsDoc(firebaseDb, 'businesses', businessId)) : null;
+                const bizWH = bizSnap && bizSnap.exists() ? (bizSnap.data() || {}).workingHours : undefined;
+                for (const s of sessions) {
+                    const day = toLocalDateString(s.date);
+                    const w = resolveDayWindow(profData, bizWH, day);
+                    const label = s.date.toLocaleDateString('pt-BR');
+                    if (!w) {
+                        clashes.push(`${label}: dia bloqueado ou de folga`);
+                    } else {
+                        const st = toMin(hhmm(s.time));
+                        if (st < toMin(w.start) || st + duration > toMin(w.end)) {
+                            clashes.push(`${label} às ${hhmm(s.time)}: fora do horário (${w.start} às ${w.end})`);
+                        }
+                    }
+                }
+            } catch {
+                // sem a agenda do profissional, segue so com o conflito de horario
+            }
             if (clashes.length > 0) {
                 const proceed = await new Promise<boolean>((resolve) => Alert.alert(
-                    'Horário ocupado',
-                    `${selectedProfessional.name} já tem atendimento em:\n${clashes.join('\n')}\n\nAgendar mesmo assim?`,
+                    'Atenção ao horário',
+                    `Para ${selectedProfessional.name}:\n${clashes.join('\n')}\n\nAgendar mesmo assim?`,
                     [
                         { text: 'Voltar', style: 'cancel', onPress: () => resolve(false) },
                         { text: 'Agendar mesmo assim', onPress: () => resolve(true) },

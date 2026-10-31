@@ -18,6 +18,7 @@ import { getClientAppointments, getBusinessAppointments, cancelAppointment, Appo
 import { getBusinessByOwnerId } from '../../services/businesses'; // Importar função para buscar negócio do proprietário
 import { firebaseAuth } from '../../config/firebase';
 import BusinessThumb from '../../components/BusinessThumb';
+import { doc as fsDoc, firebaseDb as fsDb, updateDoc as fsUpdateDoc } from '../../config/firebase';
 import { formatLocalDate, toLocalDateString } from '../../utils/localDate';
 
 
@@ -131,6 +132,25 @@ const AppointmentsScreen: React.FC = () => {
 
   // Load appointments on component mount
   // Recarrega sempre que a tela ganha foco (ex: depois de avaliar)
+  // novidades vistas ao abrir a aba: a faixa "Novo" aparece nesta visita e o numero da aba some
+  useEffect(() => {
+    const uid = firebaseAuth.currentUser?.uid;
+    if (!uid || isOwner) {
+      return;
+    }
+    const ids = appointments
+      .filter((a: any) => a.clientUnread === true && a.clientId === uid)
+      .map((a: any) => a.id as string);
+    if (!ids.length) {
+      return;
+    }
+    const t = setTimeout(() => {
+      ids.forEach((id) => fsUpdateDoc(fsDoc(fsDb, 'appointments', id), { clientUnread: false }).catch(() => undefined));
+    }, 2500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appointments]);
+
   useFocusEffect(
     React.useCallback(() => {
       loadAppointments();

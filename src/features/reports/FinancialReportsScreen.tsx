@@ -29,6 +29,9 @@ import {
   ReportParams,
 } from '../../services/financialReports';
 import { validateCommissionConfig } from '../../services/businessConfig';
+import { computeFinancialData } from '../../services/financialReports';
+import { useFocusEffect } from '@react-navigation/native';
+import { Timestamp } from '../../config/firebase';
 import { formatCurrency as formatCurrencyUtil } from '../../constants/reportConfig';
 import { parseLocalDate } from '../../utils/localDate';
 
@@ -80,26 +83,32 @@ const FinancialReportsScreen: React.FC = () => {
 
     try {
       setLoading(true);
-      const fetchedReports = await getFinancialReports(businessId);
-
-      if (fetchedReports.length === 0) {
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-        try {
-          const currentMonthReport = await generateFinancialReport({
-            businessId,
-            period: 'monthly',
-            startDate: startOfMonth,
-            endDate: endOfMonth,
-          });
-          setReports([currentMonthReport]);
-        } catch (autoReportError) {
-          setReports([]);
-        }
-      } else {
-        setReports(fetchedReports);
+      // mes atual: calculado na hora, sempre com os agendamentos de agora
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const saved = await getFinancialReports(businessId).catch(() => [] as FinancialReport[]);
+      try {
+        const data = await computeFinancialData(businessId, startOfMonth, endOfMonth);
+        const live: FinancialReport = {
+          id: 'ao-vivo',
+          businessId,
+          period: 'monthly',
+          startDate: Timestamp.fromDate(startOfMonth),
+          endDate: Timestamp.fromDate(endOfMonth),
+          totalRevenue: data.totalRevenue,
+          totalCommission: data.totalCommission,
+          totalAppointments: data.totalAppointments,
+          completedAppointments: data.completedAppointments,
+          canceledAppointments: data.canceledAppointments,
+          noShowAppointments: data.noShowAppointments,
+          professionalCommissions: data.professionalCommissions,
+          serviceRevenue: data.serviceRevenue,
+          createdAt: Timestamp.now(),
+        };
+        setReports([live, ...saved]);
+      } catch {
+        setReports(saved);
       }
 
       setLoading(false);
@@ -109,11 +118,13 @@ const FinancialReportsScreen: React.FC = () => {
     }
   }, [businessId]);
 
-  useEffect(() => {
-    if (businessId) {
-      loadReports();
-    }
-  }, [businessId, loadReports]);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (businessId) {
+        loadReports();
+      }
+    }, [businessId, loadReports]),
+  );
 
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
