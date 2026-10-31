@@ -1,484 +1,417 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// src/features/dashboard/DashboardScreen.tsx
+// Painel do dono, sincronizado em tempo real com os agendamentos.
+// - resumo de hoje, estatisticas e receita do periodo escolhido
+// - aba "Cancelamentos e faltas" com a lista do periodo
+// Following React Native Firebase v22 modular API patterns
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
-  RefreshControl,
-  Share, // Import Share API
-  Alert, // Import Alert
-  Modal,
+  Alert,
   FlatList,
+  Modal,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useAuth } from '../auth/context/AuthContext';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { collection, doc, getDoc, getDocs, limit, onSnapshot, query, where } from '@react-native-firebase/firestore';
+import { firebaseDb } from '../../config/firebase';
 import { colors } from '../../constants/colors';
-import { firestore, collection, doc, getDoc, getDocs, query, where, limit } from '../../config/firebase';
-import { getAppointmentStats } from '../../services/appointments';
+import { useAuth } from '../auth/context/AuthContext';
 import { AppStackParamList } from '../../types/types';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Importar Icon
 import CreateBusinessCard from '../business/components/CreateBusinessCard';
 import { getProfessionalsByBusiness, Professional } from '../../services/professionals';
+import { getServicesByBusiness } from '../../services/services';
+import { formatLocalDate, toLocalDateString } from '../../utils/localDate';
 
-type DashboardScreenNavigationProp = StackNavigationProp<AppStackParamList, 'DashboardScreen'>;
+type Nav = StackNavigationProp<AppStackParamList, 'DashboardScreen'>;
+type Period = 'today' | 'week' | 'month' | 'lastMonth';
+type Tab = 'overview' | 'losses';
+
+interface Appt {
+  id: string;
+  date: string;
+  time: string;
+  status: string;
+  price: number;
+  clientName: string;
+  serviceName: string;
+  professionalName: string;
+}
+
+const PERIODS: { key: Period; label: string }[] = [
+  { key: 'today', label: 'Hoje' },
+  { key: 'week', label: '7 dias' },
+  { key: 'month', label: 'Este mês' },
+  { key: 'lastMonth', label: 'Mês passado' },
+];
+
+const brl = (v: number) => `R$ ${(Number(v) || 0).toFixed(2).replace('.', ',')}`;
+const pct = (v: number) => `${Math.round(v * 100)}%`;
+
+const periodRange = (p: Period): { start: string; end: string } => {
+  const now = new Date();
+  const today = toLocalDateString(now);
+  if (p === 'today') {
+    return { start: today, end: today };
+  }
+  if (p === 'week') {
+    return { start: toLocalDateString(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)), end: today };
+  }
+  if (p === 'month') {
+    return {
+      start: toLocalDateString(new Date(now.getFullYear(), now.getMonth(), 1)),
+      end: toLocalDateString(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
+    };
+  }
+  return {
+    start: toLocalDateString(new Date(now.getFullYear(), now.getMonth() - 1, 1)),
+    end: toLocalDateString(new Date(now.getFullYear(), now.getMonth(), 0)),
+  };
+};
 
 const DashboardScreen: React.FC = () => {
   const { user, refreshUser } = useAuth();
-  const navigation = useNavigation<DashboardScreenNavigationProp>();
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [businessId, setBusinessId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const navigation = useNavigation<Nav>();
+  const [businessId, setBusinessId] = useState<string | null>(user?.businessId || null);
+  const [checkedBusiness, setCheckedBusiness] = useState(!!user?.businessId);
+  const [appointments, setAppointments] = useState<Appt[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [business, setBusiness] = useState<Record<string, any> | null>(null);
+  const [counts, setCounts] = useState({ professionals: 0, services: 0 });
+  const [period, setPeriod] = useState<Period>('month');
+  const [tab, setTab] = useState<Tab>('overview');
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [showProfessionalModal, setShowProfessionalModal] = useState(false);
-  const [stats, setStats] = useState({
-    totalAppointments: 0,
-    pendingAppointments: 0,
-    completedAppointments: 0,
-    canceledAppointments: 0,
-    todayAppointments: 0,
-    todayRevenue: 0, // Add todayRevenue to stats
-    totalRevenue: 0,
-    totalProfessionals: 0,
-    totalServices: 0,
-    averageRating: 0,
-  });
 
-  const fetchBusinessId = useCallback(async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    // Check if user has businessId in their profile first
-    if (user.businessId) {
-      setBusinessId(user.businessId);
-      return;
-    }
-
-    try {
-      // Buscar o ID do estabelecimento do proprietário atual
-      const businessQuery = query(
-        collection(firestore, 'businesses'),
-        where('ownerId', '==', user.uid),
-        limit(1)
-      );
-      const businessSnapshot = await getDocs(businessQuery);
-
-      if (!businessSnapshot.empty) {
-        const businessDoc = businessSnapshot.docs[0];
-        setBusinessId(businessDoc.id);
-      } else {
-        // Se não encontrar um estabelecimento, não tem negócio
-
-        setBusinessId(null);
-        setLoading(false);
-      }
-    } catch {
-
-      setBusinessId(null);
-      setLoading(false);
-    }
-  }, [user]);
-
+  // estabelecimento do dono
   useEffect(() => {
-    fetchBusinessId();
-  }, [fetchBusinessId]); const loadDashboardData = useCallback(async () => {
-    if (!user || !businessId) {
-      setLoading(false);
+    if (businessId || !user?.uid) {
+      setCheckedBusiness(true);
       return;
     }
+    getDocs(query(collection(firebaseDb, 'businesses'), where('ownerId', '==', user.uid), limit(1)))
+      .then((snap: { empty: boolean; docs: { id: string }[] }) => {
+        if (!snap.empty) {
+          setBusinessId(snap.docs[0].id);
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => setCheckedBusiness(true));
+  }, [businessId, user?.uid]);
 
+  // agendamentos em tempo real
+  useEffect(() => {
+    if (!businessId) {
+      return;
+    }
+    return onSnapshot(
+      query(collection(firebaseDb, 'appointments'), where('businessId', '==', businessId)),
+      (snap: { docs: { id: string; data: () => Record<string, any> | undefined }[] }) => {
+        setAppointments(snap.docs.map((d) => {
+          const a = d.data() || {};
+          return {
+            id: d.id,
+            date: a.date || '',
+            time: a.time || '',
+            status: a.status || 'scheduled',
+            price: Number(a.price) || 0,
+            clientName: a.clientName || 'Cliente',
+            serviceName: a.serviceName || '',
+            professionalName: a.professionalName || '',
+          };
+        }));
+        setLoaded(true);
+      },
+      () => setLoaded(true),
+    );
+  }, [businessId]);
+
+  // nota, profissionais e servicos
+  const loadExtras = useCallback(async () => {
+    if (!businessId) {
+      return;
+    }
     try {
-      setLoading(true);
-      setError(null); // Reset error state
-
-      // Buscar estatísticas usando nosso serviço real
-      const [todayStats, monthStats] = await Promise.all([
-        getAppointmentStats(businessId, 'today'),
-        getAppointmentStats(businessId, 'month'),
+      const [bizSnap, profs, services] = await Promise.all([
+        getDoc(doc(firebaseDb, 'businesses', businessId)),
+        getProfessionalsByBusiness(businessId).catch(() => [] as Professional[]),
+        getServicesByBusiness(businessId).catch(() => []),
       ]);
-
-      // Buscar profissionais ativos - usar subcoleção
-      const professionalsQuery = query(
-        collection(firestore, 'businesses', businessId, 'professionals'),
-        where('active', '==', true)
-      );
-      const professionalsSnapshot = await getDocs(professionalsQuery);
-
-      // Buscar serviços ativos - usar subcoleção
-      const servicesQuery = query(
-        collection(firestore, 'businesses', businessId, 'services'),
-        where('active', '==', true)
-      );
-      const servicesSnapshot = await getDocs(servicesQuery);
-
-      // Buscar dados do estabelecimento para rating
-      const businessDocRef = doc(firestore, 'businesses', businessId);
-      const businessDoc = await getDoc(businessDocRef);
-
-      const businessData = businessDoc.data();
-
-      setStats({
-        totalAppointments: monthStats.total,
-        pendingAppointments: monthStats.confirmed, // Assuming 'confirmed' is used for 'pending completion'
-        completedAppointments: monthStats.completed,
-        canceledAppointments: monthStats.cancelled,
-        todayAppointments: todayStats.total,
-        todayRevenue: todayStats.revenue, // Add todayRevenue to stats
-        totalRevenue: monthStats.revenue,
-        totalProfessionals: professionalsSnapshot.size,
-        totalServices: servicesSnapshot.size,
-        averageRating: businessData?.rating || 0,
-      });
+      setBusiness(bizSnap.exists() ? bizSnap.data() || null : null);
+      setCounts({ professionals: profs.length, services: services.length });
     } catch {
-      setError('Erro ao carregar dados do dashboard. Tente novamente.');
-    } finally {
-      setLoading(false);
+      // painel continua com os agendamentos
     }
-  }, [user, businessId]); const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    setError(null); // Reset error state
-    if (businessId) {
-      await loadDashboardData();
-    }
-    setRefreshing(false);
-  }, [businessId, loadDashboardData]);
+  }, [businessId]);
 
-  // Effect to load dashboard data when businessId is available
   useEffect(() => {
-    if (businessId && user) {
-      loadDashboardData();
-    }
-  }, [businessId, user, loadDashboardData]); if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Carregando dashboard...</Text>
-      </View>
-    );
-  }
+    loadExtras();
+  }, [loadExtras]);
 
-  // If there's an error, show error message
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Dashboard</Text>
-          <Text style={styles.headerSubtitle}>
-            Bem-vindo, {user?.displayName || 'Proprietário'}
-          </Text>
-        </View>
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
-            <Text style={styles.retryButtonText}>Tentar Novamente</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
+  const today = toLocalDateString(new Date());
 
-  // If user doesn't have a business, show create business card
-  if (!businessId) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Dashboard</Text>
-          <Text style={styles.headerSubtitle}>
-            Bem-vindo, {user?.displayName || 'Proprietário'}
-          </Text>
-        </View>
-        <CreateBusinessCard onBusinessCreated={() => {
-          if (refreshUser) {
-            refreshUser(); // Refresh user data to get new businessId
-          }
-          // After business creation, refetch businessId and then data
-          fetchBusinessId().then(() => {
-            if (businessId) { // Check if businessId was fetched
-              loadDashboardData();
-            }
-          });
-        }} />
-      </View>
-    );
-  }
+  const todayStats = useMemo(() => {
+    const list = appointments.filter((a) => a.date === today);
+    const active = list.filter((a) => a.status !== 'cancelled');
+    return {
+      count: active.length,
+      pending: list.filter((a) => a.status === 'scheduled').length,
+      expected: active.filter((a) => a.status !== 'no_show').reduce((s, a) => s + a.price, 0),
+      done: list.filter((a) => a.status === 'completed').reduce((s, a) => s + a.price, 0),
+    };
+  }, [appointments, today]);
+
+  const range = periodRange(period);
+  const periodStats = useMemo(() => {
+    const list = appointments.filter((a) => a.date >= range.start && a.date <= range.end);
+    const completed = list.filter((a) => a.status === 'completed');
+    const noShow = list.filter((a) => a.status === 'no_show');
+    const cancelled = list.filter((a) => a.status === 'cancelled');
+    const open = list.filter((a) => a.status === 'scheduled' || a.status === 'confirmed');
+    const revenue = completed.reduce((s, a) => s + a.price, 0);
+    const attended = completed.length + noShow.length;
+    return {
+      total: list.length,
+      pending: list.filter((a) => a.status === 'scheduled').length,
+      confirmed: list.filter((a) => a.status === 'confirmed').length,
+      completed: completed.length,
+      cancelled: cancelled.length,
+      noShow: noShow.length,
+      revenue,
+      expected: open.reduce((s, a) => s + a.price, 0),
+      lost: cancelled.concat(noShow).reduce((s, a) => s + a.price, 0),
+      ticket: completed.length ? revenue / completed.length : 0,
+      attendanceRate: attended ? completed.length / attended : 0,
+      cancelRate: list.length ? cancelled.length / list.length : 0,
+      losses: cancelled.concat(noShow).sort((x, y) => (y.date + y.time).localeCompare(x.date + x.time)),
+    };
+  }, [appointments, range.start, range.end]);
 
   const handleShareBusinessLink = async () => {
     if (!businessId) {
-      Alert.alert('Erro', 'ID do estabelecimento não encontrado.');
       return;
     }
     try {
-      const url = `https://agendmy.app/business/${businessId}`; // Replace with your actual domain
-      await Share.share({
-        message: `Confira nossa página: ${url}`,
-        url: url,
-        title: 'Compartilhar Estabelecimento',
-      });
+      const url = `https://agendmy.app/business/${businessId}`;
+      await Share.share({ message: `Confira nossa página: ${url}`, url, title: 'Compartilhar Estabelecimento' });
     } catch {
       Alert.alert('Erro', 'Não foi possível compartilhar o link.');
-    }
-  };
-
-  const handleShareProfessionalProfile = async () => {
-    if (!businessId) {
-      Alert.alert('Erro', 'ID do estabelecimento não encontrado.');
-      return;
-    }
-
-    try {
-      // Buscar profissionais do estabelecimento
-      const professionalsData = await getProfessionalsByBusiness(businessId);
-
-      if (professionalsData.length === 0) {
-        Alert.alert(
-          'Nenhum Profissional',
-          'Não há profissionais cadastrados para compartilhar. Cadastre um profissional primeiro.'
-        );
-        return;
-      }
-
-      // Se há apenas um profissional, compartilha diretamente
-      if (professionalsData.length === 1) {
-        await shareProfessionalProfile(professionalsData[0]);
-        return;
-      }
-
-      // Se há vários profissionais, mostra modal de seleção
-      setProfessionals(professionalsData);
-      setShowProfessionalModal(true);
-
-    } catch (fetchError) {
-      console.error('Erro ao buscar profissionais:', fetchError);
-      Alert.alert('Erro', 'Não foi possível buscar os profissionais.');
     }
   };
 
   const shareProfessionalProfile = async (professional: Professional) => {
     try {
       const profileUrl = `https://agendmy.app/professional/${professional.id}`;
-      const appDownloadUrl = 'https://agendmy.app/download'; // Link para download do app
-
-      const message = `🎯 Conheça ${professional.name} - ${professional.specialty}
-
-📋 Especialista em ${professional.specialty}
-⭐ Avaliação: ${professional.rating ? professional.rating.toFixed(1) : 'N/A'}/5
-
-👇 Veja o perfil completo e agende seu horário:
-${profileUrl}
-
-📱 Baixe nosso app para uma experiência completa:
-${appDownloadUrl}
-
-#Agendmy #${professional.specialty.replace(/\s+/g, '')}`;
-
-      await Share.share({
-        message,
-        url: profileUrl,
-        title: `Perfil de ${professional.name}`,
-      });
-
-      // Fechar modal se estiver aberto
+      const specialty = professional.specialty || '';
+      const message = `Conheça ${professional.name}${specialty ? ` - ${specialty}` : ''}\n\n` +
+        `Veja o perfil completo e agende seu horário:\n${profileUrl}`;
+      await Share.share({ message, url: profileUrl, title: `Perfil de ${professional.name}` });
       setShowProfessionalModal(false);
-    } catch (shareError) {
-      console.error('Erro ao compartilhar perfil:', shareError);
+    } catch {
       Alert.alert('Erro', 'Não foi possível compartilhar o perfil do profissional.');
     }
   };
 
-  return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+  const handleShareProfessionalProfile = async () => {
+    if (!businessId) {
+      return;
+    }
+    try {
+      const list = await getProfessionalsByBusiness(businessId);
+      if (list.length === 0) {
+        Alert.alert('Nenhum profissional', 'Cadastre um profissional primeiro.');
+        return;
       }
-    >
+      if (list.length === 1) {
+        await shareProfessionalProfile(list[0]);
+        return;
+      }
+      setProfessionals(list);
+      setShowProfessionalModal(true);
+    } catch {
+      Alert.alert('Erro', 'Não foi possível buscar os profissionais.');
+    }
+  };
+
+  if (!checkedBusiness || (businessId && !loaded)) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Carregando painel...</Text>
+      </View>
+    );
+  }
+
+  if (!businessId) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Painel</Text>
+        </View>
+        <CreateBusinessCard onBusinessCreated={() => refreshUser && refreshUser()} />
+      </View>
+    );
+  }
+
+  const rating = Number(business?.rating) || 0;
+  const reviewCount = Number(business?.reviewCount) || 0;
+
+  const Stat = ({ value, label, color }: { value: string | number; label: string; color?: string }) => (
+    <View style={styles.statItem}>
+      <Text style={[styles.statValue, color ? { color } : null]}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Dashboard</Text>
-        <Text style={styles.headerSubtitle}>
-          Bem-vindo, {user?.displayName || 'Proprietário'}
-        </Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Icon name="arrow-back" size={24} color={colors.white} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Painel</Text>
+        <Text style={styles.headerSubtitle}>Atualiza sozinho com os agendamentos</Text>
       </View>
 
-      {/* Resumo de Hoje */}
-      <View style={styles.todaySummary}>
-        <Text style={styles.sectionTitle}>Resumo de Hoje</Text>
-        <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{stats.todayAppointments}</Text>
-            <Text style={styles.statLabel}>Agendamentos</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>
-              R$ {(stats.todayRevenue || 0).toFixed(2)}
-            </Text>
-            <Text style={styles.statLabel}>Receita Estimada</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Estatísticas Gerais */}
+      {/* Resumo de hoje */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Estatísticas Gerais</Text>
+        <Text style={styles.sectionTitle}>{`Hoje, ${formatLocalDate(today)}`}</Text>
         <View style={styles.statsGrid}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{stats.totalAppointments}</Text>
-            <Text style={styles.statLabel}>Total de Agendamentos</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{stats.pendingAppointments}</Text>
-            <Text style={styles.statLabel}>Pendentes</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{stats.completedAppointments}</Text>
-            <Text style={styles.statLabel}>Concluídos</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{stats.canceledAppointments}</Text>
-            <Text style={styles.statLabel}>Cancelados</Text>
-          </View>
+          <Stat value={todayStats.count} label="Agendamentos" />
+          <Stat value={todayStats.pending} label="A confirmar" color={todayStats.pending ? colors.warning : undefined} />
+          <Stat value={brl(todayStats.expected)} label="Previsto hoje" />
+          <Stat value={brl(todayStats.done)} label="Recebido hoje" color={colors.success} />
         </View>
       </View>
 
-      {/* Receita */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Receita</Text>
-        <View style={styles.revenueCard}>
-          <Text style={styles.revenueValue}>
-            R$ {stats.totalRevenue.toFixed(2)}
+      {/* Periodo */}
+      <View style={styles.chips}>
+        {PERIODS.map((p) => (
+          <TouchableOpacity key={p.key} style={[styles.chip, period === p.key && styles.chipActive]} onPress={() => setPeriod(p.key)}>
+            <Text style={[styles.chipText, period === p.key && styles.chipTextActive]}>{p.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={styles.tabs}>
+        <TouchableOpacity style={[styles.tab, tab === 'overview' && styles.tabActive]} onPress={() => setTab('overview')}>
+          <Text style={[styles.tabText, tab === 'overview' && styles.tabTextActive]}>Visão geral</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.tab, tab === 'losses' && styles.tabActive]} onPress={() => setTab('losses')}>
+          <Text style={[styles.tabText, tab === 'losses' && styles.tabTextActive]}>
+            {`Cancelamentos e faltas (${periodStats.cancelled + periodStats.noShow})`}
           </Text>
-          <Text style={styles.revenueLabel}>Receita Total</Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
-      {/* Avaliações */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Avaliações</Text>
-        <View style={styles.ratingCard}>
-          <Text style={styles.ratingValue}>{stats.averageRating.toFixed(1)}</Text>
-          <View style={styles.starsContainer}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Text key={star} style={styles.starIcon}>
-                {star <= Math.round(stats.averageRating) ? '★' : '☆'}
-              </Text>
-            ))}
+      {tab === 'overview' ? (
+        <>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Estatísticas</Text>
+            <View style={styles.statsGrid}>
+              <Stat value={periodStats.total} label="Total" />
+              <Stat value={periodStats.pending} label="A confirmar" color={periodStats.pending ? colors.warning : undefined} />
+              <Stat value={periodStats.confirmed} label="Confirmados" color={colors.primary} />
+              <Stat value={periodStats.completed} label="Concluídos" color={colors.success} />
+              <Stat value={periodStats.cancelled} label="Cancelados" color={colors.error} />
+              <Stat value={periodStats.noShow} label="Faltas" color={colors.error} />
+            </View>
           </View>
-          <Text style={styles.ratingLabel}>Avaliação Média</Text>
-        </View>
-      </View>
 
-      {/* Ações Rápidas */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Receita</Text>
+            <View style={styles.revenueCard}>
+              <Text style={styles.revenueValue}>{brl(periodStats.revenue)}</Text>
+              <Text style={styles.revenueLabel}>Recebido (atendimentos concluídos)</Text>
+            </View>
+            <View style={styles.statsGrid}>
+              <Stat value={brl(periodStats.expected)} label="A receber (agendados)" />
+              <Stat value={brl(periodStats.ticket)} label="Ticket médio" />
+              <Stat value={pct(periodStats.attendanceRate)} label="Comparecimento" color={colors.success} />
+              <Stat value={brl(periodStats.lost)} label="Perdido (cancel. e faltas)" color={colors.error} />
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Seu negócio</Text>
+            <View style={styles.statsGrid}>
+              <Stat value={rating ? rating.toFixed(1).replace('.', ',') : '-'} label={`Nota (${reviewCount} avaliações)`} color="#FFC107" />
+              <Stat value={counts.professionals} label="Profissionais" />
+              <Stat value={counts.services} label="Serviços ativos" />
+            </View>
+          </View>
+        </>
+      ) : (
+        <View style={styles.section}>
+          <View style={styles.statsGrid}>
+            <Stat value={periodStats.cancelled} label="Cancelados" color={colors.error} />
+            <Stat value={periodStats.noShow} label="Faltas" color={colors.error} />
+            <Stat value={pct(periodStats.cancelRate)} label="Taxa de cancelamento" />
+            <Stat value={brl(periodStats.lost)} label="Valor perdido" color={colors.error} />
+          </View>
+          {periodStats.losses.length === 0 ? (
+            <Text style={styles.empty}>Nenhum cancelamento ou falta neste período.</Text>
+          ) : (
+            periodStats.losses.map((a) => (
+              <View key={a.id} style={styles.lossItem}>
+                <View style={styles.flex}>
+                  <Text style={styles.lossClient}>{a.clientName}</Text>
+                  <Text style={styles.lossLine}>{`${a.serviceName}${a.professionalName ? ` · ${a.professionalName}` : ''}`}</Text>
+                  <Text style={styles.lossLine}>{`${formatLocalDate(a.date)} às ${a.time}`}</Text>
+                </View>
+                <View style={[styles.lossBadge, { backgroundColor: a.status === 'no_show' ? colors.lightText : colors.error }]}>
+                  <Text style={styles.lossBadgeText}>{a.status === 'no_show' ? 'Faltou' : 'Cancelado'}</Text>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+      )}
+
+      {/* Acoes rapidas */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Ações Rápidas</Text>
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('OwnerTabs', { screen: 'AppointmentManagement' })}
-          >
-            <Icon name="event" size={24} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Gerenciar Agendamentos</Text>
+        <Text style={styles.sectionTitle}>Ações rápidas</Text>
+        {[
+          { icon: 'event', label: 'Gerenciar agendamentos', onPress: () => navigation.navigate('OwnerTabs', { screen: 'AppointmentManagement' }) },
+          { icon: 'person', label: 'Agendamentos por profissional', onPress: () => navigation.navigate('ProfessionalAppointmentsScreen') },
+          { icon: 'content-cut', label: 'Gerenciar serviços', onPress: () => navigation.navigate('ServiceManagement') },
+          { icon: 'group', label: 'Gerenciar profissionais', onPress: () => navigation.navigate('ProfessionalManagementScreen') },
+          { icon: 'assessment', label: 'Relatórios financeiros', onPress: () => navigation.navigate('FinancialReportsScreen') },
+          { icon: 'share', label: 'Compartilhar link', onPress: handleShareBusinessLink },
+          { icon: 'person-add', label: 'Compartilhar perfil', onPress: handleShareProfessionalProfile },
+        ].map((a) => (
+          <TouchableOpacity key={a.label} style={styles.actionButton} onPress={a.onPress}>
+            <Icon name={a.icon} size={22} color={colors.primary} />
+            <Text style={styles.actionText}>{a.label}</Text>
+            <Icon name="chevron-right" size={22} color={colors.lightText} />
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('ProfessionalAppointmentsScreen')}
-          >
-            <Icon name="person" size={24} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Agendamentos por Profissional</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('ServiceManagement')}
-          >
-            <Icon name="content-cut" size={24} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Gerenciar Serviços</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('ProfessionalManagementScreen')}
-          >
-            <Icon name="group" size={24} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Gerenciar Profissionais</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('FinancialReportsScreen')}
-          >
-            <Icon name="assessment" size={24} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Relatórios Financeiros</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={handleShareBusinessLink}
-          >
-            <Icon name="share" size={24} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Compartilhar Link</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={handleShareProfessionalProfile}
-          >
-            <Icon name="person-add" size={24} color={colors.primary} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Compartilhar Perfil</Text>
-          </TouchableOpacity>
-        </View>
+        ))}
       </View>
 
-      {/* Modal de Seleção de Profissional */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showProfessionalModal}
-        onRequestClose={() => setShowProfessionalModal(false)}
-      >
+      <Modal animationType="slide" transparent visible={showProfessionalModal} onRequestClose={() => setShowProfessionalModal(false)}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
+          <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Selecionar Profissional</Text>
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={() => setShowProfessionalModal(false)}
-              >
+              <Text style={styles.modalTitle}>Selecionar profissional</Text>
+              <TouchableOpacity onPress={() => setShowProfessionalModal(false)}>
                 <Icon name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
-
             <FlatList
               data={professionals}
               keyExtractor={(item) => item.id}
-              style={styles.professionalsList}
               renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.professionalItem}
-                  onPress={() => shareProfessionalProfile(item)}
-                >
-                  <View style={styles.professionalInfo}>
-                    <Text style={styles.professionalName}>{item.name}</Text>
-                    <Text style={styles.professionalSpecialty}>{item.specialty}</Text>
-                    <View style={styles.professionalRating}>
-                      <Icon name="star" size={16} color="#FFD700" />
-                      <Text style={styles.ratingText}>
-                        {item.rating ? item.rating.toFixed(1) : 'N/A'}
-                      </Text>
-                    </View>
-                  </View>
-                  <Icon name="share" size={24} color={colors.primary} />
+                <TouchableOpacity style={styles.profItem} onPress={() => shareProfessionalProfile(item)}>
+                  <Text style={styles.profName}>{item.name}</Text>
+                  {item.specialty ? <Text style={styles.lossLine}>{item.specialty}</Text> : null}
                 </TouchableOpacity>
               )}
-              ListEmptyComponent={
-                <Text style={styles.emptyText}>
-                  Nenhum profissional encontrado
-                </Text>
-              }
             />
           </View>
         </View>
@@ -488,260 +421,48 @@ ${appDownloadUrl}
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-  }, loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: colors.text,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    color: colors.error,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  header: {
-    padding: 20,
-    backgroundColor: colors.primary,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.white,
-    marginBottom: 5,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: colors.white,
-    opacity: 0.8,
-  },
-  todaySummary: {
-    margin: 15,
-    padding: 15,
-    backgroundColor: colors.white,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  section: {
-    margin: 15,
-    marginTop: 0,
-    padding: 15,
-    backgroundColor: colors.white,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 15,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: colors.background,
-    borderRadius: 8,
-    marginHorizontal: 5,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  statItem: {
-    width: '48%',
-    alignItems: 'center',
-    padding: 15,
-    backgroundColor: colors.background,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginBottom: 5,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: colors.lightText,
-    textAlign: 'center',
-  },
-  revenueCard: {
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: colors.background,
-    borderRadius: 8,
-  },
-  revenueValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: colors.success,
-    marginBottom: 5,
-  },
-  revenueLabel: {
-    fontSize: 16,
-    color: colors.lightText,
-  },
-  ratingCard: {
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: colors.background,
-    borderRadius: 8,
-  },
-  ratingValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginBottom: 5,
-  },
-  starsContainer: {
-    flexDirection: 'row',
-    marginBottom: 5,
-  },
-  starIcon: {
-    fontSize: 20,
-    color: '#FFD700',
-    marginHorizontal: 2,
-  },
-  ratingLabel: {
-    fontSize: 16,
-    color: colors.lightText,
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    width: '48%',
-    alignItems: 'center',
-    padding: 15,
-    backgroundColor: colors.background,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  actionIcon: {
-    // fontSize: 24, // Size é controlado pelo componente Icon
-    marginBottom: 8,
-  },
-  actionText: {
-    fontSize: 14,
-    color: colors.text,
-    textAlign: 'center',
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    margin: 20,
-    maxHeight: '70%',
-    width: '90%',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.lightGray,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-  },
-  modalCloseButton: {
-    padding: 4,
-  },
-  professionalsList: {
-    maxHeight: 400,
-  },
-  professionalItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.lightGray,
-  },
-  professionalInfo: {
-    flex: 1,
-  },
-  professionalName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  professionalSpecialty: {
-    fontSize: 14,
-    color: colors.lightText,
-    marginBottom: 4,
-  },
-  professionalRating: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    fontSize: 14,
-    color: colors.text,
-    marginLeft: 4,
-  },
-  emptyText: {
-    textAlign: 'center',
-    padding: 20,
-    color: colors.lightText,
-    fontSize: 16,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { paddingBottom: 32 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
+  loadingText: { marginTop: 10, color: colors.text },
+  flex: { flex: 1 },
+  header: { padding: 20, backgroundColor: colors.primary, alignItems: 'center' },
+  backButton: { position: 'absolute', left: 16, top: 20 },
+  headerTitle: { color: colors.white, fontSize: 20, fontWeight: 'bold' },
+  headerSubtitle: { color: colors.offWhite, fontSize: 12, marginTop: 2 },
+  section: { backgroundColor: colors.white, marginHorizontal: 12, marginTop: 12, borderRadius: 12, padding: 14 },
+  sectionTitle: { fontSize: 16, fontWeight: 'bold', color: colors.text, marginBottom: 10 },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -4 },
+  statItem: { width: '50%', padding: 4 },
+  statValue: { fontSize: 20, fontWeight: 'bold', color: colors.text },
+  statLabel: { fontSize: 12, color: colors.lightText, marginTop: 2 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, marginTop: 12 },
+  chip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.lightGray, marginRight: 8, marginBottom: 6 },
+  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  chipText: { fontSize: 13, color: colors.text },
+  chipTextActive: { color: colors.white, fontWeight: '600' },
+  tabs: { flexDirection: 'row', marginHorizontal: 12, marginTop: 6, backgroundColor: colors.white, borderRadius: 10, padding: 4 },
+  tab: { flex: 1, paddingVertical: 9, borderRadius: 8, alignItems: 'center' },
+  tabActive: { backgroundColor: colors.primary },
+  tabText: { fontSize: 13, color: colors.primary, fontWeight: '600', textAlign: 'center' },
+  tabTextActive: { color: colors.white },
+  revenueCard: { alignItems: 'center', paddingVertical: 8, marginBottom: 8 },
+  revenueValue: { fontSize: 26, fontWeight: 'bold', color: colors.success },
+  revenueLabel: { fontSize: 12, color: colors.lightText },
+  empty: { textAlign: 'center', color: colors.lightText, marginTop: 12 },
+  lossItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.lightGray },
+  lossClient: { fontSize: 15, fontWeight: 'bold', color: colors.text },
+  lossLine: { fontSize: 13, color: colors.lightText, marginTop: 2 },
+  lossBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginLeft: 8 },
+  lossBadgeText: { color: colors.white, fontSize: 11, fontWeight: 'bold' },
+  actionButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.lightGray },
+  actionText: { flex: 1, fontSize: 15, color: colors.text, marginLeft: 12 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalBox: { backgroundColor: colors.white, borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 16, maxHeight: '70%' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  modalTitle: { fontSize: 17, fontWeight: 'bold', color: colors.text },
+  profItem: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.lightGray },
+  profName: { fontSize: 15, fontWeight: '600', color: colors.text },
 });
 
 export default DashboardScreen;

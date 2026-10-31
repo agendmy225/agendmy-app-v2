@@ -326,6 +326,13 @@ const BusinessSettingsScreen: React.FC = () => {
         return;
       }
 
+      // cidade e estado sao usados para mostrar o negocio aos clientes da cidade
+      if (!settings.city || !settings.city.trim() || !settings.state || !settings.state.trim()) {
+        Alert.alert('Endereço incompleto', 'Preencha a cidade e o estado (UF). Eles são usados para mostrar seu negócio aos clientes da sua cidade.');
+        setSaving(false);
+        return;
+      }
+
       // Preparar dados para salvar
       const dataToSave = {
         ...settings,
@@ -376,7 +383,7 @@ const BusinessSettingsScreen: React.FC = () => {
       await updateDoc(businessDocRef, dataToSave);
 
       setHasChanges(false);
-      Alert.alert('Sucesso', 'Configurações salvas com sucesso!');
+      Alert.alert('Sucesso', (dataToSave as any).location ? 'Configurações salvas! Seu endereço foi encontrado no mapa.' : 'Configurações salvas!');
 
       setSaving(false);
     } catch (error) {
