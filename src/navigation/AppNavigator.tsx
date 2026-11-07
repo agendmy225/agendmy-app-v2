@@ -187,6 +187,8 @@ const AppNavigator: React.FC = () => {
               <Stack.Screen name="OwnerTabs" component={OwnerTabNavigator} />
               {/* Telas específicas do proprietário */}
               <Stack.Screen name="BusinessDetails" component={BusinessDetailsScreen} />
+              {/* Ver todos tambem para o dono (tela inicial igual a do cliente) */}
+              <Stack.Screen name="AllBusinesses" component={AllBusinessesScreen} />
               <Stack.Screen name="AppointmentDateTime" component={AppointmentDateTimeScreen} />
               <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
               <Stack.Screen name="AppointmentDetails" component={AppointmentDetailsScreen} />

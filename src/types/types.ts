@@ -39,6 +39,7 @@ export type AppStackParamList = {
 
   // Telas compartilhadas
   BusinessDetails: { businessId: string };
+  AllBusinesses: HomeStackParamList['AllBusinesses'];
 
   // Telas do cliente
   // BusinessDetails moved to HomeStackParamList
@@ -123,6 +124,7 @@ export type OwnerTabParamList = {
   OwnerHome: undefined; // Nova aba inicial idêntica ao CLIENT
   AppointmentManagement: undefined; // Mantida
   BusinessHub: undefined; // Nova aba agregadora
+  MyPage: undefined; // abre a pagina publica do estabelecimento
   // As telas abaixo agora são acessadas via Stack a partir do BusinessHub,
   // então elas devem estar no AppStackParamList se forem navegadas diretamente
   // ou serem parte de um Stack aninhado dentro do BusinessHub.

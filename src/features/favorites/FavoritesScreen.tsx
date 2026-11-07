@@ -40,7 +40,7 @@ const FavoritesScreen: React.FC = () => {
         <Text style={styles.itemName}>{item.businessName}</Text>
         <Text style={styles.itemAddress} numberOfLines={1}>{item.businessAddress}</Text>
         <View style={styles.ratingContainer}>
-          <Icon name="star" size={16} color={colors.primary} />
+          <Icon name="star" size={16} color="#FFC107" />
           <Text style={styles.itemRating}>{item.businessRating.toFixed(1)}</Text>
         </View>
       </View>

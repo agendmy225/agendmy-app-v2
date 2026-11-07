@@ -187,9 +187,14 @@ exports.horariosLivres = onCall({ region: REGION }, async (req) => {
     prof, wh, date, durationMin, stepMin,
     busy: busyFromDocs(snap.docs, ignoreId),
   });
+  const w = resolveDayWindow(prof, wh, date);
   console.log('horariosLivres', JSON.stringify({
-    uid: req.auth.uid, professionalId: professionalId, date: date,
+    uid: req.auth.uid, professionalId: professionalId, nome: prof.name || '', date: date,
     durationMin: durationMin, livres: slots.length,
+    horarioProprio: !!prof.schedule, diasNoHorario: prof.schedule ? Object.keys(prof.schedule) : [],
+    diaDaSemana: weekdayKey(date), horarioDoDia: prof.schedule ? (prof.schedule[weekdayKey(date)] || null) : null,
+    bloqueios: Array.isArray(prof.blockedDates) ? prof.blockedDates : [],
+    janelaUsada: w,
   }));
   return { slots };
 });

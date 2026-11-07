@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Importar Icon
 import { colors } from '../constants/colors';
 import { OwnerTabParamList } from '../types/types';
@@ -12,7 +12,7 @@ import { useOwnerPendingCount } from '../hooks/useOwnerPendingCount';
 // Telas do proprietário
 // import DashboardScreen from '../screens/owner/DashboardScreen'; // Será acessado via BusinessHubScreen
 import AppointmentManagementScreen from '../features/appointment/AppointmentManagementScreen';
-import OwnerHomeScreen from '../screens/OwnerHomeScreen'; // Tela inicial igual ao CLIENT
+import HomeScreen from '../screens/HomeScreen'; // mesma tela inicial do cliente
 // import ServiceManagementScreen from '../screens/owner/ServiceManagementScreen'; // Será acessado via BusinessHubScreen
 // import ProfessionalManagementScreen from '../screens/owner/ProfessionalManagementScreen'; // Será acessado via BusinessHubScreen
 // import FinancialReportsScreen from '../screens/owner/FinancialReportsScreen'; // Será acessado via BusinessHubScreen
@@ -34,6 +34,13 @@ const renderAppointmentsIcon = ({ color, size }: { color: string; size: number }
 const renderBusinessHubIcon = ({ color, size }: { color: string; size: number }) => (
   <Icon name="business" size={size} color={color} /> // Ícone para o Hub de Negócios
 );
+
+const renderMyPageIcon = ({ color, size }: { color: string; size: number }) => (
+  <Icon name="storefront" size={size} color={color} />
+);
+
+// a aba so abre a pagina publica; esta tela nunca aparece
+const MyPagePlaceholder: React.FC = () => <View />;
 
 const OwnerTabNavigator: React.FC = () => {
   const { user } = useAuth();
@@ -58,7 +65,7 @@ const OwnerTabNavigator: React.FC = () => {
       >
         <Tab.Screen
           name="OwnerHome" // Nova aba inicial idêntica ao CLIENT
-          component={OwnerHomeScreen}
+          component={HomeScreen}
           options={{
             tabBarLabel: 'Início',
             tabBarIcon: renderHomeIcon,
@@ -97,6 +104,24 @@ const OwnerTabNavigator: React.FC = () => {
             tabPress: (_e) => {
               // Ensure proper navigation to business hub screen
               navigation.navigate('BusinessHub');
+            },
+          })}
+        />
+        <Tab.Screen
+          name="MyPage"
+          component={MyPagePlaceholder}
+          options={{
+            tabBarLabel: 'Minha Página',
+            tabBarIcon: renderMyPageIcon,
+          }}
+          listeners={({ navigation }) => ({
+            tabPress: (e) => {
+              e.preventDefault();
+              if (user?.businessId) {
+                (navigation as any).navigate('BusinessDetails', { businessId: user.businessId });
+              } else {
+                Alert.alert('Minha Página', 'Crie seu estabelecimento em Meu Negócio para ver sua página.');
+              }
             },
           })}
         />

@@ -25,6 +25,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useLocation } from '../context/LocationContext';
 import { getCategoryById, useCategories } from '../services/categories';
 import AnnouncementsBell from '../components/AnnouncementsBell';
+import SubscriptionBanner from '../components/SubscriptionBanner';
 import { colors } from '../constants/colors';
 import { useAuth } from '../features/auth/context/AuthContext';
 import { HomeStackParamList, AppStackParamList } from '../types/types';
@@ -436,7 +437,7 @@ const HomeScreen: React.FC = () => {
       <Text style={styles.infoCardTitle} numberOfLines={1}>{item.name || 'Nome não disponível'}</Text>
       <Text style={styles.infoCardSubtitle} numberOfLines={1}>{getCategoryById(item.category)?.name || item.category || 'Serviços'}</Text>
       {item.rating ? (
-        <Text style={{ fontSize: 12, color: colors.primary, fontWeight: 'bold', marginTop: 2 }}>{'\u2605 ' + Number(item.rating).toFixed(1)}</Text>
+        <Text style={{ fontSize: 12, color: colors.text, fontWeight: 'bold', marginTop: 2 }}><Text style={{ color: '#FFC107' }}>{'\u2605 '}</Text>{Number(item.rating).toFixed(1).replace('.', ',')}</Text>
       ) : null}
     </TouchableOpacity>
   );
@@ -545,6 +546,7 @@ const HomeScreen: React.FC = () => {
         ) : (
           <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContentContainer}>
+            {user?.userType === 'owner' ? <SubscriptionBanner /> : null}
             <View style={styles.searchBarContainer}>
               <Icon name="search" size={20} color={colors.lightText} />
               <TextInput style={styles.searchInput} placeholder="Buscar estabelecimentos ou serviços"

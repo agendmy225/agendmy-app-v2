@@ -527,7 +527,7 @@ const BusinessDetailsScreen: React.FC = () => {
             <View style={styles.businessInfoContainer}>
               <Text style={styles.businessName}>{business?.name || 'Nome não disponível'}</Text>
               <View style={styles.ratingRow}>
-                <Icon name="star" size={16} color={colors.primary} style={styles.ratingIcon} />
+                <Icon name="star" size={16} color="#FFC107" style={styles.ratingIcon} />
                 <Text style={styles.ratingValue}>{business.rating?.toFixed(1) || 'N/A'}</Text>
                 <Text style={styles.reviewCount}>({business.reviewCount || 0} avaliações)</Text>
               </View>
@@ -677,7 +677,7 @@ const BusinessDetailsScreen: React.FC = () => {
                             }
                           }}
                         >
-                          <Icon name="star-outline" size={20} color={colors.primary} />
+                          <Icon name="star-outline" size={20} color="#FFC107" />
                         </TouchableOpacity>
                       )}
                     </View>
