@@ -127,9 +127,9 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isBusinessOwner(request.resource.data.businessId) || isAdmin();
       allow update, delete: if isBusinessOwner(resource.data.businessId) || isAdmin();
-      // o proprio profissional edita seus horarios e bloqueios
+      // o proprio profissional edita seus horarios, bloqueios, foto e portfolio
       allow update: if isProfessional(professionalId) &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['schedule', 'blockedDates', 'updatedAt']);
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['schedule', 'blockedDates', 'image', 'portfolioImages', 'portfolioVideo', 'updatedAt']);
       // vinculo da conta do profissional usando um convite valido
       allow update: if signedIn() &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['accessUserId', 'appAccess', 'inviteCode', 'updatedAt']) &&
